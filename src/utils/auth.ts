@@ -1,5 +1,5 @@
 import { betterAuth } from 'better-auth';
-import { admin, organization } from 'better-auth/plugins';
+import { admin, organization, username } from 'better-auth/plugins';
 import { nextCookies } from 'better-auth/next-js';
 import { db } from './db';
 import { platformAccessControl, appRoles } from '@/lib/auth/permissions';
@@ -53,6 +53,7 @@ export const auth = betterAuth({
       roles: appRoles,
     }),
     organization({}),
+    username(),
     nextCookies(),
   ],
 });
