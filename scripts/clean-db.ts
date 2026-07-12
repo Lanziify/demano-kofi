@@ -24,13 +24,13 @@ async function run() {
       END $$;
     `.execute(db);
 
-    await db
-      .insertInto('platform')
-      .values({
-        id: 1,
-        initialized: false,
-      })
-      .execute();
+    // await db
+    //   .insertInto('platform')
+    //   .values({
+    //     id: 1,
+    //     initialized: false,
+    //   })
+    //   .execute();
 
     console.log('✅ Database data cleared successfully.');
   } catch (error) {

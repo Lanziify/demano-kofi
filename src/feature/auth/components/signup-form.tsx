@@ -15,55 +15,103 @@ import {
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { signInUserSchema, SignInUserValues } from '../schema/auth.schema';
-import { useAuthStore } from '@/store/auth-store';
+import { signUpUserSchema, SignUpUserValues } from '../schema/auth.schema';
 import { toast } from 'sonner';
 import Link from 'next/link';
-import { ScreenLoader } from '@/components/custom/screen-loader';
+import { singUpUserAction } from '../actions/auth.actions';
+import { Empty, EmptyHeader, EmptyDescription } from '@/components/ui/empty';
+import { MailIcon } from 'lucide-react';
+import React from 'react';
 import { useTheme } from 'next-themes';
 
-export function SignInForm({
+type VerificationStatus =
+  'idle' | 'creating' | 'verifying' | 'completed' | 'error';
+
+export function SignUpForm({
   className,
   ...props
 }: React.ComponentProps<'div'>) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackURL = searchParams.get('callbackURL');
-  const { isLoading, signIn } = useAuthStore();
   const { theme } = useTheme();
 
-  const signUpLink = new URL(`${process.env.NEXT_PUBLIC_SERVER_URL!}/signup`);
+  const [status, setStatus] = React.useState<VerificationStatus>('idle');
+
+  const signInLink = new URL(`${process.env.NEXT_PUBLIC_SERVER_URL!}/signin`);
 
   if (callbackURL) {
-    signUpLink.searchParams.append('callbackURL', callbackURL);
+    signInLink.searchParams.append('callbackURL', callbackURL);
   }
 
-  const { control, handleSubmit } = useForm<SignInUserValues>({
-    resolver: zodResolver(signInUserSchema),
+  const { control, handleSubmit } = useForm<SignUpUserValues>({
+    resolver: zodResolver(signUpUserSchema),
     defaultValues: {
+      name: '',
       username: '',
+      email: '',
       password: '',
+      confirmPassword: '',
       rememberMe: false,
-      callbackURL: callbackURL || '',
+      callbackURL: '/verification/email-confirmation',
     },
   });
 
-  async function onSubmit(values: SignInUserValues) {
-    const { error } = await signIn(values);
+  async function onSubmit(values: SignUpUserValues) {
+    const { confirmPassword, ...transformedValues } = values;
+
+    setStatus('creating');
+
+    const { error } = await singUpUserAction(transformedValues);
 
     if (error) {
       toast.error(error.message);
+      setStatus('error');
       return;
     }
 
-    toast.success('Signed in successfully');
-    router.replace(callbackURL ?? '/dashboard');
+    setStatus('verifying');
   }
 
-  console.log(isLoading);
+  React.useEffect(() => {
+    if (status !== 'verifying') return;
 
-  if (isLoading) {
-    return <ScreenLoader />;
+    const channel = new BroadcastChannel('email-verification');
+
+    channel.onmessage = (event) => {
+      if (event.data === 'email-verified') {
+        toast.success('Signed in successfully');
+        router.replace(callbackURL ?? '/dashboard');
+      }
+    };
+
+    return () => {
+      channel.close();
+    };
+  }, [status]);
+
+  if (status === 'verifying') {
+    return (
+      <Card>
+        <CardContent>
+          <Empty className="border-none p-4">
+            <EmptyHeader>
+              <MailIcon className="text-muted-foreground size-10" />
+              <h2 className="text-2xl font-bold">Check Your Email</h2>
+
+              <EmptyDescription>
+                A verification link was sent to your email
+              </EmptyDescription>
+
+              <p className="text-muted-foreground mt-2 text-xs">
+                Keep this tab open — setup will continue automatically after
+                verification.
+              </p>
+            </EmptyHeader>
+          </Empty>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
@@ -73,11 +121,30 @@ export function SignInForm({
           <form className="p-6 md:p-8" onSubmit={handleSubmit(onSubmit)}>
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
-                <h1 className="text-2xl font-bold">Welcome back</h1>
-                <p className="text-muted-foreground text-balance">
-                  Login to your <strong>Demano-Kofi</strong> account
+                <h1 className="text-2xl font-bold">Create your account</h1>
+                <p className="text-muted-foreground text-sm text-balance">
+                  Enter your email below to create your account
                 </p>
               </div>
+
+              <Controller
+                name="name"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field>
+                    <FieldLabel htmlFor={field.name}>Name</FieldLabel>
+                    <Input
+                      {...field}
+                      placeholder="Juan Dela Cruz"
+                      autoComplete="new-name"
+                    />
+
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
 
               <Controller
                 name="username"
@@ -87,8 +154,28 @@ export function SignInForm({
                     <FieldLabel htmlFor={field.name}>Username</FieldLabel>
                     <Input
                       {...field}
-                      placeholder="username"
+                      placeholder="Juan_23"
                       autoComplete="new-username"
+                    />
+
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+
+              <Controller
+                name="email"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field>
+                    <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                    <Input
+                      {...field}
+                      type="email"
+                      placeholder="email@example.com"
+                      autoComplete="new-email"
                     />
 
                     {fieldState.invalid && (
@@ -103,14 +190,7 @@ export function SignInForm({
                 control={control}
                 render={({ field, fieldState }) => (
                   <Field>
-                    <div className="flex items-center">
-                      <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-                      <a
-                        href="#"
-                        className="ml-auto text-sm underline-offset-2 hover:underline">
-                        Forgot your password?
-                      </a>
-                    </div>
+                    <FieldLabel htmlFor={field.name}>Password</FieldLabel>
                     <Input
                       {...field}
                       type="password"
@@ -124,8 +204,30 @@ export function SignInForm({
                   </Field>
                 )}
               />
+
+              <Controller
+                name="confirmPassword"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field>
+                    <FieldLabel htmlFor={field.name}>
+                      Confirm Password
+                    </FieldLabel>
+                    <Input
+                      {...field}
+                      type="password"
+                      placeholder="••••••••"
+                      autoComplete="new-confirm-password"
+                    />
+
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
               <Field>
-                <Button type="submit">Sign In</Button>
+                <Button type="submit">Sign Up</Button>
               </Field>
               <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
                 Or continue with
@@ -138,12 +240,12 @@ export function SignInForm({
                       fill="currentColor"
                     />
                   </svg>
-                  Sign in with Google
+                  Sign up with Google
                 </Button>
               </Field>
               <FieldDescription className="text-center">
-                Don&apos;t have an account?{' '}
-                <Link href={signUpLink.toString()}>Sign up</Link>
+                Already have an account?{' '}
+                <Link href={signInLink.toString()}>Sign in</Link>
               </FieldDescription>
             </FieldGroup>
           </form>
