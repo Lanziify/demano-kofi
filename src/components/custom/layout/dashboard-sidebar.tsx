@@ -10,7 +10,7 @@ import {
   SidebarRail,
 } from '@/components/ui/sidebar';
 
-import { NavMain } from './dashboard-nav-main';
+import { DashboardMainNav } from './dashboard-nav-main';
 import DashboardMenuHeader from './dashboard-menu-header';
 
 export function DashboardSidebar({
@@ -22,7 +22,7 @@ export function DashboardSidebar({
         <DashboardMenuHeader />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain />
+        <DashboardMainNav />
       </SidebarContent>
       <SidebarFooter>{/* <NavUser user={data.user} /> */}</SidebarFooter>
       <SidebarRail />

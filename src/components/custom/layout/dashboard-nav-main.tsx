@@ -21,7 +21,7 @@ import {
 import { dashboardMenuItems } from '@/data/dashboard-menu';
 import Link from 'next/link';
 
-export function NavMain() {
+export function DashboardMainNav() {
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Menu</SidebarGroupLabel>
