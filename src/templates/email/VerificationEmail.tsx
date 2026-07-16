@@ -1,4 +1,4 @@
-import { User } from 'better-auth';
+import { AuthType } from '@/utils/auth';
 import {
   Body,
   Button,
@@ -14,7 +14,7 @@ import {
 } from 'react-email';
 
 type VerificationEmailProps = {
-  user: User | null;
+  user: AuthType['Session']['user'] | null;
   url: string | null;
 };
 

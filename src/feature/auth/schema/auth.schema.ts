@@ -1,16 +1,20 @@
 import { z } from 'zod';
 import { SignInBody, SignUpBody } from '../actions/auth.actions';
 
+const nameSchema = z
+  .string()
+  .min(2, 'Must be at least 2 characters')
+  .max(50, 'Must be at most 50 characters')
+  .regex(
+    /^[a-zA-Z\s'-]+$/,
+    'Can only contain letters, spaces, hyphens, and apostrophes'
+  );
+
 export const signUpUserSchema = z
   .object({
-    name: z
-      .string()
-      .min(2, 'Name must be at least 2 characters')
-      .max(50, 'Name must be at most 50 characters')
-      .regex(
-        /^[a-zA-Z\s'-]+$/,
-        'Name can only contain letters, spaces, hyphens, and apostrophes'
-      ),
+    name: z.string(),
+    firstName: nameSchema,
+    lastName: nameSchema,
     username: z
       .string()
       .min(3, 'Username must be at least 3 characters')
@@ -39,9 +43,9 @@ export const signUpUserSchema = z
         path: ['confirmPassword'],
       });
     }
-  }) satisfies z.ZodType<SignUpBody>;
+  });
 
-export type SignUpUserValues = z.infer<typeof signUpUserSchema>;
+export type SignUpUserValues = z.input<typeof signUpUserSchema>;
 
 export const signInUserSchema = z.object({
   username: z.string().min(1, 'Username is required'),

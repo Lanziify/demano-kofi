@@ -4,11 +4,8 @@ import {
   BadgeCheck,
   Bell,
   CircleQuestionMark,
-  CreditCard,
-  LogOut,
   MessageSquareWarning,
   Settings,
-  Sparkles,
 } from 'lucide-react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -24,16 +21,21 @@ import {
 import { ThemeDropdown } from '../theme-dropdown';
 import SignoutButton from '../signout-button';
 import { LanguageDropdown } from '../language-dropdown';
+import { useAuthStore } from '@/store/auth-store';
+import { getInitials } from '@/lib/strings';
+import Link from 'next/link';
 
 export function DashboardNavUser() {
+  const { user } = useAuthStore();
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button className="flex items-center gap-2 rounded-full outline-none">
           <Avatar className="size-8">
-            <AvatarImage src="" alt="Profile" />
+            <AvatarImage src={String(user?.image)} alt="Profile" />
             <AvatarFallback className="bg-amber-100 text-sm font-semibold text-amber-700">
-              DK
+              {getInitials(user?.name)}
             </AvatarFallback>
           </Avatar>
         </button>
@@ -42,12 +44,14 @@ export function DashboardNavUser() {
         <DropdownMenuLabel className="overflow-hidden font-normal">
           <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
             <Avatar className="h-8 w-8 rounded-lg">
-              <AvatarImage src="" alt="Profile" />
-              <AvatarFallback className="text-sm font-bold">DK</AvatarFallback>
+              <AvatarImage src={String(user?.image)} alt="Profile" />
+              <AvatarFallback className="text-sm font-bold">
+                {getInitials(user?.name)}
+              </AvatarFallback>
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
-              <span className="truncate font-medium">Demano Kofi</span>
-              <span className="truncate text-xs">admin@demanokofi.com</span>
+              <span className="truncate font-medium">{user?.name}</span>
+              <span className="truncate text-xs">{user?.email}</span>
             </div>
           </div>
         </DropdownMenuLabel>
@@ -69,9 +73,11 @@ export function DashboardNavUser() {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <Settings />
-            Settings
+          <DropdownMenuItem asChild>
+            <Link href="/settings">
+              <Settings />
+              Settings
+            </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />

@@ -48,6 +48,8 @@ export function SignUpForm({
     resolver: zodResolver(signUpUserSchema),
     defaultValues: {
       name: '',
+      firstName: '',
+      lastName: '',
       username: '',
       email: '',
       password: '',
@@ -58,11 +60,9 @@ export function SignUpForm({
   });
 
   async function onSubmit(values: SignUpUserValues) {
-    const { confirmPassword, ...transformedValues } = values;
-
     setStatus('creating');
 
-    const { error } = await singUpUserAction(transformedValues);
+    const { error } = await singUpUserAction(values);
 
     if (error) {
       toast.error(error.message);
@@ -127,24 +127,37 @@ export function SignUpForm({
                 </p>
               </div>
 
-              <Controller
-                name="name"
-                control={control}
-                render={({ field, fieldState }) => (
-                  <Field>
-                    <FieldLabel htmlFor={field.name}>Name</FieldLabel>
-                    <Input
-                      {...field}
-                      placeholder="Juan Dela Cruz"
-                      autoComplete="new-name"
-                    />
+              <div className="grid grid-cols-2 gap-4">
+                <Controller
+                  name="firstName"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <Field>
+                      <FieldLabel htmlFor={field.name}>First Name</FieldLabel>
+                      <Input {...field} placeholder="Juan" />
 
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+
+                <Controller
+                  name="lastName"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <Field>
+                      <FieldLabel htmlFor={field.name}>Last name</FieldLabel>
+                      <Input {...field} placeholder="Cruz" />
+
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+              </div>
 
               <Controller
                 name="username"
@@ -152,11 +165,7 @@ export function SignUpForm({
                 render={({ field, fieldState }) => (
                   <Field>
                     <FieldLabel htmlFor={field.name}>Username</FieldLabel>
-                    <Input
-                      {...field}
-                      placeholder="Juan_23"
-                      autoComplete="new-username"
-                    />
+                    <Input {...field} placeholder="Juan_23" />
 
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
@@ -175,7 +184,6 @@ export function SignUpForm({
                       {...field}
                       type="email"
                       placeholder="email@example.com"
-                      autoComplete="new-email"
                     />
 
                     {fieldState.invalid && (
@@ -191,12 +199,7 @@ export function SignUpForm({
                 render={({ field, fieldState }) => (
                   <Field>
                     <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-                    <Input
-                      {...field}
-                      type="password"
-                      placeholder="••••••••"
-                      autoComplete="new-password"
-                    />
+                    <Input {...field} type="password" placeholder="••••••••" />
 
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
@@ -213,12 +216,7 @@ export function SignUpForm({
                     <FieldLabel htmlFor={field.name}>
                       Confirm Password
                     </FieldLabel>
-                    <Input
-                      {...field}
-                      type="password"
-                      placeholder="••••••••"
-                      autoComplete="new-confirm-password"
-                    />
+                    <Input {...field} type="password" placeholder="••••••••" />
 
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
