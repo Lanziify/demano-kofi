@@ -34,6 +34,8 @@ export function actionErrorParser(error: unknown): ParsedActionError {
     };
   }
 
+  console.log(error)
+
   return {
     code: 'INTERNAL_SERVER_ERROR',
     message: 'Something went wrong',

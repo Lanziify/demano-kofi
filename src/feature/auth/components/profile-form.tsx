@@ -1,4 +1,5 @@
 'use client';
+
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -20,31 +21,36 @@ import { useAuthStore } from '@/store/auth-store';
 import { getInitials } from '@/lib/strings';
 import { DobPicker } from '@/components/custom/dob-picker';
 import { profileSchema, ProfileSchemaValues } from '../schema/profile.schema';
-import { getUserProfile } from '../actions/auth.actions';
+import { useUserQueries } from '../hooks/use-user-queries';
+import { Spinner } from '@/components/ui/spinner';
+import { toDate, isValidDate, formatDate } from '@/lib/date';
 
 export default function ProfileForm() {
   const { user } = useAuthStore();
+  const { userProfile } = useUserQueries();
+  const initialized = React.useRef(false);
 
-  const { control, handleSubmit } = useForm<ProfileSchemaValues>({
-    resolver: zodResolver(profileSchema),
-    defaultValues: {
-      image: '',
-      username: '',
-      firstName: '',
-      lastName: '',
-      bio: '',
-      phone: '',
-      dateOfBirth: '',
-      address: {
-        building: '',
-        street: '',
-        barangay: '',
-        city: '',
-        province: '',
-        region: '',
-        postalCode: '',
-      },
+  const defaultFormValues = {
+    image: '',
+    username: '',
+    firstName: '',
+    lastName: '',
+    bio: '',
+    phone: '',
+    dateOfBirth: '',
+    address: {
+      building: '',
+      street: '',
+      barangay: '',
+      city: '',
+      province: '',
+      region: '',
+      postalCode: '',
     },
+  };
+  const { control, handleSubmit, reset } = useForm<ProfileSchemaValues>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: defaultFormValues,
   });
 
   function onSubmit(values: ProfileSchemaValues) {
@@ -62,16 +68,35 @@ export default function ProfileForm() {
   }
 
   React.useEffect(() => {
-    if (!user) return;
+    if (!userProfile.data || initialized.current) return;
 
-    async function getProfileData() {
-      const result = await getUserProfile(user.id);
+    const profile = userProfile.data.profile;
 
-      console.log(result.data);
-    }
+    const values = {
+      ...defaultFormValues,
+      ...userProfile.data.profile,
+      image: userProfile.data.image ?? '',
+      username: userProfile.data.username ?? '',
+      firstName: profile?.firstName ?? '',
+      lastName: profile?.lastName ?? '',
+      bio: profile?.bio ?? '',
+      phone: profile?.phone ?? '',
+      dateOfBirth: formatDate(profile?.dateOfBirth as Date) ?? '',
+      address: {
+        ...defaultFormValues.address,
+      },
+    };
 
-    getProfileData();
-  }, [user]);
+    reset(values);
+
+    initialized.current = true;
+  }, [userProfile.data, reset]);
+
+  if (userProfile.isFetching) {
+    <div className="flex h-full w-full items-center justify-center">
+      <Spinner />
+    </div>;
+  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-7">
@@ -81,7 +106,7 @@ export default function ProfileForm() {
         render={({ field }) => (
           <Field>
             <UploadProfileAvatar
-              value={user?.image}
+              value={field.value}
               fallback={getInitials(user?.name)}
               onChange={(file) => field.onChange(file)}
             />
@@ -104,7 +129,7 @@ export default function ProfileForm() {
             render={({ field, fieldState }) => (
               <Field>
                 <FieldLabel htmlFor={field.name}>Username</FieldLabel>
-                <Input {...field} placeholder="New username" />
+                <Input {...field} placeholder="New username" disabled/>
 
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />

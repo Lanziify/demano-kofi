@@ -24,14 +24,15 @@ export const getSessionAction = async () => {
 };
 
 export async function signUpAdminAction(values: SignUpBody) {
+  const repository = new AuthRepository();
+
   return await safeCatch(
     async () => {
       const response = await auth.api.signUpEmail({
         body: values,
       });
 
-      const authRepository = new AuthRepository();
-      await authRepository.setUserRole(response.user.id, APP_ROLES.admin);
+      await repository.setUserRole(response.user.id, APP_ROLES.admin);
 
       return response;
     },
@@ -39,10 +40,12 @@ export async function signUpAdminAction(values: SignUpBody) {
   );
 }
 
-export const singUpUserAction = async (values: SignUpUserValues) => {
+export const signUpUserAction = async (values: SignUpUserValues) => {
+  const repository = new AuthRepository();
+
   const { firstName, lastName, confirmPassword, ...transformedValues } = values;
 
-  const result = await safeCatch(
+  const userResult = await safeCatch(
     async () => {
       return await auth.api.signUpEmail({
         body: {
@@ -54,27 +57,37 @@ export const singUpUserAction = async (values: SignUpUserValues) => {
     { parser: actionErrorParser }
   );
 
-  if (result.error) {
-    // TODO: or maybe throw the custom error?
-    return result;
+  // if (!userResult.data || userResult.error) {
+  //   // TODO: or maybe throw the custom error?
+  //   return userResult;
+  // }
+
+  if (userResult.data?.user.id) {
+    const userProfileResult = await safeCatch(
+      async () => {
+        const result = await repository.createUserProfile(
+          userResult.data.user.id,
+          { firstName, lastName }
+        );
+
+        console.log(result);
+
+        return result;
+      },
+      { parser: actionErrorParser }
+    );
+
+    console.log(userProfileResult);
   }
 
-  const repository = new AuthRepository();
-  await repository.createUserProfile(result.data?.user.id, values);
+  // if (userProfileResult.error) {
+  //   await auth.api.removeUser({ body: { userId: userResult.data.user.id } });
+  // }
 
-  return result;
+  return userResult;
 };
 
-export const signInUserAction = async (values: SignInBody) => {
-  return await safeCatch(
-    async () => {
-      return await auth.api.signInUsername({
-        body: values,
-      });
-    },
-    { parser: actionErrorParser }
-  );
-};
+export const signInUserAction = async (values: SignInBody) => {};
 
 export const signOutUserAction = async () => {
   return await safeCatch(
@@ -82,16 +95,6 @@ export const signOutUserAction = async () => {
       return await auth.api.signOut({
         headers: await headers(),
       });
-    },
-    { parser: actionErrorParser }
-  );
-};
-
-export const getUserProfile = async (userId: string) => {
-  return await safeCatch(
-    async () => {
-      const repository = new AuthRepository();
-      return await repository.findUserProfile(userId);
     },
     { parser: actionErrorParser }
   );

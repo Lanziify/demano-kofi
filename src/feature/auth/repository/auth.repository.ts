@@ -21,20 +21,30 @@ export class AuthRepository {
       .executeTakeFirstOrThrow();
   }
 
-  async createUserProfile(userId: string, data: ProfileInfoSchemaValues) {
-    const { image, username, ...values } = data;
-
-    return db.insertInto('userProfile').values({
-      userId,
-      ...values,
-    });
+  async createUserProfile(
+    userId: string,
+    values: Omit<ProfileInfoSchemaValues, 'username' | 'image'>
+  ) {
+    return db
+      .insertInto('userProfile')
+      .values({
+        userId,
+        ...values,
+      })
+      .executeTakeFirst();
   }
 
   async findUserProfile(userId: string) {
     return db
       .selectFrom('user')
       .leftJoin('userProfile', 'user.id', 'userProfile.userId')
-      .selectAll('userProfile')
+      .select([
+        'userProfile.firstName',
+        'userProfile.lastName',
+        'userProfile.bio',
+        'userProfile.phone',
+        'userProfile.dateOfBirth',
+      ])
       .where('user.id', '=', userId)
       .executeTakeFirst();
   }

@@ -60,8 +60,6 @@ export function SignInForm({
     router.replace(callbackURL ?? '/dashboard');
   }
 
-  console.log(isLoading);
-
   if (isLoading) {
     return <ScreenLoader />;
   }

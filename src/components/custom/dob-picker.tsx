@@ -16,33 +16,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-
-export function toDate(value: string | Date): Date {
-  if (value instanceof Date) {
-    return value;
-  }
-
-  return new Date(value);
-}
-
-function formatDate(date: Date | undefined) {
-  if (!date) {
-    return '';
-  }
-
-  return date.toLocaleDateString('en-US', {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric',
-  });
-}
-
-function isValidDate(date: Date | undefined) {
-  if (!date) {
-    return false;
-  }
-  return !isNaN(date.getTime());
-}
+import { toDate, isValidDate, formatDate } from '@/lib/date';
 
 type DobPickerProps = {
   value: string | undefined;

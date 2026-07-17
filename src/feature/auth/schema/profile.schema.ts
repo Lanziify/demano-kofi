@@ -18,7 +18,12 @@ export const profileInfoSchema = z.object({
     .min(3, 'Username must be at least 3 characters')
     .max(30, 'Username must be at most 30 characters'),
   bio: z.string().optional(),
-  phone: z.string().optional(),
+  phone: z
+    .string()
+    .transform((v) => v || undefined)
+    .refine((v) => !v || /^(\+63|0)9\d{9}$/.test(v), {
+      message: 'Please enter a valid phone number.',
+    }),
   dateOfBirth: z.string().optional(),
 });
 

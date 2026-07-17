@@ -18,7 +18,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { signUpUserSchema, SignUpUserValues } from '../schema/auth.schema';
 import { toast } from 'sonner';
 import Link from 'next/link';
-import { singUpUserAction } from '../actions/auth.actions';
+import { signUpUserAction } from '../actions/auth.actions';
 import { Empty, EmptyHeader, EmptyDescription } from '@/components/ui/empty';
 import { MailIcon } from 'lucide-react';
 import React from 'react';
@@ -62,7 +62,7 @@ export function SignUpForm({
   async function onSubmit(values: SignUpUserValues) {
     setStatus('creating');
 
-    const { error } = await singUpUserAction(values);
+    const { error } = await signUpUserAction(values);
 
     if (error) {
       toast.error(error.message);
