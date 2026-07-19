@@ -16,10 +16,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { toDate, isValidDate, formatDate } from '@/lib/date';
+import { formatDate, isValidDate, toDate } from '@/lib/date';
 
 type DobPickerProps = {
-  value: string | undefined;
+  value?: string | null;
   onChange: (value: string) => void;
 };
 
@@ -29,43 +29,107 @@ export function DobPicker({
   ...props
 }: DobPickerProps & React.ComponentProps<'div'>) {
   const [open, setOpen] = React.useState(false);
-  const [date, setDate] = React.useState<Date | undefined>(
-    value ? toDate(value) : new Date()
-  );
+  const [inputValue, setInputValue] = React.useState(value ?? '');
+  const [date, setDate] = React.useState<Date | undefined>(() => {
+    if (!value) return undefined;
+    const parsed = toDate(value);
+    return isValidDate(parsed) ? parsed : undefined;
+  });
+
   const [month, setMonth] = React.useState<Date | undefined>(date);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const date = new Date(e.target.value);
-    onChange(e.target.value);
+  React.useEffect(() => {
+    setInputValue(value ?? '');
 
-    if (isValidDate(date)) {
-      setDate(date);
-      setMonth(date);
-      onChange(formatDate(date));
+    if (!value) {
+      setDate(undefined);
+      return;
+    }
+
+    const parsed = toDate(value);
+
+    if (isValidDate(parsed)) {
+      setDate(parsed);
+      setMonth(parsed);
+    }
+  }, [value]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const text = e.target.value;
+
+    setInputValue(text);
+
+    const parsed = new Date(text);
+
+    if (isValidDate(parsed)) {
+      setDate(parsed);
+      setMonth(parsed);
     }
   };
 
-  const handleSelectDate = (date: Date | undefined) => {
-    setDate(date);
+  const commitInput = () => {
+    if (!inputValue.trim()) {
+      onChange('');
+      setDate(undefined);
+      return;
+    }
+
+    const parsed = new Date(inputValue);
+
+    if (!isValidDate(parsed)) {
+      return;
+    }
+
+    const formatted = formatDate(parsed);
+
+    setInputValue(formatted);
+    setDate(parsed);
+    setMonth(parsed);
+
+    onChange(formatted);
+  };
+
+  const handleSelectDate = (selected: Date | undefined) => {
+    setDate(selected);
+    setMonth(selected);
+
+    if (!selected) {
+      setInputValue('');
+      onChange('');
+    } else {
+      const formatted = formatDate(selected);
+
+      setInputValue(formatted);
+      onChange(formatted);
+    }
+
     setOpen(false);
-    onChange(formatDate(date));
   };
 
   return (
     <Field {...props}>
       <FieldLabel htmlFor="date-required">Date of birth</FieldLabel>
+
       <InputGroup>
         <InputGroupInput
           id="date-required"
-          value={value}
+          placeholder="Enter or select date"
+          value={inputValue}
           onChange={handleInputChange}
+          onBlur={commitInput}
           onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              commitInput();
+            }
+
             if (e.key === 'ArrowDown') {
               e.preventDefault();
               setOpen(true);
             }
           }}
         />
+
         <InputGroupAddon align="inline-end">
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger
@@ -80,6 +144,7 @@ export function DobPicker({
                 </InputGroupButton>
               }
             />
+
             <PopoverContent
               className="w-auto overflow-hidden p-0"
               align="end"

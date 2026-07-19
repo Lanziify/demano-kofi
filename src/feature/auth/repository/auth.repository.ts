@@ -1,10 +1,19 @@
 import { db } from '@/utils/db';
 import { ProfileInfoSchemaValues } from '../schema/profile.schema';
-import { jsonObjectFrom } from 'kysely/helpers/postgres';
+import { Updateable, type Kysely, type Transaction } from 'kysely';
+import { DB, UserProfile } from '@/types/db';
+
+type Dastabase = Kysely<DB> | Transaction<DB>;
 
 export class AuthRepository {
+  constructor(private readonly database: Dastabase = db) {}
+
+  withTransaction(trx: Transaction<DB>) {
+    return new AuthRepository(trx);
+  }
+
   async adminExists() {
-    return db
+    return this.database
       .selectFrom('user')
       .selectAll()
       .where('role', '=', 'admin')
@@ -12,7 +21,7 @@ export class AuthRepository {
   }
 
   async setUserRole(userId: string, role: string) {
-    return db
+    return this.database
       .updateTable('user')
       .set({
         role: role,
@@ -25,7 +34,7 @@ export class AuthRepository {
     userId: string,
     values: Omit<ProfileInfoSchemaValues, 'username' | 'image'>
   ) {
-    return db
+    return this.database
       .insertInto('userProfile')
       .values({
         userId,
@@ -34,8 +43,16 @@ export class AuthRepository {
       .executeTakeFirst();
   }
 
+  async findUserById(userId: string) {
+    return this.database
+      .selectFrom('user')
+      .selectAll()
+      .where('id', '=', userId)
+      .executeTakeFirst();
+  }
+
   async findUserProfile(userId: string) {
-    return db
+    return this.database
       .selectFrom('user')
       .leftJoin('userProfile', 'user.id', 'userProfile.userId')
       .select([
@@ -47,5 +64,16 @@ export class AuthRepository {
       ])
       .where('user.id', '=', userId)
       .executeTakeFirst();
+  }
+
+  async updateUserProfile(
+    userId: string,
+    values: Omit<Updateable<UserProfile>, 'userId' | 'createdAt' | 'updatedAt'>
+  ) {
+    return this.database
+      .updateTable('userProfile')
+      .set(values)
+      .where('userId', '=', userId)
+      .execute();
   }
 }

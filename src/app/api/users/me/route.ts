@@ -1,4 +1,8 @@
 import { AuthRepository } from '@/feature/auth/repository/auth.repository';
+import {
+  profileSchema,
+  profileSchemaWithUserId,
+} from '@/feature/auth/schema/profile.schema';
 import { AuthService } from '@/feature/auth/service/auth.service';
 import { apiErrorHandler, requiredSession } from '@/lib/api-handler';
 import { auth, AuthType } from '@/utils/auth';
@@ -29,4 +33,17 @@ export const GET = apiErrorHandler(
   {
     guards: [requiredSession],
   }
+);
+
+export const PATCH = apiErrorHandler(
+  async (req) => {
+    const values = await req.json();
+
+    const parsedValues = profileSchemaWithUserId.parse(values);
+
+    const result = await service.updateUserProfile(parsedValues);
+
+    return NextResponse.json(result, { status: 200 });
+  },
+  { guards: [requiredSession] }
 );

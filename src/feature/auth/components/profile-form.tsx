@@ -23,11 +23,13 @@ import { DobPicker } from '@/components/custom/dob-picker';
 import { profileSchema, ProfileSchemaValues } from '../schema/profile.schema';
 import { useUserQueries } from '../hooks/use-user-queries';
 import { Spinner } from '@/components/ui/spinner';
-import { toDate, isValidDate, formatDate } from '@/lib/date';
+import { formatDate, toDate } from '@/lib/date';
+import { useUpdateUserProfile } from '../mutations/user.mutation';
 
 export default function ProfileForm() {
   const { user } = useAuthStore();
   const { userProfile } = useUserQueries();
+  const updateProfile = useUpdateUserProfile();
   const initialized = React.useRef(false);
 
   const defaultFormValues = {
@@ -37,7 +39,7 @@ export default function ProfileForm() {
     lastName: '',
     bio: '',
     phone: '',
-    dateOfBirth: '',
+    dateOfBirth: null,
     address: {
       building: '',
       street: '',
@@ -48,23 +50,27 @@ export default function ProfileForm() {
       postalCode: '',
     },
   };
-  const { control, handleSubmit, reset } = useForm<ProfileSchemaValues>({
-    resolver: zodResolver(profileSchema),
-    defaultValues: defaultFormValues,
-  });
 
-  function onSubmit(values: ProfileSchemaValues) {
-    try {
-      console.log(values);
-      toast(
-        <pre className="mt-2 w-85 rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(values, null, 2)}</code>
-        </pre>
-      );
-    } catch (error) {
-      console.error('Form submission error', error);
-      toast.error('Failed to submit the form. Please try again.');
-    }
+  const { control, handleSubmit, reset, formState } =
+    useForm<ProfileSchemaValues>({
+      resolver: zodResolver(profileSchema),
+      defaultValues: defaultFormValues,
+    });
+
+  async function onSubmit(values: ProfileSchemaValues) {
+    await updateProfile.mutateAsync({ ...values, userId: user?.id! });
+
+    // try {
+    //   console.log(values);
+    //   toast(
+    //     <pre className="mt-2 flex-1 rounded-md bg-slate-950 p-4">
+    //       <code className="text-white">{JSON.stringify(values, null, 2)}</code>
+    //     </pre>
+    //   );
+    // } catch (error) {
+    //   console.error('Form submission error', error);
+    //   toast.error('Failed to submit the form. Please try again.');
+    // }
   }
 
   React.useEffect(() => {
@@ -76,12 +82,12 @@ export default function ProfileForm() {
       ...defaultFormValues,
       ...userProfile.data.profile,
       image: userProfile.data.image ?? '',
-      username: userProfile.data.username ?? '',
+      username: userProfile.data.displayUsername ?? '',
       firstName: profile?.firstName ?? '',
       lastName: profile?.lastName ?? '',
       bio: profile?.bio ?? '',
       phone: profile?.phone ?? '',
-      dateOfBirth: formatDate(profile?.dateOfBirth as Date) ?? '',
+      dateOfBirth: formatDate(toDate(String(profile?.dateOfBirth))) ?? null,
       address: {
         ...defaultFormValues.address,
       },
@@ -92,10 +98,12 @@ export default function ProfileForm() {
     initialized.current = true;
   }, [userProfile.data, reset]);
 
-  if (userProfile.isFetching) {
-    <div className="flex h-full w-full items-center justify-center">
-      <Spinner />
-    </div>;
+  if (userProfile.isPending) {
+    return (
+      <div className="flex h-full w-full items-center justify-center">
+        <Spinner />
+      </div>
+    );
   }
 
   return (
@@ -129,7 +137,11 @@ export default function ProfileForm() {
             render={({ field, fieldState }) => (
               <Field>
                 <FieldLabel htmlFor={field.name}>Username</FieldLabel>
-                <Input {...field} placeholder="New username" disabled/>
+                <Input {...field} placeholder="New username" />
+                <FieldDescription>
+                  This username identifies your account and is used for signing
+                  in. Keep it unique and easy to remember.
+                </FieldDescription>
 
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
@@ -213,7 +225,7 @@ export default function ProfileForm() {
             render={({ field, fieldState }) => (
               <Field>
                 <FieldLabel htmlFor={field.name}>Phone</FieldLabel>
-                <Input {...field} type="tel" />
+                <Input {...field} type="tel" placeholder="09123456789" />
 
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
@@ -354,7 +366,10 @@ export default function ProfileForm() {
           </div>
         </FieldGroup>
       </FieldSet>
-      <Button type="submit" className="col-span-full">
+      <Button
+        type="submit"
+        className="col-span-full"
+        disabled={!formState.isDirty}>
         Update Profile
       </Button>
     </form>

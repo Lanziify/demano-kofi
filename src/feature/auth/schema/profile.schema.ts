@@ -20,11 +20,11 @@ export const profileInfoSchema = z.object({
   bio: z.string().optional(),
   phone: z
     .string()
-    .transform((v) => v || undefined)
+    .transform((v) => v || '')
     .refine((v) => !v || /^(\+63|0)9\d{9}$/.test(v), {
       message: 'Please enter a valid phone number.',
     }),
-  dateOfBirth: z.string().optional(),
+  dateOfBirth: z.string().nullable().optional(),
 });
 
 export type ProfileInfoSchemaValues = z.infer<typeof profileInfoSchema>;
@@ -46,3 +46,11 @@ export const profileSchema = profileInfoSchema.extend({
 });
 
 export type ProfileSchemaValues = z.infer<typeof profileSchema>;
+
+export const profileSchemaWithUserId = profileSchema.extend({
+  userId: z.string(),
+});
+
+export type ProfileSchemaWithUserIdValues = z.infer<
+  typeof profileSchemaWithUserId
+>;

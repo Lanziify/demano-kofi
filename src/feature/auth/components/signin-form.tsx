@@ -49,12 +49,14 @@ export function SignInForm({
   });
 
   async function onSubmit(values: SignInUserValues) {
-    const { error } = await signIn(values);
+    const result = await signIn(values);
 
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
+    console.log(result)
+
+    // if (error) {
+    //   toast.error(error.message);
+    //   return;
+    // }
 
     toast.success('Signed in successfully');
     router.replace(callbackURL ?? '/dashboard');
