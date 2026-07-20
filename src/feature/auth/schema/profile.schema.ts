@@ -24,7 +24,7 @@ export const profileInfoSchema = z.object({
     .refine((v) => !v || /^(\+63|0)9\d{9}$/.test(v), {
       message: 'Please enter a valid phone number.',
     }),
-  dateOfBirth: z.string().nullable().optional(),
+  dateOfBirth: z.string().optional(),
 });
 
 export type ProfileInfoSchemaValues = z.infer<typeof profileInfoSchema>;

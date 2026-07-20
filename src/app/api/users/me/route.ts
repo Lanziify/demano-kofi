@@ -11,9 +11,9 @@ import { NextResponse } from 'next/server';
 const repository = new AuthRepository();
 const service = new AuthService(repository);
 
-export type UserProfileApiResponse = AuthType['Session']['user'] & {
-  profile: Awaited<ReturnType<AuthService['getUserProfile']>>;
-};
+export type UserProfileApiResponse = Awaited<
+  ReturnType<AuthService['getUserProfile']>
+>;
 
 export const GET = apiErrorHandler(
   async (req) => {
@@ -21,14 +21,9 @@ export const GET = apiErrorHandler(
       headers: req.headers,
     });
 
-    const profile = await service.getUserProfile(session?.user.id!);
+    const result = await service.getUserProfile(session?.user.id!);
 
-    const response = {
-      profile,
-      ...session?.user,
-    };
-
-    return NextResponse.json(response, { status: 200 });
+    return NextResponse.json(result, { status: 200 });
   },
   {
     guards: [requiredSession],

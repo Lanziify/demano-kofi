@@ -1,7 +1,7 @@
 import { db } from '@/utils/db';
-import { ProfileInfoSchemaValues } from '../schema/profile.schema';
 import { Updateable, type Kysely, type Transaction } from 'kysely';
-import { DB, UserProfile } from '@/types/db';
+import { jsonObjectFrom } from 'kysely/helpers/postgres';
+import { DB, UserAddress, UserProfile } from '@/types/db';
 
 type Dastabase = Kysely<DB> | Transaction<DB>;
 
@@ -30,9 +30,17 @@ export class AuthRepository {
       .executeTakeFirstOrThrow();
   }
 
+  async findUserById(userId: string) {
+    return this.database
+      .selectFrom('user')
+      .selectAll()
+      .where('id', '=', userId)
+      .executeTakeFirst();
+  }
+
   async createUserProfile(
     userId: string,
-    values: Omit<ProfileInfoSchemaValues, 'username' | 'image'>
+    values: Omit<Updateable<UserProfile>, 'username' | 'image'>
   ) {
     return this.database
       .insertInto('userProfile')
@@ -43,24 +51,33 @@ export class AuthRepository {
       .executeTakeFirst();
   }
 
-  async findUserById(userId: string) {
-    return this.database
-      .selectFrom('user')
-      .selectAll()
-      .where('id', '=', userId)
-      .executeTakeFirst();
-  }
-
   async findUserProfile(userId: string) {
     return this.database
       .selectFrom('user')
-      .leftJoin('userProfile', 'user.id', 'userProfile.userId')
-      .select([
-        'userProfile.firstName',
-        'userProfile.lastName',
-        'userProfile.bio',
-        'userProfile.phone',
-        'userProfile.dateOfBirth',
+      .selectAll()
+      .select((eb) => [
+        jsonObjectFrom(
+          eb
+            .selectFrom('userProfile')
+            .select(['firstName', 'lastName', 'bio', 'phone', 'dateOfBirth'])
+            .whereRef('userProfile.userId', '=', 'user.id')
+        ).as('profile'),
+        jsonObjectFrom(
+          eb
+            .selectFrom('userAddress')
+            .select([
+              'userAddress.active',
+              'userAddress.barangay',
+              'userAddress.building',
+              'userAddress.city',
+              'userAddress.postalCode',
+              'userAddress.province',
+              'userAddress.region',
+              'userAddress.street',
+            ])
+            .whereRef('userAddress.userId', '=', 'user.id')
+            .where("userAddress.active", "=", true)
+        ).as('address'),
       ])
       .where('user.id', '=', userId)
       .executeTakeFirst();
@@ -74,6 +91,47 @@ export class AuthRepository {
       .updateTable('userProfile')
       .set(values)
       .where('userId', '=', userId)
-      .execute();
+      .executeTakeFirstOrThrow();
+  }
+
+  async createUserAddress(
+    userId: string,
+    values: Omit<Updateable<UserAddress>, 'userId' | 'createdAt' | 'updatedAt'>
+  ) {
+    return this.database
+      .insertInto('userAddress')
+      .values({
+        userId,
+        ...values,
+      })
+      .executeTakeFirst();
+  }
+
+  async findUserActiveAddress(userId: string) {
+    return this.database
+      .selectFrom('userAddress')
+      .selectAll()
+      .where('userAddress.userId', '=', userId)
+      .where('userAddress.active', '=', true)
+      .executeTakeFirstOrThrow();
+  }
+
+  async findUserAddress(userId: string) {
+    return this.database
+      .selectFrom('userAddress')
+      .selectAll()
+      .where('userAddress.userId', '=', userId)
+      .executeTakeFirstOrThrow();
+  }
+
+  async updateUserAddress(
+    userId: string,
+    values: Omit<Updateable<UserAddress>, 'userId' | 'createdAt' | 'updatedAt'>
+  ) {
+    return this.database
+      .updateTable('userAddress')
+      .set(values)
+      .where('userId', '=', userId)
+      .executeTakeFirstOrThrow();
   }
 }

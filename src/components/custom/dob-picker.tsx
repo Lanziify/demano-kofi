@@ -19,7 +19,7 @@ import {
 import { formatDate, isValidDate, toDate } from '@/lib/date';
 
 type DobPickerProps = {
-  value?: string | null;
+  value?: string;
   onChange: (value: string) => void;
 };
 

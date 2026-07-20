@@ -27,7 +27,7 @@ import { formatDate, toDate } from '@/lib/date';
 import { useUpdateUserProfile } from '../mutations/user.mutation';
 
 export default function ProfileForm() {
-  const { user } = useAuthStore();
+  const { user, updateAuthSession } = useAuthStore();
   const { userProfile } = useUserQueries();
   const updateProfile = useUpdateUserProfile();
   const initialized = React.useRef(false);
@@ -39,7 +39,7 @@ export default function ProfileForm() {
     lastName: '',
     bio: '',
     phone: '',
-    dateOfBirth: null,
+    dateOfBirth: '',
     address: {
       building: '',
       street: '',
@@ -59,24 +59,20 @@ export default function ProfileForm() {
 
   async function onSubmit(values: ProfileSchemaValues) {
     await updateProfile.mutateAsync({ ...values, userId: user?.id! });
+    await updateAuthSession();
 
-    // try {
-    //   console.log(values);
-    //   toast(
-    //     <pre className="mt-2 flex-1 rounded-md bg-slate-950 p-4">
-    //       <code className="text-white">{JSON.stringify(values, null, 2)}</code>
-    //     </pre>
-    //   );
-    // } catch (error) {
-    //   console.error('Form submission error', error);
-    //   toast.error('Failed to submit the form. Please try again.');
-    // }
+    if (updateProfile.isError) {
+      toast.error(updateProfile.error.message);
+    }
+
+    toast.success('Profile updated!');
   }
 
   React.useEffect(() => {
     if (!userProfile.data || initialized.current) return;
 
     const profile = userProfile.data.profile;
+    const address = userProfile.data.address;
 
     const values = {
       ...defaultFormValues,
@@ -87,9 +83,18 @@ export default function ProfileForm() {
       lastName: profile?.lastName ?? '',
       bio: profile?.bio ?? '',
       phone: profile?.phone ?? '',
-      dateOfBirth: formatDate(toDate(String(profile?.dateOfBirth))) ?? null,
+      dateOfBirth: profile?.dateOfBirth
+        ? formatDate(toDate(profile.dateOfBirth))
+        : '',
       address: {
         ...defaultFormValues.address,
+        building: address?.building ?? '',
+        street: address?.street ?? '',
+        barangay: address?.barangay ?? '',
+        city: address?.city ?? '',
+        province: address?.province ?? '',
+        region: address?.region ?? '',
+        postalCode: address?.postalCode ?? '',
       },
     };
 

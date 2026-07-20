@@ -87,7 +87,16 @@ export const signUpUserAction = async (values: SignUpUserValues) => {
   return userResult;
 };
 
-export const signInUserAction = async (values: SignInBody) => {};
+export const signInUserAction = async (values: SignInBody) => {
+  return await safeCatch(
+    async () => {
+      return await auth.api.signInUsername({
+        body: values,
+      });
+    },
+    { parser: actionErrorParser }
+  );
+};
 
 export const signOutUserAction = async () => {
   return await safeCatch(

@@ -1,6 +1,9 @@
 import { db } from '@/utils/db';
 import { AuthRepository } from '../repository/auth.repository';
-import { ProfileSchemaValues } from '../schema/profile.schema';
+import {
+  AddressDetailsSchemaValues,
+  ProfileSchemaValues,
+} from '../schema/profile.schema';
 import { auth } from '@/utils/auth';
 import { toDate } from '@/lib/date';
 import { DatabaseError } from '@/lib/errors/app-error';
@@ -55,11 +58,21 @@ export class AuthService {
       if (Object.keys(authUpdates).length > 0) {
         await auth.api.updateUser({
           body: authUpdates,
-          headers: await headers()
+          headers: await headers(),
         });
       }
 
-      return await repo.findUserProfile(userId)
+      return await repo.findUserProfile(userId);
     });
+  }
+
+  async updateUserAddress(
+    values: AddressDetailsSchemaValues & { userId: string }
+  ) {
+    const { userId, ...address } = values;
+
+    const user = await this.repository.findUserById(userId);
+
+    return await db.transaction().execute(async (trx) => {});
   }
 }

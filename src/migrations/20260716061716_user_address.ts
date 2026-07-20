@@ -7,7 +7,7 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn('userId', 'text', (col) =>
       col.primaryKey().references('user.id').onDelete('cascade')
     )
-	.addColumn('active', 'boolean', (col) => col.defaultTo(false))
+    .addColumn('active', 'boolean', (col) => col.defaultTo(false))
     .addColumn('building', 'text')
     .addColumn('street', 'text')
     .addColumn('barangay', 'text')
