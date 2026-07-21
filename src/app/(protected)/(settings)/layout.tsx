@@ -16,8 +16,8 @@ export default async function SettingsPageLayout({
 }: SettingsPageLayoutProps) {
   return (
     <div className="bg-background min-h-screen">
-      <SettingsLayoutHeader breadcrumbs={breadcrumbs}/>
-      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8 md:flex md:gap-8">
+      <SettingsLayoutHeader breadcrumbs={breadcrumbs} />
+      <div className="mx-auto min-h-[calc(100svh-57px)] max-w-6xl px-4 py-6 sm:px-6 sm:py-8 md:flex md:gap-8">
         {/* Left nav — desktop only */}
         <SettingsLayoutSidebar />
 

@@ -51,6 +51,14 @@ export const profileSchemaWithUserId = profileSchema.extend({
   userId: z.string(),
 });
 
+export const addressSchemaWithUserId = addressDetailsSchema.extend({
+  userId: z.string(),
+});
+
 export type ProfileSchemaWithUserIdValues = z.infer<
   typeof profileSchemaWithUserId
+>;
+
+export type AddressSchemaWithUserIdValues = z.infer<
+  typeof addressSchemaWithUserId
 >;

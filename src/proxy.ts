@@ -8,7 +8,7 @@ export async function proxy(request: NextRequest) {
 
   // Define routes before fetching session
   const guestOnlyRoutes = ['/signin'];
-  const protectedRoutes = ['/dashboard'];
+  const protectedRoutes = ['/dashboard', '/settings'];
   // const bootstrapRoutes = ['/setup', '/setup/verification-success'];
 
   const isGuestOnlyRoute = guestOnlyRoutes.some((route) =>

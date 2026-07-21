@@ -1,3 +1,8 @@
+export function emptyToNull (value: string) {
+  const trimmed = value.trim();
+  return trimmed === '' ? null : trimmed;
+};
+
 export function normalizeSeparators(value: string): string {
   return value
     .replace(/[-_.\\/]+/g, ' ')

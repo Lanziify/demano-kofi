@@ -90,6 +90,8 @@ export interface UserAddress {
   building: string | null;
   city: string | null;
   createdAt: Generated<Timestamp>;
+  id: Generated<string>;
+  label: string | null;
   postalCode: string | null;
   province: string | null;
   region: string | null;

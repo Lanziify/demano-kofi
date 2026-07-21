@@ -2,6 +2,7 @@ import { db } from '@/utils/db';
 import { AuthRepository } from '../repository/auth.repository';
 import {
   AddressDetailsSchemaValues,
+  AddressSchemaWithUserIdValues,
   ProfileSchemaValues,
 } from '../schema/profile.schema';
 import { auth } from '@/utils/auth';
@@ -21,7 +22,7 @@ export class AuthService {
   async updateUserProfile(values: ProfileSchemaValues & { userId: string }) {
     const { userId, image, username, address, ...profile } = values;
 
-    const user = await this.repository.findUserById(userId);
+    const user = await this.repository.findUserProfile(userId);
 
     if (!user) {
       throw new DatabaseError('Could not find user');
@@ -55,6 +56,17 @@ export class AuthService {
         dateOfBirth: profile.dateOfBirth ? toDate(profile.dateOfBirth) : null,
       });
 
+      if (!user.address) {
+        await this.repository.createUserAddress(userId, {
+          active: true,
+          ...address,
+        });
+      } else {
+        await this.repository.updateUserAddress(userId, {
+          ...address,
+        });
+      }
+
       if (Object.keys(authUpdates).length > 0) {
         await auth.api.updateUser({
           body: authUpdates,
@@ -66,6 +78,12 @@ export class AuthService {
     });
   }
 
+  async createNewUserAddress(data: AddressSchemaWithUserIdValues) {
+    const { userId, ...values } = data;
+
+    return await this.repository.createUserAddress(userId, values);
+  }
+
   async updateUserAddress(
     values: AddressDetailsSchemaValues & { userId: string }
   ) {
@@ -73,6 +91,18 @@ export class AuthService {
 
     const user = await this.repository.findUserById(userId);
 
-    return await db.transaction().execute(async (trx) => {});
+    if (!user) {
+      throw new DatabaseError('Could not find user');
+    }
+
+    return await db.transaction().execute(async (trx) => {
+      return await this.repository.updateUserAddress(userId, {
+        ...address,
+      });
+    });
+  }
+
+  async getUserAddress(userId: string) {
+    return await this.repository.findUserAddresses(userId);
   }
 }

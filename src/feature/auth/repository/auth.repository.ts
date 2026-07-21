@@ -76,7 +76,7 @@ export class AuthRepository {
               'userAddress.street',
             ])
             .whereRef('userAddress.userId', '=', 'user.id')
-            .where("userAddress.active", "=", true)
+            .where('userAddress.active', '=', true)
         ).as('address'),
       ])
       .where('user.id', '=', userId)
@@ -96,7 +96,10 @@ export class AuthRepository {
 
   async createUserAddress(
     userId: string,
-    values: Omit<Updateable<UserAddress>, 'userId' | 'createdAt' | 'updatedAt'>
+    values: Omit<
+      Updateable<UserAddress>,
+      'id' | 'userId' | 'createdAt' | 'updatedAt'
+    >
   ) {
     return this.database
       .insertInto('userAddress')
@@ -116,12 +119,12 @@ export class AuthRepository {
       .executeTakeFirstOrThrow();
   }
 
-  async findUserAddress(userId: string) {
+  async findUserAddresses(userId: string) {
     return this.database
       .selectFrom('userAddress')
       .selectAll()
       .where('userAddress.userId', '=', userId)
-      .executeTakeFirstOrThrow();
+      .execute();
   }
 
   async updateUserAddress(
