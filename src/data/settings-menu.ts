@@ -9,12 +9,10 @@ import {
   Key,
   Smartphone,
   Eye,
-  MapPin,
 } from 'lucide-react';
 
 const accountMenuItems = [
   { title: 'Public profile', path: '/settings/profile', icon: User },
-  { title: 'Address', path: '/settings/address', icon: MapPin },
   { title: 'Account', path: '/settings/account', icon: Key },
   { title: 'Appearance', path: '/settings/appearance', icon: Palette },
   { title: 'Notifications', path: '/settings/notifications', icon: Bell },

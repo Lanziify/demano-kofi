@@ -24,7 +24,7 @@ interface AuthStore {
 
   setAuthSession(data: AuthType['Session'] | null): void;
 
-  updateAuthSession: () => Promise<void>;
+  updateAuthSession: () => Promise<AuthType['Session'] | null>;
 
   signIn: (
     credentials: SignInUserValues
@@ -44,7 +44,6 @@ export const useAuthStore = create<AuthStore>((set) => ({
     set({
       user: data?.user ?? null,
       session: data?.session ?? null,
-      isInitialized: true,
     });
   },
 
@@ -59,8 +58,9 @@ export const useAuthStore = create<AuthStore>((set) => ({
       user: data?.user ?? null,
       session: data?.session ?? null,
       isLoading: false,
-      isInitialized: true,
     });
+
+    return data
   },
 
   signIn: async (credentials) => {

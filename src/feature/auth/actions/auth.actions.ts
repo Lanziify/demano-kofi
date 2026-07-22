@@ -12,17 +12,6 @@ import { SignUpUserValues } from '../schema/auth.schema';
 export type SignUpBody = ApiBody<typeof auth.api.signUpEmail>;
 export type SignInBody = ApiBody<typeof auth.api.signInUsername>;
 
-export const getSessionAction = async () => {
-  return await safeCatch(
-    async () => {
-      return await auth.api.getSession({ headers: await headers() });
-    },
-    {
-      parser: actionErrorParser,
-    }
-  );
-};
-
 export async function signUpAdminAction(values: SignUpBody) {
   const repository = new AuthRepository();
 

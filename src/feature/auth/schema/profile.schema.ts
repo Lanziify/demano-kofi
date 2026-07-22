@@ -35,35 +35,10 @@ export const profileSchema = z.object({
 
 export type ProfileSchemaValues = z.infer<typeof profileSchema>;
 
-// export const addressDetailsSchema = z.object({
-//   building: z.string().optional(),
-//   street: z.string().optional(),
-//   region: z.string().optional(),
-//   province: z.string().optional(),
-//   municipality: z.string().optional(),
-//   barangay: z.string().optional(),
-// });
-
-// export type AddressDetailsSchemaValues = z.infer<typeof addressDetailsSchema>;
-
-// export const profileSchema = profileInfoSchema.extend({
-//   address: addressDetailsSchema,
-// });
-
-// export type ProfileSchemaValues = z.infer<typeof profileSchema>;
-
 export const profileSchemaWithUserId = profileSchema.extend({
   userId: z.string(),
 });
 
-// export const addressSchemaWithUserId = addressDetailsSchema.extend({
-//   userId: z.string(),
-// });
-
 export type ProfileSchemaWithUserIdValues = z.infer<
   typeof profileSchemaWithUserId
 >;
-
-// export type AddressSchemaWithUserIdValues = z.infer<
-//   typeof addressSchemaWithUserId
-// >;

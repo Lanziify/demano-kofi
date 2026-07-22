@@ -57,7 +57,7 @@ export default function ProfileForm() {
     barangay: '',
   };
 
-  const { control, handleSubmit, reset, watch, formState } =
+  const { control, handleSubmit, reset, watch, getValues, formState } =
     useForm<ProfileSchemaValues>({
       resolver: zodResolver(profileSchema),
       defaultValues: defaultFormValues,
@@ -84,7 +84,6 @@ export default function ProfileForm() {
     if (!userProfile.data || initialized.current) return;
 
     const profile = userProfile.data.profile;
-    // const address = userProfile.data.address;
 
     const values = {
       ...defaultFormValues,
@@ -256,12 +255,12 @@ export default function ProfileForm() {
           deliveries.
         </FieldDescription>
 
-        <FieldGroup>
+        <FieldGroup className="grid grid-cols-2">
           <Controller
             name="building"
             control={control}
             render={({ field, fieldState }) => (
-              <Field>
+              <Field className="col-span-full">
                 <FieldLabel htmlFor={field.name}>
                   House/Unit No., Building
                 </FieldLabel>
@@ -279,7 +278,7 @@ export default function ProfileForm() {
             name="street"
             control={control}
             render={({ field, fieldState }) => (
-              <Field>
+              <Field className="col-span-full">
                 <FieldLabel htmlFor={field.name}>Street</FieldLabel>
 
                 <Input {...field} placeholder="Ayala Avenue" />
@@ -290,59 +289,6 @@ export default function ProfileForm() {
               </Field>
             )}
           />
-
-          {/* <Controller
-            name="barangay"
-            control={control}
-            render={({ field, fieldState }) => (
-              <Field>
-                <FieldLabel htmlFor={field.name}>Barangay</FieldLabel>
-
-                <Input {...field} placeholder="Bel-Air" />
-
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
-          />
-
-          <div className="grid grid-cols-2 gap-4">
-            <Controller
-              name="municipality"
-              control={control}
-              render={({ field, fieldState }) => (
-                <Field>
-                  <FieldLabel htmlFor={field.name}>
-                    City / Municipality
-                  </FieldLabel>
-
-                  <Input {...field} placeholder="Makati City" />
-
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-
-            <Controller
-              name="province"
-              control={control}
-              render={({ field, fieldState }) => (
-                <Field>
-                  <FieldLabel htmlFor={field.name}>Province</FieldLabel>
-
-                  <Input {...field} placeholder="Metro Manila" />
-
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-          </div>
-          */}
 
           <Controller
             name="region"
@@ -355,7 +301,7 @@ export default function ProfileForm() {
                   <SelectTrigger>
                     <SelectValue placeholder="Select a region" />
                   </SelectTrigger>
-                  <SelectContent alignItemWithTrigger={true}>
+                  <SelectContent alignItemWithTrigger={false}>
                     <SelectGroup>
                       {regions.data &&
                         regions.data.map((region) => (
@@ -381,11 +327,14 @@ export default function ProfileForm() {
               <Field>
                 <FieldLabel htmlFor={field.name}>Province</FieldLabel>
 
-                <Select value={field.value} onValueChange={field.onChange}>
+                <Select
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  disabled={!getValues('region')}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a province" />
                   </SelectTrigger>
-                  <SelectContent alignItemWithTrigger={true}>
+                  <SelectContent alignItemWithTrigger={false}>
                     <SelectGroup>
                       {provinces.data &&
                         provinces.data.map((province) => (
@@ -396,6 +345,10 @@ export default function ProfileForm() {
                     </SelectGroup>
                   </SelectContent>
                 </Select>
+
+                <FieldDescription>
+                  Select a region first to use this field
+                </FieldDescription>
 
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
@@ -411,11 +364,14 @@ export default function ProfileForm() {
               <Field>
                 <FieldLabel htmlFor={field.name}>Municipality</FieldLabel>
 
-                <Select value={field.value} onValueChange={field.onChange}>
+                <Select
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  disabled={!getValues('province')}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a municipality" />
                   </SelectTrigger>
-                  <SelectContent alignItemWithTrigger={true}>
+                  <SelectContent alignItemWithTrigger={false}>
                     <SelectGroup>
                       {municipalities.data &&
                         municipalities.data.map((municipality) => (
@@ -428,6 +384,10 @@ export default function ProfileForm() {
                     </SelectGroup>
                   </SelectContent>
                 </Select>
+
+                <FieldDescription>
+                  Select a province first to use this field
+                </FieldDescription>
 
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
@@ -443,11 +403,14 @@ export default function ProfileForm() {
               <Field>
                 <FieldLabel htmlFor={field.name}>Barangay</FieldLabel>
 
-                <Select value={field.value} onValueChange={field.onChange}>
+                <Select
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  disabled={!getValues('municipality')}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a barangay" />
                   </SelectTrigger>
-                  <SelectContent alignItemWithTrigger={true}>
+                  <SelectContent alignItemWithTrigger={false}>
                     <SelectGroup>
                       {barangays.data &&
                         barangays.data.map((barangay) => (
@@ -458,6 +421,10 @@ export default function ProfileForm() {
                     </SelectGroup>
                   </SelectContent>
                 </Select>
+
+                <FieldDescription>
+                  Select a municipality first to use this field
+                </FieldDescription>
 
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />

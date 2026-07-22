@@ -1,4 +1,5 @@
 import { AuthType } from '@/utils/auth';
+import { User } from 'better-auth';
 import {
   Body,
   Button,
@@ -14,11 +15,11 @@ import {
 } from 'react-email';
 
 type VerificationEmailProps = {
-  user: AuthType['Session']['user'] | null;
+  user: User | null;
   url: string | null;
 };
 
-export function VerificationEmail ({ user, url }: VerificationEmailProps) {
+export function VerificationEmail({ user, url }: VerificationEmailProps) {
   return (
     <Html>
       <Head />
@@ -65,4 +66,4 @@ export function VerificationEmail ({ user, url }: VerificationEmailProps) {
       </Tailwind>
     </Html>
   );
-};
+}

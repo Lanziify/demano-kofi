@@ -1,6 +1,8 @@
 import React from 'react';
 import { redirect } from 'next/navigation';
-import { getSessionAction } from '@/feature/auth/actions/auth.actions';
+import { AuthProvider } from '@/components/providers/auth-provider';
+import { auth } from '@/utils/auth';
+import { headers } from 'next/headers';
 
 type ProtectedPagesLayoutProps = {
   children: React.ReactNode;
@@ -9,11 +11,13 @@ type ProtectedPagesLayoutProps = {
 export default async function ProtectedPagesLayout({
   children,
 }: ProtectedPagesLayoutProps) {
-  const { data, error } = await getSessionAction();
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
-  if (!data || error) {
+  if (!session) {
     redirect('/signin');
   }
 
-  return <>{children}</>;
+  return <AuthProvider sessionData={session}>{children}</AuthProvider>;
 }

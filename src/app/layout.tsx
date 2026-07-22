@@ -7,9 +7,6 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/utils/query-client';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { ThemeProvider } from 'next-themes';
-import { AuthProvider } from '@/components/providers/auth-provider';
-import { auth } from '@/utils/auth';
-import { headers } from 'next/headers';
 
 const poppins = Poppins({
   variable: '--font-poppins',
@@ -38,9 +35,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+
 
   return (
     <html
@@ -56,15 +51,13 @@ export default async function RootLayout({
       )}>
       <body className="flex min-h-full flex-col">
         <QueryClientProvider client={queryClient}>
-          <AuthProvider sessionData={session}>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange>
-              <TooltipProvider>{children}</TooltipProvider>
-            </ThemeProvider>
-          </AuthProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange>
+            <TooltipProvider>{children}</TooltipProvider>
+          </ThemeProvider>
         </QueryClientProvider>
         <Toaster />
       </body>

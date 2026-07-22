@@ -23,6 +23,7 @@ import { Empty, EmptyHeader, EmptyDescription } from '@/components/ui/empty';
 import { MailIcon } from 'lucide-react';
 import React from 'react';
 import { useTheme } from 'next-themes';
+import { useAuthStore } from '@/store/auth-store';
 
 type VerificationStatus =
   'idle' | 'creating' | 'verifying' | 'completed' | 'error';
@@ -32,6 +33,7 @@ export function SignUpForm({
   ...props
 }: React.ComponentProps<'div'>) {
   const router = useRouter();
+  const { updateAuthSession } = useAuthStore();
   const searchParams = useSearchParams();
   const callbackURL = searchParams.get('callbackURL');
   const { theme } = useTheme();
@@ -76,19 +78,19 @@ export function SignUpForm({
   React.useEffect(() => {
     if (status !== 'verifying') return;
 
-    const channel = new BroadcastChannel('email-verification');
+    const interval = setInterval(async () => {
+      const data = await updateAuthSession();
 
-    channel.onmessage = (event) => {
-      if (event.data === 'email-verified') {
-        toast.success('Signed in successfully');
-        router.replace(callbackURL ?? '/dashboard');
-      }
-    };
+      if (!data) return;
 
-    return () => {
-      channel.close();
-    };
-  }, [status]);
+      await updateAuthSession();
+
+      toast.success('Signed in successfully');
+      router.replace(callbackURL ?? '/dashboard');
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [status, updateAuthSession, callbackURL, router]);
 
   if (status === 'verifying') {
     return (

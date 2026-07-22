@@ -26,14 +26,16 @@ import { getInitials } from '@/lib/strings';
 import Link from 'next/link';
 
 export function DashboardNavUser() {
-  const { user } = useAuthStore();
+  const user = useAuthStore((state) => state.user);
+
+  console.log(user);
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button className="flex items-center gap-2 rounded-full outline-none">
           <Avatar className="size-8">
-            <AvatarImage src={String(user?.image)} alt="Profile" />
+            <AvatarImage src={user?.image ?? undefined} alt="Profile" />
             <AvatarFallback className="bg-amber-100 text-sm font-semibold text-amber-700">
               {getInitials(user?.name)}
             </AvatarFallback>

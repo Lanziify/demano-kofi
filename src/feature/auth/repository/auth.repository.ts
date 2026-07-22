@@ -89,48 +89,4 @@ export class AuthRepository {
       .where('userId', '=', userId)
       .executeTakeFirstOrThrow();
   }
-
-  // async createUserAddress(
-  //   userId: string,
-  //   values: Omit<
-  //     Updateable<UserAddress>,
-  //     'id' | 'userId' | 'createdAt' | 'updatedAt'
-  //   >
-  // ) {
-  //   return this.database
-  //     .insertInto('userAddress')
-  //     .values({
-  //       userId,
-  //       ...values,
-  //     })
-  //     .executeTakeFirst();
-  // }
-
-  // async findUserActiveAddress(userId: string) {
-  //   return this.database
-  //     .selectFrom('userAddress')
-  //     .selectAll()
-  //     .where('userAddress.userId', '=', userId)
-  //     .where('userAddress.active', '=', true)
-  //     .executeTakeFirstOrThrow();
-  // }
-
-  // async findUserAddresses(userId: string) {
-  //   return this.database
-  //     .selectFrom('userAddress')
-  //     .selectAll()
-  //     .where('userAddress.userId', '=', userId)
-  //     .execute();
-  // }
-
-  // async updateUserAddress(
-  //   userId: string,
-  //   values: Omit<Updateable<UserAddress>, 'userId' | 'createdAt' | 'updatedAt'>
-  // ) {
-  //   return this.database
-  //     .updateTable('userAddress')
-  //     .set(values)
-  //     .where('userId', '=', userId)
-  //     .executeTakeFirstOrThrow();
-  // }
 }

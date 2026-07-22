@@ -54,17 +54,6 @@ export class AuthService {
         dateOfBirth: profile.dateOfBirth ? toDate(profile.dateOfBirth) : null,
       });
 
-      // if (!user.address) {
-      //   await this.repository.createUserAddress(userId, {
-      //     active: true,
-      //     ...address,
-      //   });
-      // } else {
-      //   await this.repository.updateUserAddress(userId, {
-      //     ...address,
-      //   });
-      // }
-
       if (Object.keys(authUpdates).length > 0) {
         await auth.api.updateUser({
           body: authUpdates,
