@@ -25,6 +25,15 @@ import { useUserQueries } from '../hooks/use-user-queries';
 import { Spinner } from '@/components/ui/spinner';
 import { formatDate, toDate } from '@/lib/date';
 import { useUpdateUserProfile } from '../mutations/user.mutation';
+import { usePsgcQueries } from '../hooks/use-psgc-quries';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export default function ProfileForm() {
   const { user, updateAuthSession } = useAuthStore();
@@ -40,22 +49,25 @@ export default function ProfileForm() {
     bio: '',
     phone: '',
     dateOfBirth: '',
-    address: {
-      building: '',
-      street: '',
-      barangay: '',
-      city: '',
-      province: '',
-      region: '',
-      postalCode: '',
-    },
+    building: '',
+    street: '',
+    region: '',
+    province: '',
+    municipality: '',
+    barangay: '',
   };
 
-  const { control, handleSubmit, reset, formState } =
+  const { control, handleSubmit, reset, watch, formState } =
     useForm<ProfileSchemaValues>({
       resolver: zodResolver(profileSchema),
       defaultValues: defaultFormValues,
     });
+
+  const { regions, provinces, municipalities, barangays } = usePsgcQueries({
+    region: watch('region') ?? '',
+    province: watch('province') ?? '',
+    municipality: watch('municipality') ?? '',
+  });
 
   async function onSubmit(values: ProfileSchemaValues) {
     await updateProfile.mutateAsync({ ...values, userId: user?.id! });
@@ -72,11 +84,10 @@ export default function ProfileForm() {
     if (!userProfile.data || initialized.current) return;
 
     const profile = userProfile.data.profile;
-    const address = userProfile.data.address;
+    // const address = userProfile.data.address;
 
     const values = {
       ...defaultFormValues,
-      ...userProfile.data.profile,
       image: userProfile.data.image ?? '',
       username: userProfile.data.displayUsername ?? '',
       firstName: profile?.firstName ?? '',
@@ -86,16 +97,12 @@ export default function ProfileForm() {
       dateOfBirth: profile?.dateOfBirth
         ? formatDate(toDate(profile.dateOfBirth))
         : '',
-      address: {
-        ...defaultFormValues.address,
-        building: address?.building ?? '',
-        street: address?.street ?? '',
-        barangay: address?.barangay ?? '',
-        city: address?.city ?? '',
-        province: address?.province ?? '',
-        region: address?.region ?? '',
-        postalCode: address?.postalCode ?? '',
-      },
+      building: profile?.building ?? '',
+      street: profile?.street ?? '',
+      region: profile?.region ?? '',
+      province: profile?.province ?? '',
+      municipality: profile?.municipality ?? '',
+      barangay: profile?.barangay ?? '',
     };
 
     reset(values);
@@ -251,7 +258,7 @@ export default function ProfileForm() {
 
         <FieldGroup>
           <Controller
-            name="address.building"
+            name="building"
             control={control}
             render={({ field, fieldState }) => (
               <Field>
@@ -269,7 +276,7 @@ export default function ProfileForm() {
           />
 
           <Controller
-            name="address.street"
+            name="street"
             control={control}
             render={({ field, fieldState }) => (
               <Field>
@@ -284,8 +291,8 @@ export default function ProfileForm() {
             )}
           />
 
-          <Controller
-            name="address.barangay"
+          {/* <Controller
+            name="barangay"
             control={control}
             render={({ field, fieldState }) => (
               <Field>
@@ -302,7 +309,7 @@ export default function ProfileForm() {
 
           <div className="grid grid-cols-2 gap-4">
             <Controller
-              name="address.city"
+              name="municipality"
               control={control}
               render={({ field, fieldState }) => (
                 <Field>
@@ -320,7 +327,7 @@ export default function ProfileForm() {
             />
 
             <Controller
-              name="address.province"
+              name="province"
               control={control}
               render={({ field, fieldState }) => (
                 <Field>
@@ -335,40 +342,129 @@ export default function ProfileForm() {
               )}
             />
           </div>
+          */}
 
-          <div className="grid grid-cols-2 gap-4">
-            <Controller
-              name="address.region"
-              control={control}
-              render={({ field, fieldState }) => (
-                <Field>
-                  <FieldLabel htmlFor={field.name}>Region</FieldLabel>
+          <Controller
+            name="region"
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field>
+                <FieldLabel htmlFor={field.name}>Region</FieldLabel>
 
-                  <Input {...field} placeholder="NCR" />
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a region" />
+                  </SelectTrigger>
+                  <SelectContent alignItemWithTrigger={true}>
+                    <SelectGroup>
+                      {regions.data &&
+                        regions.data.map((region) => (
+                          <SelectItem key={region.code} value={region.name}>
+                            {region.name}
+                          </SelectItem>
+                        ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
 
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
 
-            <Controller
-              name="address.postalCode"
-              control={control}
-              render={({ field, fieldState }) => (
-                <Field>
-                  <FieldLabel htmlFor={field.name}>Postal Code</FieldLabel>
+          <Controller
+            name="province"
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field>
+                <FieldLabel htmlFor={field.name}>Province</FieldLabel>
 
-                  <Input {...field} placeholder="1209" />
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a province" />
+                  </SelectTrigger>
+                  <SelectContent alignItemWithTrigger={true}>
+                    <SelectGroup>
+                      {provinces.data &&
+                        provinces.data.map((province) => (
+                          <SelectItem key={province.code} value={province.name}>
+                            {province.name}
+                          </SelectItem>
+                        ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
 
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-          </div>
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+
+          <Controller
+            name="municipality"
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field>
+                <FieldLabel htmlFor={field.name}>Municipality</FieldLabel>
+
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a municipality" />
+                  </SelectTrigger>
+                  <SelectContent alignItemWithTrigger={true}>
+                    <SelectGroup>
+                      {municipalities.data &&
+                        municipalities.data.map((municipality) => (
+                          <SelectItem
+                            key={municipality.code}
+                            value={municipality.name}>
+                            {municipality.name}
+                          </SelectItem>
+                        ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+
+          <Controller
+            name="barangay"
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field>
+                <FieldLabel htmlFor={field.name}>Barangay</FieldLabel>
+
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a barangay" />
+                  </SelectTrigger>
+                  <SelectContent alignItemWithTrigger={true}>
+                    <SelectGroup>
+                      {barangays.data &&
+                        barangays.data.map((barangay) => (
+                          <SelectItem key={barangay.code} value={barangay.name}>
+                            {barangay.name}
+                          </SelectItem>
+                        ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
         </FieldGroup>
       </FieldSet>
       <Button

@@ -1,5 +1,5 @@
 import { queryOptions } from '@tanstack/react-query';
-import { getUserAddresses, getUserProfile } from '../api/user.api';
+import { getUserProfile } from '../api/user.api';
 
 export const userQueries = {
   profile: () => {
@@ -9,11 +9,11 @@ export const userQueries = {
     });
   },
 
-  addresses: (userId: string) => {
-    return queryOptions({
-      queryKey: ['addresses'],
-      queryFn: () => getUserAddresses(userId),
-      enabled: Boolean(userId)
-    });
-  },
+  // addresses: (userId: string) => {
+  //   return queryOptions({
+  //     queryKey: ['addresses'],
+  //     queryFn: () => getUserAddresses(userId),
+  //     enabled: Boolean(userId)
+  //   });
+  // },
 };

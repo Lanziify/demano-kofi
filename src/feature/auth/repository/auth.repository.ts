@@ -1,7 +1,7 @@
 import { db } from '@/utils/db';
 import { Updateable, type Kysely, type Transaction } from 'kysely';
 import { jsonObjectFrom } from 'kysely/helpers/postgres';
-import { DB, UserAddress, UserProfile } from '@/types/db';
+import { DB, UserProfile } from '@/types/db';
 
 type Dastabase = Kysely<DB> | Transaction<DB>;
 
@@ -59,25 +59,21 @@ export class AuthRepository {
         jsonObjectFrom(
           eb
             .selectFrom('userProfile')
-            .select(['firstName', 'lastName', 'bio', 'phone', 'dateOfBirth'])
+            .select([
+              'firstName',
+              'lastName',
+              'bio',
+              'phone',
+              'dateOfBirth',
+              'building',
+              'street',
+              'region',
+              'province',
+              'municipality',
+              'barangay',
+            ])
             .whereRef('userProfile.userId', '=', 'user.id')
         ).as('profile'),
-        jsonObjectFrom(
-          eb
-            .selectFrom('userAddress')
-            .select([
-              'userAddress.active',
-              'userAddress.barangay',
-              'userAddress.building',
-              'userAddress.city',
-              'userAddress.postalCode',
-              'userAddress.province',
-              'userAddress.region',
-              'userAddress.street',
-            ])
-            .whereRef('userAddress.userId', '=', 'user.id')
-            .where('userAddress.active', '=', true)
-        ).as('address'),
       ])
       .where('user.id', '=', userId)
       .executeTakeFirst();
@@ -94,47 +90,47 @@ export class AuthRepository {
       .executeTakeFirstOrThrow();
   }
 
-  async createUserAddress(
-    userId: string,
-    values: Omit<
-      Updateable<UserAddress>,
-      'id' | 'userId' | 'createdAt' | 'updatedAt'
-    >
-  ) {
-    return this.database
-      .insertInto('userAddress')
-      .values({
-        userId,
-        ...values,
-      })
-      .executeTakeFirst();
-  }
+  // async createUserAddress(
+  //   userId: string,
+  //   values: Omit<
+  //     Updateable<UserAddress>,
+  //     'id' | 'userId' | 'createdAt' | 'updatedAt'
+  //   >
+  // ) {
+  //   return this.database
+  //     .insertInto('userAddress')
+  //     .values({
+  //       userId,
+  //       ...values,
+  //     })
+  //     .executeTakeFirst();
+  // }
 
-  async findUserActiveAddress(userId: string) {
-    return this.database
-      .selectFrom('userAddress')
-      .selectAll()
-      .where('userAddress.userId', '=', userId)
-      .where('userAddress.active', '=', true)
-      .executeTakeFirstOrThrow();
-  }
+  // async findUserActiveAddress(userId: string) {
+  //   return this.database
+  //     .selectFrom('userAddress')
+  //     .selectAll()
+  //     .where('userAddress.userId', '=', userId)
+  //     .where('userAddress.active', '=', true)
+  //     .executeTakeFirstOrThrow();
+  // }
 
-  async findUserAddresses(userId: string) {
-    return this.database
-      .selectFrom('userAddress')
-      .selectAll()
-      .where('userAddress.userId', '=', userId)
-      .execute();
-  }
+  // async findUserAddresses(userId: string) {
+  //   return this.database
+  //     .selectFrom('userAddress')
+  //     .selectAll()
+  //     .where('userAddress.userId', '=', userId)
+  //     .execute();
+  // }
 
-  async updateUserAddress(
-    userId: string,
-    values: Omit<Updateable<UserAddress>, 'userId' | 'createdAt' | 'updatedAt'>
-  ) {
-    return this.database
-      .updateTable('userAddress')
-      .set(values)
-      .where('userId', '=', userId)
-      .executeTakeFirstOrThrow();
-  }
+  // async updateUserAddress(
+  //   userId: string,
+  //   values: Omit<Updateable<UserAddress>, 'userId' | 'createdAt' | 'updatedAt'>
+  // ) {
+  //   return this.database
+  //     .updateTable('userAddress')
+  //     .set(values)
+  //     .where('userId', '=', userId)
+  //     .executeTakeFirstOrThrow();
+  // }
 }

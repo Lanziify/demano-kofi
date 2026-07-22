@@ -84,29 +84,19 @@ export interface User {
   username: string | null;
 }
 
-export interface UserAddress {
-  active: Generated<boolean | null>;
-  barangay: string | null;
-  building: string | null;
-  city: string | null;
-  createdAt: Generated<Timestamp>;
-  id: Generated<string>;
-  label: string | null;
-  postalCode: string | null;
-  province: string | null;
-  region: string | null;
-  street: string | null;
-  updatedAt: Generated<Timestamp>;
-  userId: string;
-}
-
 export interface UserProfile {
+  barangay: string | null;
   bio: string | null;
+  building: string | null;
   createdAt: Generated<Timestamp>;
   dateOfBirth: Timestamp | null;
   firstName: string | null;
   lastName: string | null;
+  municipality: string | null;
   phone: string | null;
+  province: string | null;
+  region: string | null;
+  street: string | null;
   updatedAt: Generated<Timestamp>;
   userId: string;
 }
@@ -127,7 +117,6 @@ export interface DB {
   organization: Organization;
   session: Session;
   user: User;
-  userAddress: UserAddress;
   userProfile: UserProfile;
   verification: Verification;
 }

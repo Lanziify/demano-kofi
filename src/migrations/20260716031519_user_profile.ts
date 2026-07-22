@@ -12,6 +12,15 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn('bio', 'text')
     .addColumn('phone', 'text')
     .addColumn('dateOfBirth', 'date')
+
+    // Address
+    .addColumn('building', 'text')
+    .addColumn('street', 'text')
+    .addColumn('region', 'text')
+    .addColumn('province', 'text')
+    .addColumn('municipality', 'text')
+    .addColumn('barangay', 'text')
+
     .addColumn('createdAt', 'timestamptz', (col) =>
       col.defaultTo(sql`now()`).notNull()
     )

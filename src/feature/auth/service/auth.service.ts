@@ -1,8 +1,6 @@
 import { db } from '@/utils/db';
 import { AuthRepository } from '../repository/auth.repository';
 import {
-  AddressDetailsSchemaValues,
-  AddressSchemaWithUserIdValues,
   ProfileSchemaValues,
 } from '../schema/profile.schema';
 import { auth } from '@/utils/auth';
@@ -20,7 +18,7 @@ export class AuthService {
   }
 
   async updateUserProfile(values: ProfileSchemaValues & { userId: string }) {
-    const { userId, image, username, address, ...profile } = values;
+    const { userId, image, username, ...profile } = values;
 
     const user = await this.repository.findUserProfile(userId);
 
@@ -56,16 +54,16 @@ export class AuthService {
         dateOfBirth: profile.dateOfBirth ? toDate(profile.dateOfBirth) : null,
       });
 
-      if (!user.address) {
-        await this.repository.createUserAddress(userId, {
-          active: true,
-          ...address,
-        });
-      } else {
-        await this.repository.updateUserAddress(userId, {
-          ...address,
-        });
-      }
+      // if (!user.address) {
+      //   await this.repository.createUserAddress(userId, {
+      //     active: true,
+      //     ...address,
+      //   });
+      // } else {
+      //   await this.repository.updateUserAddress(userId, {
+      //     ...address,
+      //   });
+      // }
 
       if (Object.keys(authUpdates).length > 0) {
         await auth.api.updateUser({
@@ -78,31 +76,31 @@ export class AuthService {
     });
   }
 
-  async createNewUserAddress(data: AddressSchemaWithUserIdValues) {
-    const { userId, ...values } = data;
+  // async createNewUserAddress(data: AddressSchemaWithUserIdValues) {
+  //   const { userId, ...values } = data;
 
-    return await this.repository.createUserAddress(userId, values);
-  }
+  //   return await this.repository.createUserAddress(userId, values);
+  // }
 
-  async updateUserAddress(
-    values: AddressDetailsSchemaValues & { userId: string }
-  ) {
-    const { userId, ...address } = values;
+  // async updateUserAddress(
+  //   values: AddressDetailsSchemaValues & { userId: string }
+  // ) {
+  //   const { userId, ...address } = values;
 
-    const user = await this.repository.findUserById(userId);
+  //   const user = await this.repository.findUserById(userId);
 
-    if (!user) {
-      throw new DatabaseError('Could not find user');
-    }
+  //   if (!user) {
+  //     throw new DatabaseError('Could not find user');
+  //   }
 
-    return await db.transaction().execute(async (trx) => {
-      return await this.repository.updateUserAddress(userId, {
-        ...address,
-      });
-    });
-  }
+  //   return await db.transaction().execute(async (trx) => {
+  //     return await this.repository.updateUserAddress(userId, {
+  //       ...address,
+  //     });
+  //   });
+  // }
 
-  async getUserAddress(userId: string) {
-    return await this.repository.findUserAddresses(userId);
-  }
+  // async getUserAddress(userId: string) {
+  //   return await this.repository.findUserAddresses(userId);
+  // }
 }

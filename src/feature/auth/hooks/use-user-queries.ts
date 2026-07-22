@@ -7,12 +7,11 @@ type UserQueriesHookProps = {
 };
 
 export const useUserQueries = (options?: UserQueriesHookProps) => {
-  const [userProfile, userAddresses] = useQueries({
-    queries: [userQueries.profile(), userQueries.addresses(options?.userId!)],
+  const [userProfile] = useQueries({
+    queries: [userQueries.profile()],
   });
 
   return {
     userProfile,
-    userAddresses
   };
 };
