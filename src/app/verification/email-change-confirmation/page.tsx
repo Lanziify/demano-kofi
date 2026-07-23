@@ -34,5 +34,5 @@ export default function VerifiedPage() {
         </EmptyDescription>
       </Empty>
     </div>
-  );
+  ); 
 }

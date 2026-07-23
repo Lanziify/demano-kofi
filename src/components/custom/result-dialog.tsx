@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckCircle2, Loader2, XCircle } from 'lucide-react';
+import { CheckCircle2, Info, Loader2, XCircle } from 'lucide-react';
 
 import {
   Dialog,
@@ -12,9 +12,9 @@ import {
 
 import { Button } from '@/components/ui/button';
 
-type ResultDialogVariant = 'loading' | 'success' | 'error';
+type ResultDialogVariant = 'idle' | 'loading' | 'success' | 'error';
 
-type ResultDialogProps = {
+export type ResultDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   variant: ResultDialogVariant;
@@ -34,6 +34,7 @@ export function ResultDialog({
   const isLoading = variant === 'loading';
 
   const icon = {
+    idle: <Info className="size-8 animate-spin" />,
     loading: <Loader2 className="size-8 animate-spin" />,
     success: <CheckCircle2 className="size-8" />,
     error: <XCircle className="size-8" />,
@@ -51,7 +52,7 @@ export function ResultDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent>
-        <DialogHeader className="items-center text-center">
+        <DialogHeader className="items-center text-center space-y-4">
           {icon}
 
           <DialogTitle>{title}</DialogTitle>

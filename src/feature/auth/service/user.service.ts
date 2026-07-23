@@ -72,6 +72,9 @@ export class UserService {
   async updateEmail(values: ChangeEmailSchemaValues) {
     return await auth.api.changeEmail({
       body: values,
+      params: {
+        type: 'email-change',
+      },
       headers: await headers(),
     });
   }

@@ -1,11 +1,12 @@
 import { appRoles, platformAccessControl } from '@/lib/auth/permissions';
 import {
   ChangeEmailConfirmationEmail,
+  ChangeEmailVerification,
   VerificationEmail,
 } from '@/templates/email';
 import { betterAuth } from 'better-auth';
 import { nextCookies } from 'better-auth/next-js';
-import { admin, organization, username } from 'better-auth/plugins';
+import { admin, organization, username, emailOTP } from 'better-auth/plugins';
 import { render } from 'react-email';
 import { db } from './db';
 import { transporter } from './email';
@@ -38,15 +39,16 @@ export const auth = betterAuth({
     requireEmailVerification: true,
   },
   emailVerification: {
+    sendOnSignUp: false,
     autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url }) => {
-      const verificationEmail = await render(VerificationEmail({ user, url }));
+      const template = ChangeEmailVerification({ user, url });
 
       await transporter.sendMail({
         from: process.env.ADMIN_FROM!,
         to: user.email,
-        subject: 'Verify your email',
-        html: verificationEmail,
+        subject: 'Verify your new email address',
+        html: await render(template),
       });
     },
   },
@@ -78,6 +80,30 @@ export const auth = betterAuth({
     }),
     organization({}),
     username(),
+    emailOTP({
+      sendVerificationOnSignUp: true,
+      async sendVerificationOTP({ email, otp, type }) {
+        // const { users } = await auth.api.listUsers({
+        //   query: {
+        //     filterField: 'email',
+        //     filterValue: email,
+        //     filterOperator: 'eq',
+        //     limit: 1,
+        //   },
+        // });
+
+        if (type === 'email-verification') {
+          const template = VerificationEmail({ email, otp });
+
+          await transporter.sendMail({
+            from: process.env.ADMIN_FROM!,
+            to: email,
+            subject: 'Verify your account',
+            html: await render(template),
+          });
+        }
+      },
+    }),
     nextCookies(),
   ],
 });

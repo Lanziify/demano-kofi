@@ -1,4 +1,5 @@
-import { User } from "better-auth";
+import { User } from 'better-auth';
+import { UserWithRole } from 'better-auth/plugins';
 import {
   Body,
   Button,
@@ -11,14 +12,14 @@ import {
   Section,
   Tailwind,
   Text,
-} from "react-email";
+} from 'react-email';
 
 type VerificationEmailProps = {
-  user: User | null;
-  url: string | null;
+  otp: string;
+  email: string;
 };
 
-export function VerificationEmail({ user, url }: VerificationEmailProps) {
+export function VerificationEmail({ otp, email }: VerificationEmailProps) {
   return (
     <Html>
       <Head />
@@ -34,24 +35,27 @@ export function VerificationEmail({ user, url }: VerificationEmailProps) {
             </Section>
 
             <Section className="px-8 py-10">
-              <Text className="text-base text-slate-700">Hi {user?.name},</Text>
-
-              <Text className="text-base leading-7 text-slate-700">
-                Thanks for creating your account. Please verify your email
-                address to continue using our platform.
+              <Text className="text-base text-slate-700">
+                Hi!,
               </Text>
 
+              <Text className="text-base leading-7 text-slate-700">
+                Thanks for creating your account. Please enter the verification
+                code below to continue.
+              </Text>
+
+              {/* OTP Code Display */}
               <Section className="my-8 text-center">
-                <Button
-                  href={url ?? ""}
-                  className="rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white no-underline"
-                >
-                  Verify Email
-                </Button>
+                <Text className="mb-2 text-xs tracking-widest text-slate-500 uppercase">
+                  Your Verification Code
+                </Text>
+                <div className="mx-auto w-fit rounded-lg bg-slate-100 px-6 py-4 font-mono text-4xl font-bold tracking-[0.2em] text-slate-900">
+                  {otp}
+                </div>
               </Section>
 
               <Text className="text-sm text-slate-500">
-                This link expires in <strong>30 minutes</strong>.
+                This code expires in <strong>30 minutes</strong>.
               </Text>
 
               <Hr className="my-8 border-slate-200" />

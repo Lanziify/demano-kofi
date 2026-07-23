@@ -1,8 +1,15 @@
 import { UserProfileApiResponse } from '@/app/api/users/me/route';
 import { withClientErrorHandling } from '@/lib/errors/client-error-parser';
 import axios from 'axios';
-import { updateEmailAddressAction, updateUsernameAction, verifyUserPasswordAction } from '../actions/user.actions';
-import { ChangeEmailSchemaValues, UsernameUpdateSchemaValues } from '../schema/account.schema';
+import {
+  updateEmailAddressAction,
+  updateUsernameAction,
+  verifyUserPasswordAction,
+} from '../actions/user.actions';
+import {
+  ChangeEmailSchemaValues,
+  UsernameUpdateSchemaValues,
+} from '../schema/account.schema';
 import { ProfileSchemaWithUserIdValues } from '../schema/profile.schema';
 
 export const getUserProfile = withClientErrorHandling(async () => {
@@ -23,24 +30,20 @@ export const updateUserProfile = withClientErrorHandling(
 export const updateUsername = withClientErrorHandling(
   async (value: UsernameUpdateSchemaValues) => {
     const { data } = await updateUsernameAction(value.username);
-    
+
     return data;
   }
 );
 
 export const updateEmailAddress = withClientErrorHandling(
   async (values: ChangeEmailSchemaValues) => {
-    const { data } = await updateEmailAddressAction(values);
-    
-    return data;
+    return await updateEmailAddressAction(values);
   }
 );
 
 export const verifyUserPassword = withClientErrorHandling(
   async (value: string) => {
-    const { data } = await verifyUserPasswordAction(value);
-    
-    return data;
+    return await verifyUserPasswordAction(value);
   }
 );
 //#endregion

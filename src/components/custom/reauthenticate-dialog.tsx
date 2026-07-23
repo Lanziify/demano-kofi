@@ -93,8 +93,8 @@ export function ReauthenticateDialog({
             <Button
               variant="outline"
               onClick={() => {
-                onOpenChange(false);
                 reset();
+                onOpenChange(false);
               }}
               disabled={isSubmitting}>
               Cancel

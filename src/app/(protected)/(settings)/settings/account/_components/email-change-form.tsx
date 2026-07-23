@@ -22,7 +22,6 @@ import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
 
 import { ReauthenticateDialog } from '@/components/custom/reauthenticate-dialog';
-import { SuccessDialog } from '@/components/custom/success-dialog';
 import {
   useUpdateEmailAddress,
   useVerifyUserPassword,
@@ -32,10 +31,22 @@ import {
   type EmailUpdateSchemaValues,
 } from '@/feature/auth/schema/account.schema';
 import React from 'react';
+import {
+  ResultDialog,
+  ResultDialogProps,
+} from '@/components/custom/result-dialog';
 
 export default function AccountEmailForm() {
   const [isReauthDialogOpen, setIsReauthDialogOpen] = React.useState(false);
-  const [isSuccessDialogOpen, setSuccessDialogOpen] = React.useState(false);
+  const [resultDialog, setResultDialog] = React.useState<
+    Omit<ResultDialogProps, 'onOpenChange'>
+  >({
+    open: false,
+    variant: 'idle',
+    title: '',
+    description: '',
+    closeText: '',
+  });
   const verifyUserPassword = useVerifyUserPassword();
   const updateEmailAddress = useUpdateEmailAddress();
 
@@ -59,10 +70,51 @@ export default function AccountEmailForm() {
   }
 
   async function handleEmailChange(password: string) {
+    setIsReauthDialogOpen(false);
+    setResultDialog({
+      open: true,
+      variant: 'loading',
+      title: 'Verifying your account',
+    });
+
     const passwordCheckResult = await verifyUserPassword.mutateAsync(password);
 
-    if (!passwordCheckResult?.status) {
+    if (!passwordCheckResult?.data && passwordCheckResult.error) {
+      setResultDialog({
+        open: true,
+        variant: 'error',
+        title: 'Could not verify your account',
+        description: `Details: ${passwordCheckResult.error.message}`,
+        closeText: 'Close',
+      });
+
+      return;
     }
+
+    const emailUpdateResult = await updateEmailAddress.mutateAsync({
+      newEmail: getValues('email'),
+      callbackURL: '/verification/email-change-confirmation',
+    });
+
+    if (!emailUpdateResult.data && emailUpdateResult.error) {
+      setResultDialog({
+        open: true,
+        variant: 'error',
+        title: "Something wen't while trying to change your email address",
+        description: `Details: ${emailUpdateResult.error.message}`,
+        closeText: 'Close',
+      });
+
+      return;
+    }
+
+    setResultDialog({
+      open: true,
+      variant: 'success',
+      title: 'Verification email sent',
+      description:
+        'Your email address has been updated. Please check your new email inbox and click the verification link to complete the change.',
+    });
   }
 
   return (
@@ -132,18 +184,9 @@ export default function AccountEmailForm() {
         onOpenChange={setIsReauthDialogOpen}
         onConfirm={handleEmailChange}
       />
-      <SuccessDialog
-        open={isSuccessDialogOpen}
-        onOpenChange={setSuccessDialogOpen}
-        title="Verification email sent"
-        description={
-          <>
-            We've sent a verification link to{' '}
-            <strong>{getValues('email')}</strong>.
-            <br />
-            Please check your inbox and confirm your new email address.
-          </>
-        }
+      <ResultDialog
+        onOpenChange={(open) => setResultDialog({ ...resultDialog, open })}
+        {...resultDialog}
       />
     </>
   );
