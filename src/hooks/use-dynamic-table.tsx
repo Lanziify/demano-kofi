@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React from 'react';
+import React from "react";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -9,15 +9,15 @@ import {
   getPaginationRowModel,
   useReactTable,
   VisibilityState,
-} from '@tanstack/react-table';
+} from "@tanstack/react-table";
 
 export default function useDynamicTable<T>() {
   const [data, setData] = React.useState<T[]>([]);
   const [defaultColumn, setDefaultColumn] = React.useState<ColumnDef<T>>();
   const [columns, setColumns] = React.useState<ColumnDef<T>[]>([]);
-  const [globalFilter, setGlobalFilter] = React.useState('');
+  const [globalFilter, setGlobalFilter] = React.useState("");
   const [columnFilters, setColumnFilter] = React.useState<ColumnFiltersState>(
-    []
+    [],
   );
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});

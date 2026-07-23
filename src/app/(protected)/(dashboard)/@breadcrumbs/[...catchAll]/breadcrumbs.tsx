@@ -6,18 +6,18 @@ import {
   BreadcrumbSeparator,
   BreadcrumbItem,
   BreadcrumbPage,
-} from '@/components/ui/breadcrumb';
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { toSentenceCase } from '@/lib/strings';
-import { Coffee } from 'lucide-react';
-import { Fragment } from 'react';
+} from "@/components/ui/dropdown-menu";
+import { toSentenceCase } from "@/lib/strings";
+import { Coffee } from "lucide-react";
+import { Fragment } from "react";
 
 export default function DynamicBreadcrumbs({
   segments,
@@ -34,7 +34,7 @@ export default function DynamicBreadcrumbs({
   const getBreadcrumbs = (): Breadcrumb[] => {
     const resolved = segments.map((segment, i) => ({
       label: segment,
-      href: `/${segments.slice(0, i + 1).join('/')}`,
+      href: `/${segments.slice(0, i + 1).join("/")}`,
     }));
 
     if (resolved.length <= 4) {
@@ -62,7 +62,7 @@ export default function DynamicBreadcrumbs({
         <BreadcrumbSeparator /> */}
         {breadcrumbs.map((crumb, i) => (
           <Fragment key={i}>
-            {'items' in crumb ? (
+            {"items" in crumb ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button size="icon-sm" variant="ghost">

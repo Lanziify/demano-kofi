@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   Select,
@@ -6,10 +6,10 @@ import {
   SelectContent,
   SelectItem,
   SelectValue,
-} from '@/components/ui/select';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Table } from '@tanstack/react-table';
+} from "@/components/ui/select";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Table } from "@tanstack/react-table";
 
 export default function DataTablePagination<T>({ table }: { table: Table<T> }) {
   return (
@@ -17,10 +17,11 @@ export default function DataTablePagination<T>({ table }: { table: Table<T> }) {
       <div
         className={`text-muted-foreground flex-1 ${
           table.getFilteredSelectedRowModel().rows.length === 0
-            ? 'invisible'
-            : 'visible'
-        }`}>
-        {table.getFilteredSelectedRowModel().rows.length} of{' '}
+            ? "invisible"
+            : "visible"
+        }`}
+      >
+        {table.getFilteredSelectedRowModel().rows.length} of{" "}
         {table.getFilteredRowModel().rows.length} row(s) selected
       </div>
       <div className="mt-2 flex flex-col-reverse items-center gap-4 sm:flex-row sm:gap-6 lg:gap-8">
@@ -30,7 +31,8 @@ export default function DataTablePagination<T>({ table }: { table: Table<T> }) {
             value={`${table.getState().pagination.pageSize}`}
             onValueChange={(value) => {
               table.setPageSize(Number(value));
-            }}>
+            }}
+          >
             <SelectTrigger className="h-fit gap-1 p-2">
               <SelectValue placeholder={table.getState().pagination.pageSize} />
               <SelectContent side="bottom">
@@ -44,7 +46,7 @@ export default function DataTablePagination<T>({ table }: { table: Table<T> }) {
           </Select>
         </div>
         <div className="flex items-center justify-center font-medium">
-          Page {table.getState().pagination.pageIndex + 1} of{' '}
+          Page {table.getState().pagination.pageIndex + 1} of{" "}
           {table.getPageCount()}
         </div>
         <div className="item-center flex gap-2">
@@ -52,14 +54,16 @@ export default function DataTablePagination<T>({ table }: { table: Table<T> }) {
             variant="outline"
             size="sm"
             onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}>
+            disabled={!table.getCanPreviousPage()}
+          >
             <ChevronLeft size={16} />
           </Button>
           <Button
             variant="outline"
             size="sm"
             onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}>
+            disabled={!table.getCanNextPage()}
+          >
             <ChevronRight size={16} />
           </Button>
         </div>

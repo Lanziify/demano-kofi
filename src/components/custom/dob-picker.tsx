@@ -1,35 +1,38 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import { CalendarIcon } from 'lucide-react';
+import * as React from "react";
+import { CalendarIcon } from "lucide-react";
 
-import { Calendar } from '@/components/ui/calendar';
-import { Field, FieldLabel } from '@/components/ui/field';
+import { Calendar } from "@/components/ui/calendar";
+import { Field, FieldLabel } from "@/components/ui/field";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
   InputGroupInput,
-} from '@/components/ui/input-group';
+} from "@/components/ui/input-group";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/ui/popover';
-import { formatDate, isValidDate, toDate } from '@/lib/date';
+} from "@/components/ui/popover";
+import { formatDate, isValidDate, toDate } from "@/lib/date";
+import { ControllerFieldState } from "react-hook-form";
 
 type DobPickerProps = {
   value?: string;
   onChange: (value: string) => void;
+  fieldState: ControllerFieldState;
 };
 
 export function DobPicker({
   value,
   onChange,
+  fieldState,
   ...props
-}: DobPickerProps & React.ComponentProps<'div'>) {
+}: DobPickerProps & React.ComponentProps<"div">) {
   const [open, setOpen] = React.useState(false);
-  const [inputValue, setInputValue] = React.useState(value ?? '');
+  const [inputValue, setInputValue] = React.useState(value ?? "");
   const [date, setDate] = React.useState<Date | undefined>(() => {
     if (!value) return undefined;
     const parsed = toDate(value);
@@ -39,7 +42,7 @@ export function DobPicker({
   const [month, setMonth] = React.useState<Date | undefined>(date);
 
   React.useEffect(() => {
-    setInputValue(value ?? '');
+    setInputValue(value ?? "");
 
     if (!value) {
       setDate(undefined);
@@ -69,7 +72,7 @@ export function DobPicker({
 
   const commitInput = () => {
     if (!inputValue.trim()) {
-      onChange('');
+      onChange("");
       setDate(undefined);
       return;
     }
@@ -94,8 +97,8 @@ export function DobPicker({
     setMonth(selected);
 
     if (!selected) {
-      setInputValue('');
-      onChange('');
+      setInputValue("");
+      onChange("");
     } else {
       const formatted = formatDate(selected);
 
@@ -107,7 +110,7 @@ export function DobPicker({
   };
 
   return (
-    <Field {...props}>
+    <Field {...props} data-invalid={fieldState.invalid}>
       <FieldLabel htmlFor="date-required">Date of birth</FieldLabel>
 
       <InputGroup>
@@ -118,12 +121,12 @@ export function DobPicker({
           onChange={handleInputChange}
           onBlur={commitInput}
           onKeyDown={(e) => {
-            if (e.key === 'Enter') {
+            if (e.key === "Enter") {
               e.preventDefault();
               commitInput();
             }
 
-            if (e.key === 'ArrowDown') {
+            if (e.key === "ArrowDown") {
               e.preventDefault();
               setOpen(true);
             }
@@ -138,7 +141,8 @@ export function DobPicker({
                   id="date-picker"
                   variant="ghost"
                   size="icon-xs"
-                  aria-label="Select date">
+                  aria-label="Select date"
+                >
                   <CalendarIcon />
                   <span className="sr-only">Select date</span>
                 </InputGroupButton>
@@ -149,7 +153,8 @@ export function DobPicker({
               className="w-auto overflow-hidden p-0"
               align="end"
               alignOffset={-8}
-              sideOffset={10}>
+              sideOffset={10}
+            >
               <Calendar
                 mode="single"
                 selected={date}

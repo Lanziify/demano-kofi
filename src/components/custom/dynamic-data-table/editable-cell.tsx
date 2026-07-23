@@ -13,9 +13,9 @@ export default function EditableCell<TData, TValue>({
   const initialValue = getValue();
   const [value, setValue] = React.useState(initialValue);
 
-//   const onBlur = () => {
-//     table.options.meta?.updateData(row.index, column.id, value);
-//   };
+  //   const onBlur = () => {
+  //     table.options.meta?.updateData(row.index, column.id, value);
+  //   };
 
   React.useEffect(() => {
     setValue(initialValue);
@@ -25,7 +25,7 @@ export default function EditableCell<TData, TValue>({
     <Input
       value={value as string}
       onChange={(e) => setValue(e.target.value as TValue)}
-    //   onBlur={onBlur}
+      //   onBlur={onBlur}
     />
   );
 }

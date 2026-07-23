@@ -1,5 +1,5 @@
-import { useQueries } from '@tanstack/react-query';
-import { userQueries } from '../queries/user.queries';
+import { useQueries } from "@tanstack/react-query";
+import { userQueries } from "../queries/user.queries";
 
 type UserQueriesHookProps = {
   userId?: string;

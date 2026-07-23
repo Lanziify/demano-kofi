@@ -21,8 +21,9 @@ interface AuthStore {
 
   isLoading: boolean;
   isInitialized: boolean;
+  isRefreshing: boolean;
 
-  setAuthSession(data: AuthType['Session'] | null): void;
+  setAuthSession(data: AuthType['Session']): void;
 
   updateAuthSession: () => Promise<AuthType['Session'] | null>;
 
@@ -33,34 +34,45 @@ interface AuthStore {
   signOut: () => Promise<void>;
 }
 
-export const useAuthStore = create<AuthStore>((set) => ({
+export const useAuthStore = create<AuthStore>((set, get) => ({
   user: null,
   session: null,
 
   isLoading: false,
   isInitialized: false,
+  isRefreshing: false,
 
   setAuthSession: (data) => {
     set({
-      user: data?.user ?? null,
-      session: data?.session ?? null,
+      user: data.user,
+      session: data.session,
+      isLoading: false,
+      isInitialized: true,
     });
   },
 
   updateAuthSession: async () => {
     set({
-      isLoading: true,
+      isRefreshing: true,
     });
 
     const { data } = await authClient.getSession();
 
+    if (!data) {
+      set({
+        isRefreshing: false,
+      });
+
+      return data;
+    }
+
+    get().setAuthSession(data);
+
     set({
-      user: data?.user ?? null,
-      session: data?.session ?? null,
-      isLoading: false,
+      isRefreshing: false,
     });
 
-    return data
+    return data;
   },
 
   signIn: async (credentials) => {
@@ -79,11 +91,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
       return result;
     }
 
-    set({
-      user: sessionData.user,
-      session: sessionData.session,
-      isLoading: false,
-    });
+    get().setAuthSession(sessionData);
 
     return result;
   },

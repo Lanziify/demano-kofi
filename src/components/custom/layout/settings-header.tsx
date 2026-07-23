@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,12 +8,12 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { settingsMenuItems } from '@/data/settings-menu';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { ArrowLeft, Coffee, Menu } from 'lucide-react';
-import Link from 'next/link';
-import React from 'react';
+} from "@/components/ui/dropdown-menu";
+import { settingsMenuItems } from "@/data/settings-menu";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { ArrowLeft, Coffee, Menu } from "lucide-react";
+import Link from "next/link";
+import React from "react";
 
 type SettingsLayoutHeaderProps = {
   breadcrumbs: React.ReactNode;
@@ -30,7 +30,8 @@ export default function SettingsLayoutHeader({
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4 sm:px-6">
         <Link
           href="/dashboard"
-          className="text-muted-foreground hover:text-foreground ml-3 flex shrink-0 items-center gap-1.5 text-sm transition-colors">
+          className="text-muted-foreground hover:text-foreground ml-3 flex shrink-0 items-center gap-1.5 text-sm transition-colors"
+        >
           <ArrowLeft className="size-4" />
           <span className="hidden sm:inline">Back to Dashboard</span>
           <span className="sm:hidden">Back</span>
@@ -47,7 +48,7 @@ export default function SettingsLayoutHeader({
             <DropdownMenuTrigger>
               <Menu />
             </DropdownMenuTrigger>
-            <DropdownMenuContent className='w-56' align="end" sideOffset={19}>
+            <DropdownMenuContent className="w-56" align="end" sideOffset={19}>
               {settingsMenuItems.map((groups, i) => (
                 <DropdownMenuGroup key={i}>
                   <DropdownMenuLabel>{groups.title}</DropdownMenuLabel>

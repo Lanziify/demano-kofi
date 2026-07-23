@@ -1,7 +1,7 @@
-import z, { ZodError } from 'zod';
+import z, { ZodError } from "zod";
 
-import { APIError, isAPIError } from 'better-auth/api';
-import { AppError } from './app-error';
+import { APIError, isAPIError } from "better-auth/api";
+import { AppError } from "./app-error";
 
 type ParsedActionError = {
   code: string;
@@ -12,16 +12,16 @@ type ParsedActionError = {
 export function actionErrorParser(error: unknown): ParsedActionError {
   if (error instanceof ZodError) {
     return {
-      code: 'VALIDATION_ERROR',
-      message: 'Invalid request body',
+      code: "VALIDATION_ERROR",
+      message: "Invalid request body",
       details: z.flattenError(error),
     };
   }
 
   if (error instanceof APIError || isAPIError(error)) {
     return {
-      code: error.body?.code ?? 'AUTH_ERROR',
-      message: error.body?.message ?? 'Authentication failed',
+      code: error.body?.code ?? "AUTH_ERROR",
+      message: error.body?.message ?? "Authentication failed",
       details: error.cause,
     };
   }
@@ -34,10 +34,10 @@ export function actionErrorParser(error: unknown): ParsedActionError {
     };
   }
 
-  console.log(error)
+  console.log(error);
 
   return {
-    code: 'INTERNAL_SERVER_ERROR',
-    message: 'Something went wrong',
+    code: "INTERNAL_SERVER_ERROR",
+    message: "Something went wrong",
   };
 }

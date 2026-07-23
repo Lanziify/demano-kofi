@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import { Languages } from 'lucide-react';
+import * as React from "react";
+import { Languages } from "lucide-react";
 
 import {
   DropdownMenuItem,
@@ -9,7 +9,7 @@ import {
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 
 export function LanguageDropdown() {
   return (

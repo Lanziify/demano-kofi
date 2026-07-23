@@ -1,5 +1,5 @@
-import { createAccessControl } from 'better-auth/plugins';
-import { defaultStatements, adminAc } from 'better-auth/plugins/admin/access';
+import { createAccessControl } from "better-auth/plugins";
+import { defaultStatements, adminAc } from "better-auth/plugins/admin/access";
 
 export const platformAccessControl = createAccessControl({
   ...defaultStatements,

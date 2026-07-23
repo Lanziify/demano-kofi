@@ -1,13 +1,13 @@
-'use server';
+"use server";
 
-import { safeCatch } from '@/lib/errors/safe-catch';
-import { auth } from '@/utils/auth';
-import { AuthRepository } from '../repository/auth.repository';
-import { APP_ROLES } from '@/lib/auth/roles';
-import { actionErrorParser } from '@/lib/errors/action-error-parser';
-import { ApiBody } from '@/types/api';
-import { headers } from 'next/headers';
-import { SignUpUserValues } from '../schema/auth.schema';
+import { safeCatch } from "@/lib/errors/safe-catch";
+import { auth } from "@/utils/auth";
+import { AuthRepository } from "../repository/auth.repository";
+import { APP_ROLES } from "@/lib/auth/roles";
+import { actionErrorParser } from "@/lib/errors/action-error-parser";
+import { ApiBody } from "@/types/api";
+import { headers } from "next/headers";
+import { SignUpUserValues } from "../schema/auth.schema";
 
 export type SignUpBody = ApiBody<typeof auth.api.signUpEmail>;
 export type SignInBody = ApiBody<typeof auth.api.signInUsername>;
@@ -25,7 +25,7 @@ export async function signUpAdminAction(values: SignUpBody) {
 
       return response;
     },
-    { parser: actionErrorParser }
+    { parser: actionErrorParser },
   );
 }
 
@@ -43,7 +43,7 @@ export const signUpUserAction = async (values: SignUpUserValues) => {
         },
       });
     },
-    { parser: actionErrorParser }
+    { parser: actionErrorParser },
   );
 
   // if (!userResult.data || userResult.error) {
@@ -56,14 +56,14 @@ export const signUpUserAction = async (values: SignUpUserValues) => {
       async () => {
         const result = await repository.createUserProfile(
           userResult.data.user.id,
-          { firstName, lastName }
+          { firstName, lastName },
         );
 
         console.log(result);
 
         return result;
       },
-      { parser: actionErrorParser }
+      { parser: actionErrorParser },
     );
 
     console.log(userProfileResult);
@@ -83,7 +83,7 @@ export const signInUserAction = async (values: SignInBody) => {
         body: values,
       });
     },
-    { parser: actionErrorParser }
+    { parser: actionErrorParser },
   );
 };
 
@@ -94,6 +94,6 @@ export const signOutUserAction = async () => {
         headers: await headers(),
       });
     },
-    { parser: actionErrorParser }
+    { parser: actionErrorParser },
   );
 };

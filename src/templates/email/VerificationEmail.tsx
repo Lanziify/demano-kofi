@@ -1,5 +1,4 @@
-import { AuthType } from '@/utils/auth';
-import { User } from 'better-auth';
+import { User } from "better-auth";
 import {
   Body,
   Button,
@@ -12,7 +11,7 @@ import {
   Section,
   Tailwind,
   Text,
-} from 'react-email';
+} from "react-email";
 
 type VerificationEmailProps = {
   user: User | null;
@@ -44,8 +43,9 @@ export function VerificationEmail({ user, url }: VerificationEmailProps) {
 
               <Section className="my-8 text-center">
                 <Button
-                  href={url ?? ''}
-                  className="rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white no-underline">
+                  href={url ?? ""}
+                  className="rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white no-underline"
+                >
                   Verify Email
                 </Button>
               </Section>

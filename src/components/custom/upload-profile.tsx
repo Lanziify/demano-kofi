@@ -1,13 +1,9 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import { Camera } from 'lucide-react';
+import * as React from "react";
+import { Camera } from "lucide-react";
 
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 type UploadProfileAvatarProps = {
   value?: string | null;
@@ -17,7 +13,7 @@ type UploadProfileAvatarProps = {
 
 export function UploadProfileAvatar({
   value,
-  fallback = 'JD',
+  fallback = "JD",
   onChange,
 }: UploadProfileAvatarProps) {
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -40,7 +36,7 @@ export function UploadProfileAvatar({
 
   React.useEffect(() => {
     return () => {
-      if (preview?.startsWith('blob:')) {
+      if (preview?.startsWith("blob:")) {
         URL.revokeObjectURL(preview);
       }
     };
@@ -55,9 +51,7 @@ export function UploadProfileAvatar({
       >
         <Avatar className="h-28 w-28 transition-opacity group-hover:opacity-80">
           <AvatarImage src={preview ?? undefined} />
-          <AvatarFallback className="text-xl">
-            {fallback}
-          </AvatarFallback>
+          <AvatarFallback className="text-xl">{fallback}</AvatarFallback>
         </Avatar>
 
         <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">

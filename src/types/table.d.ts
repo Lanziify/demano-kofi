@@ -5,7 +5,7 @@ declare module "@tanstack/react-table" {
     updateData: (
       rowIndex: number,
       columnId: keyof TData,
-      value: TData[keyof TData]
+      value: TData[keyof TData],
     ) => void;
   }
 }

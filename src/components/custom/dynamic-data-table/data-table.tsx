@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { Table as TanStackTable, flexRender } from '@tanstack/react-table';
+import React from "react";
+import { Table as TanStackTable, flexRender } from "@tanstack/react-table";
 import {
   Table,
   TableBody,
@@ -9,7 +9,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from "@/components/ui/table";
 
 interface DataTableProps<T> {
   table: TanStackTable<T>;
@@ -29,12 +29,13 @@ export const DataTable = <T,>({ table }: DataTableProps<T>) => {
                     style={{
                       width: header.column.columnDef.size,
                       maxWidth: header.column.columnDef.maxSize,
-                    }}>
+                    }}
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
-                          header.getContext()
+                          header.getContext(),
                         )}
                   </TableHead>
                 ))}
@@ -51,10 +52,11 @@ export const DataTable = <T,>({ table }: DataTableProps<T>) => {
                       style={{
                         width: cell.column.columnDef.size,
                         maxWidth: cell.column.columnDef.maxSize,
-                      }}>
+                      }}
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </TableCell>
                   ))}
@@ -64,7 +66,8 @@ export const DataTable = <T,>({ table }: DataTableProps<T>) => {
               <TableRow>
                 <TableCell
                   colSpan={table.getAllColumns().length}
-                  className="h-24 text-center">
+                  className="h-24 text-center"
+                >
                   There are no data to display.
                 </TableCell>
               </TableRow>

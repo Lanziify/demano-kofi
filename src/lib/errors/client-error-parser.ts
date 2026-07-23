@@ -1,5 +1,5 @@
-import { AxiosError } from 'axios';
-import { AppError } from './app-error';
+import { AxiosError } from "axios";
+import { AppError } from "./app-error";
 
 export class ClientRequestError extends AppError {
   constructor(
@@ -8,10 +8,10 @@ export class ClientRequestError extends AppError {
       statusCode?: number;
       details?: Record<string, unknown>;
       cause?: unknown;
-    }
+    },
   ) {
     super(message, {
-      errorCode: 'CLIENT_REQUEST_ERROR',
+      errorCode: "CLIENT_REQUEST_ERROR",
       statusCode: options?.statusCode ?? 500,
       details: options?.details,
       cause: options?.cause,
@@ -20,7 +20,7 @@ export class ClientRequestError extends AppError {
 }
 
 export function withClientErrorHandling<TArgs extends unknown[], TResult>(
-  fn: (...args: TArgs) => Promise<TResult>
+  fn: (...args: TArgs) => Promise<TResult>,
 ) {
   return async (...args: TArgs): Promise<TResult> => {
     try {
@@ -34,9 +34,7 @@ export function withClientErrorHandling<TArgs extends unknown[], TResult>(
 
       const message =
         axiosError.response?.data?.message ??
-        (error instanceof Error
-          ? error.message
-          : 'Unexpected error');
+        (error instanceof Error ? error.message : "Unexpected error");
 
       throw new ClientRequestError(message, {
         statusCode: axiosError.response?.status ?? 500,

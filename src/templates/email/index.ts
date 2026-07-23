@@ -1,1 +1,2 @@
-export { VerificationEmail } from './VerificationEmail';
+export { VerificationEmail } from "./VerificationEmail";
+export { ChangeEmailConfirmationEmail } from "./ChangeEmailConfirmationEmail";

@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { flexRender, Table as TanstackTable } from '@tanstack/react-table';
+import React from "react";
+import { flexRender, Table as TanstackTable } from "@tanstack/react-table";
 import {
   Table,
   TableBody,
@@ -9,7 +9,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from "@/components/ui/table";
 
 export default function EditableTable<T>({
   table,
@@ -28,7 +28,7 @@ export default function EditableTable<T>({
                     ? null
                     : flexRender(
                         header.column.columnDef.header,
-                        header.getContext()
+                        header.getContext(),
                       )}
                 </TableHead>
               );
@@ -38,7 +38,7 @@ export default function EditableTable<T>({
       </TableHeader>
       <TableBody>
         {table.getRowModel().rows.map((row) => (
-          <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+          <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
             {row.getVisibleCells().map((cell) => (
               <TableCell key={cell.id} className="align-top">
                 {flexRender(cell.column.columnDef.cell, cell.getContext())}

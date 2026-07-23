@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import * as React from 'react';
+import * as React from "react";
 
 import {
   Sidebar,
@@ -8,10 +8,10 @@ import {
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
-} from '@/components/ui/sidebar';
+} from "@/components/ui/sidebar";
 
-import { DashboardMainNav } from './dashboard-nav-main';
-import DashboardMenuHeader from './dashboard-menu-header';
+import { DashboardMainNav } from "./dashboard-nav-main";
+import DashboardMenuHeader from "./dashboard-menu-header";
 
 export function DashboardSidebar({
   ...props

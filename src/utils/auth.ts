@@ -1,14 +1,38 @@
+import { appRoles, platformAccessControl } from '@/lib/auth/permissions';
+import {
+  ChangeEmailConfirmationEmail,
+  VerificationEmail,
+} from '@/templates/email';
 import { betterAuth } from 'better-auth';
-import { admin, organization, username } from 'better-auth/plugins';
 import { nextCookies } from 'better-auth/next-js';
+import { admin, organization, username } from 'better-auth/plugins';
+import { render } from 'react-email';
 import { db } from './db';
-import { platformAccessControl, appRoles } from '@/lib/auth/permissions';
 import { transporter } from './email';
-import { render } from "react-email";
-import { VerificationEmail } from '@/templates/email'
 
 export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL!,
+  user: {
+    changeEmail: {
+      enabled: true,
+      sendChangeEmailConfirmation: async ({ user, newEmail, url }) => {
+        const email = await render(
+          ChangeEmailConfirmationEmail({
+            user,
+            newEmail,
+            url,
+          })
+        );
+
+        await transporter.sendMail({
+          from: process.env.ADMIN_FROM!,
+          to: user.email,
+          subject: 'Confirm email change',
+          html: email,
+        });
+      },
+    },
+  },
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
@@ -16,7 +40,7 @@ export const auth = betterAuth({
   emailVerification: {
     autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url }) => {
-      const verificationEmail = await render(VerificationEmail({user, url}));
+      const verificationEmail = await render(VerificationEmail({ user, url }));
 
       await transporter.sendMail({
         from: process.env.ADMIN_FROM!,

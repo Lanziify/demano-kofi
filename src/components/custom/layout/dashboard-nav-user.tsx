@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   BadgeCheck,
@@ -6,9 +6,9 @@ import {
   CircleQuestionMark,
   MessageSquareWarning,
   Settings,
-} from 'lucide-react';
+} from "lucide-react";
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,18 +17,16 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { ThemeDropdown } from '../theme-dropdown';
-import SignoutButton from '../signout-button';
-import { LanguageDropdown } from '../language-dropdown';
-import { useAuthStore } from '@/store/auth-store';
-import { getInitials } from '@/lib/strings';
-import Link from 'next/link';
+} from "@/components/ui/dropdown-menu";
+import { ThemeDropdown } from "../theme-dropdown";
+import SignoutButton from "../signout-button";
+import { LanguageDropdown } from "../language-dropdown";
+import { useAuthStore } from "@/store/auth-store";
+import { getInitials } from "@/lib/strings";
+import Link from "next/link";
 
 export function DashboardNavUser() {
   const user = useAuthStore((state) => state.user);
-
-  console.log(user);
 
   return (
     <DropdownMenu>
@@ -36,7 +34,7 @@ export function DashboardNavUser() {
         <button className="flex items-center gap-2 rounded-full outline-none">
           <Avatar className="size-8">
             <AvatarImage src={user?.image ?? undefined} alt="Profile" />
-            <AvatarFallback className="bg-amber-100 text-sm font-semibold text-amber-700">
+            <AvatarFallback className="text-sm font-semibold">
               {getInitials(user?.name)}
             </AvatarFallback>
           </Avatar>

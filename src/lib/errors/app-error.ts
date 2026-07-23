@@ -1,4 +1,4 @@
-import { ErrorCode } from './error-codes';
+import { ErrorCode } from "./error-codes";
 
 interface AppErrorOptions extends ErrorOptions {
   errorCode: ErrorCode;
@@ -31,14 +31,14 @@ export abstract class AppError extends Error {
 
 export class BadRequestError extends AppError {
   constructor(
-    message = 'Cannot perform action. Bad request.',
+    message = "Cannot perform action. Bad request.",
     options?: {
       cause?: unknown;
       details?: Record<string, unknown>;
-    }
+    },
   ) {
     super(message, {
-      errorCode: 'BAD_REQUEST',
+      errorCode: "BAD_REQUEST",
       statusCode: 400,
       cause: options?.cause instanceof Error ? options.cause : undefined,
       details: options?.details,
@@ -48,14 +48,14 @@ export class BadRequestError extends AppError {
 
 export class UnAuthorizedError extends AppError {
   constructor(
-    message = 'Cannot perform action without authorization.',
+    message = "Cannot perform action without authorization.",
     options?: {
       cause?: unknown;
       details?: Record<string, unknown>;
-    }
+    },
   ) {
     super(message, {
-      errorCode: 'UNAUTHORIZED',
+      errorCode: "UNAUTHORIZED",
       statusCode: 401,
       cause: options?.cause instanceof Error ? options.cause : undefined,
       details: options?.details,
@@ -64,14 +64,14 @@ export class UnAuthorizedError extends AppError {
 }
 export class ServerError extends AppError {
   constructor(
-    message = 'Something went wrong with the server',
+    message = "Something went wrong with the server",
     options?: {
       cause?: unknown;
       details?: Record<string, unknown>;
-    }
+    },
   ) {
     super(message, {
-      errorCode: 'INTERNAL_SERVER_ERROR',
+      errorCode: "INTERNAL_SERVER_ERROR",
       statusCode: 500,
       cause: options?.cause instanceof Error ? options.cause : undefined,
       details: options?.details,
@@ -81,14 +81,14 @@ export class ServerError extends AppError {
 
 export class DatabaseError extends AppError {
   constructor(
-    message = 'Database operation failed',
+    message = "Database operation failed",
     options?: {
       cause?: unknown;
       details?: Record<string, unknown>;
-    }
+    },
   ) {
     super(message, {
-      errorCode: 'DATABASE_ERROR',
+      errorCode: "DATABASE_ERROR",
       statusCode: 500,
       cause: options?.cause instanceof Error ? options.cause : undefined,
       details: options?.details,

@@ -1,35 +1,40 @@
-import { queryOptions } from '@tanstack/react-query';
-import { getBarangays, getCitiesMunicipalities, getProvinces, getRegions } from '../api/psgc.api';
+import { queryOptions } from "@tanstack/react-query";
+import {
+  getBarangays,
+  getCitiesMunicipalities,
+  getProvinces,
+  getRegions,
+} from "../api/psgc.api";
 
 export const psgcQueries = {
   regions: () => {
     return queryOptions({
-      queryKey: ['regions'],
+      queryKey: ["regions"],
       queryFn: () => getRegions(),
     });
   },
 
   provinces: (region: string) => {
     return queryOptions({
-      queryKey: ['provinces', region],
+      queryKey: ["provinces", region],
       queryFn: () => getProvinces(region),
-      enabled: !!region
+      enabled: !!region,
     });
   },
 
   citiesMunicipalities: (province: string) => {
     return queryOptions({
-      queryKey: ['citiesMunicipalities', province],
+      queryKey: ["citiesMunicipalities", province],
       queryFn: () => getCitiesMunicipalities(province),
-      enabled: !!province
+      enabled: !!province,
     });
   },
 
   barangays: (citiesMunicipalities: string) => {
     return queryOptions({
-      queryKey: ['branagays', citiesMunicipalities],
+      queryKey: ["branagays", citiesMunicipalities],
       queryFn: () => getBarangays(citiesMunicipalities),
-      enabled: !!citiesMunicipalities
+      enabled: !!citiesMunicipalities,
     });
   },
 };

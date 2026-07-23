@@ -1,5 +1,11 @@
+import { useAuthStore } from '@/store/auth-store';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { updateUserProfile } from '../api/user.api';
+import {
+  updateEmailAddress,
+  updateUsername,
+  updateUserProfile,
+  verifyUserPassword,
+} from '../api/user.api';
 
 export const useUpdateUserProfile = () => {
   const queryClient = useQueryClient();
@@ -10,19 +16,31 @@ export const useUpdateUserProfile = () => {
       queryClient.invalidateQueries({
         queryKey: ['me'],
       });
+      useAuthStore.getState().updateAuthSession();
     },
   });
 };
 
-// export const useCreateUserAddress = () => {
-//   const queryClient = useQueryClient();
+export const useUpdateUsername = () => {
+  return useMutation({
+    mutationFn: updateUsername,
+    onSuccess() {
+      useAuthStore.getState().updateAuthSession();
+    },
+  });
+};
 
-//   return useMutation({
-//     mutationFn: createUserAddress,
-//     onSuccess() {
-//       queryClient.invalidateQueries({
-//         queryKey: ['addresses'],
-//       });
-//     },
-//   });
-// };
+export const useUpdateEmailAddress = () => {
+  return useMutation({
+    mutationFn: updateEmailAddress,
+    onSuccess() {
+      useAuthStore.getState().updateAuthSession();
+    },
+  });
+};
+
+export const useVerifyUserPassword = () => {
+  return useMutation({
+    mutationFn: verifyUserPassword,
+  });
+};

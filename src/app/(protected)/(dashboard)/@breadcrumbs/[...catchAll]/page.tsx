@@ -1,4 +1,4 @@
-import DynamicBreadcrumbs from './breadcrumbs';
+import DynamicBreadcrumbs from "./breadcrumbs";
 
 type Props = {
   params: Promise<{
