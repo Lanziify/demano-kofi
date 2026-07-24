@@ -83,15 +83,6 @@ export const auth = betterAuth({
     emailOTP({
       sendVerificationOnSignUp: true,
       async sendVerificationOTP({ email, otp, type }) {
-        // const { users } = await auth.api.listUsers({
-        //   query: {
-        //     filterField: 'email',
-        //     filterValue: email,
-        //     filterOperator: 'eq',
-        //     limit: 1,
-        //   },
-        // });
-
         if (type === 'email-verification') {
           const template = VerificationEmail({ email, otp });
 

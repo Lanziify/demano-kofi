@@ -55,3 +55,9 @@ export const signInUserSchema = z.object({
 }) satisfies z.ZodType<SignInBody>;
 
 export type SignInUserValues = z.infer<typeof signInUserSchema>;
+
+export const otpSchema = z.object({
+  otp: z.string().length(6, 'Enter the 6-digit verification code'),
+});
+
+export type OTPSchemaValues = z.infer<typeof otpSchema>

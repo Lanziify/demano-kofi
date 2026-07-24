@@ -1,4 +1,4 @@
-import { ErrorCode } from "./error-codes";
+import { ErrorCode } from './error-codes';
 
 interface AppErrorOptions extends ErrorOptions {
   errorCode: ErrorCode;
@@ -31,15 +31,16 @@ export abstract class AppError extends Error {
 
 export class BadRequestError extends AppError {
   constructor(
-    message = "Cannot perform action. Bad request.",
+    message = 'Cannot perform action. Bad request.',
     options?: {
+      errorCode?: ErrorCode;
       cause?: unknown;
       details?: Record<string, unknown>;
-    },
+    }
   ) {
     super(message, {
-      errorCode: "BAD_REQUEST",
       statusCode: 400,
+      errorCode: options?.errorCode ?? 'BAD_REQUEST',
       cause: options?.cause instanceof Error ? options.cause : undefined,
       details: options?.details,
     });
@@ -48,15 +49,16 @@ export class BadRequestError extends AppError {
 
 export class UnAuthorizedError extends AppError {
   constructor(
-    message = "Cannot perform action without authorization.",
+    message = 'Cannot perform action without authorization.',
     options?: {
+      errorCode?: ErrorCode;
       cause?: unknown;
       details?: Record<string, unknown>;
-    },
+    }
   ) {
     super(message, {
-      errorCode: "UNAUTHORIZED",
       statusCode: 401,
+      errorCode: options?.errorCode ?? 'UNAUTHORIZED',
       cause: options?.cause instanceof Error ? options.cause : undefined,
       details: options?.details,
     });
@@ -64,15 +66,16 @@ export class UnAuthorizedError extends AppError {
 }
 export class ServerError extends AppError {
   constructor(
-    message = "Something went wrong with the server",
+    message = 'Something went wrong with the server',
     options?: {
+      errorCode?: ErrorCode;
       cause?: unknown;
       details?: Record<string, unknown>;
-    },
+    }
   ) {
     super(message, {
-      errorCode: "INTERNAL_SERVER_ERROR",
       statusCode: 500,
+      errorCode: options?.errorCode ?? 'INTERNAL_SERVER_ERROR',
       cause: options?.cause instanceof Error ? options.cause : undefined,
       details: options?.details,
     });
@@ -81,15 +84,16 @@ export class ServerError extends AppError {
 
 export class DatabaseError extends AppError {
   constructor(
-    message = "Database operation failed",
+    message = 'Database operation failed',
     options?: {
+      errorCode?: ErrorCode;
       cause?: unknown;
       details?: Record<string, unknown>;
-    },
+    }
   ) {
     super(message, {
-      errorCode: "DATABASE_ERROR",
       statusCode: 500,
+      errorCode: options?.errorCode ?? 'DATABASE_ERROR',
       cause: options?.cause instanceof Error ? options.cause : undefined,
       details: options?.details,
     });

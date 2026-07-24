@@ -1,10 +1,8 @@
 'use client';
 
-import { cn } from '@/lib/utils';
-import { Controller, useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Empty, EmptyDescription, EmptyHeader } from '@/components/ui/empty';
 import {
   Field,
   FieldDescription,
@@ -14,20 +12,21 @@ import {
   FieldSeparator,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { signUpUserSchema, SignUpUserValues } from '../schema/auth.schema';
-import { toast } from 'sonner';
-import Link from 'next/link';
-import { signUpUserAction } from '../actions/auth.actions';
-import { Empty, EmptyHeader, EmptyDescription } from '@/components/ui/empty';
-import { MailIcon } from 'lucide-react';
-import React from 'react';
-import { useTheme } from 'next-themes';
+import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth-store';
-import { OTPVerificationForm } from './otp-verification-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { MailIcon } from 'lucide-react';
+import { useTheme } from 'next-themes';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import React from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { signUpUserAction } from '../actions/auth.actions';
+import { signUpUserSchema, SignUpUserValues } from '../schema/auth.schema';
 
 type VerificationStatus =
-  'idle' | 'creating' | 'verifying' | 'completed' | 'error';
+  'idle' | 'creating' | 'redirecting' | 'completed' | 'error';
 
 export function SignUpForm({
   className,
@@ -65,7 +64,7 @@ export function SignUpForm({
   async function onSubmit(values: SignUpUserValues) {
     setStatus('creating');
 
-    const { error } = await signUpUserAction(values);
+    const { data, error } = await signUpUserAction(values);
 
     if (error) {
       toast.error(error.message);
@@ -73,31 +72,62 @@ export function SignUpForm({
       return;
     }
 
-    setStatus('verifying');
+    localStorage.setItem('pendingVerificationEmail', data.user.email);
+
+    router.refresh();
+    router.replace(`/verify-account?email=${data.user.email}`);
   }
 
   React.useEffect(() => {
-    if (status !== 'verifying') return;
+    const pendingVerification = localStorage.getItem(
+      'pendingVerificationEmail'
+    );
 
-    const interval = setInterval(async () => {
-      const data = await updateAuthSession();
+    if (!pendingVerification) return;
 
-      if (!data) return;
+    setStatus('redirecting');
+  }, []);
 
-      await updateAuthSession();
+  React.useEffect(() => {
+    const verificationEmail = localStorage.getItem('pendingVerificationEmail');
 
-      toast.success('Signed in successfully');
-      router.replace(callbackURL ?? '/dashboard');
-    }, 2000);
+    if (!verificationEmail) return;
 
-    return () => clearInterval(interval);
-  }, [status, updateAuthSession, callbackURL, router]);
+    setStatus('redirecting');
 
-  if (status === 'verifying') {
-    return <OTPVerificationForm />;
+    const timer = setTimeout(() => {
+      router.refresh();
+      router.replace(
+        `/verify-account?email=${encodeURIComponent(verificationEmail)}`
+      );
+    }, 2500);
+
+    return () => clearTimeout(timer);
+  }, [router]);
+
+  if (status === 'redirecting') {
+    return (
+      <Card>
+        <CardContent>
+          <Empty className="border-none p-4">
+            <EmptyHeader>
+              <MailIcon className="text-muted-foreground size-10" />
+
+              <h2 className="text-2xl font-bold">Verification in Progress</h2>
+
+              <EmptyDescription>
+                We found a pending email verification for your account.
+              </EmptyDescription>
+
+              <p className="text-muted-foreground mt-2 text-xs">
+                Redirecting you to continue verification…
+              </p>
+            </EmptyHeader>
+          </Empty>
+        </CardContent>
+      </Card>
+    );
   }
-
-  return <OTPVerificationForm />;
 
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>

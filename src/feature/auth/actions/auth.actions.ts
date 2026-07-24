@@ -1,19 +1,21 @@
-"use server";
+'use server';
 
-import { safeCatch } from "@/lib/errors/safe-catch";
-import { auth } from "@/utils/auth";
-import { AuthRepository } from "../repository/auth.repository";
-import { APP_ROLES } from "@/lib/auth/roles";
-import { actionErrorParser } from "@/lib/errors/action-error-parser";
-import { ApiBody } from "@/types/api";
-import { headers } from "next/headers";
-import { SignUpUserValues } from "../schema/auth.schema";
+import { APP_ROLES } from '@/lib/auth/roles';
+import { actionErrorParser } from '@/lib/errors/action-error-parser';
+import { safeCatch } from '@/lib/errors/safe-catch';
+import { ApiBody } from '@/types/api';
+import { auth } from '@/utils/auth';
+import { headers } from 'next/headers';
+import { AuthRepository } from '../repository/auth.repository';
+import { SignUpUserValues } from '../schema/auth.schema';
+import { UserRepository } from '../repository/user.repository';
+import { AuthService } from '../service/auth.service';
 
 export type SignUpBody = ApiBody<typeof auth.api.signUpEmail>;
 export type SignInBody = ApiBody<typeof auth.api.signInUsername>;
 
 export async function signUpAdminAction(values: SignUpBody) {
-  const repository = new AuthRepository();
+  const repository = new UserRepository();
 
   return await safeCatch(
     async () => {
@@ -25,12 +27,12 @@ export async function signUpAdminAction(values: SignUpBody) {
 
       return response;
     },
-    { parser: actionErrorParser },
+    { parser: actionErrorParser }
   );
 }
 
 export const signUpUserAction = async (values: SignUpUserValues) => {
-  const repository = new AuthRepository();
+  const repository = new UserRepository();
 
   const { firstName, lastName, confirmPassword, ...transformedValues } = values;
 
@@ -43,7 +45,7 @@ export const signUpUserAction = async (values: SignUpUserValues) => {
         },
       });
     },
-    { parser: actionErrorParser },
+    { parser: actionErrorParser }
   );
 
   // if (!userResult.data || userResult.error) {
@@ -56,14 +58,14 @@ export const signUpUserAction = async (values: SignUpUserValues) => {
       async () => {
         const result = await repository.createUserProfile(
           userResult.data.user.id,
-          { firstName, lastName },
+          { firstName, lastName }
         );
 
         console.log(result);
 
         return result;
       },
-      { parser: actionErrorParser },
+      { parser: actionErrorParser }
     );
 
     console.log(userProfileResult);
@@ -83,7 +85,7 @@ export const signInUserAction = async (values: SignInBody) => {
         body: values,
       });
     },
-    { parser: actionErrorParser },
+    { parser: actionErrorParser }
   );
 };
 
@@ -94,6 +96,15 @@ export const signOutUserAction = async () => {
         headers: await headers(),
       });
     },
-    { parser: actionErrorParser },
+    { parser: actionErrorParser }
   );
+};
+
+export const verifyEmailOTPExistence = async (email: string) => {
+  const repository = new AuthRepository();
+  const service = new AuthService(repository);
+
+  return await safeCatch(async () => {
+    return await service.getPendingAccountVerification(email)
+  }, { parser: actionErrorParser });
 };

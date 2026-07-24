@@ -52,7 +52,7 @@ export function ResultDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent>
-        <DialogHeader className="items-center text-center space-y-4">
+        <DialogHeader className="items-center space-y-4 text-center">
           {icon}
 
           <DialogTitle>{title}</DialogTitle>
