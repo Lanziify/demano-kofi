@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Empty, EmptyDescription, EmptyHeader } from '@/components/ui/empty';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Empty, EmptyDescription, EmptyHeader } from "@/components/ui/empty";
 import {
   Field,
   FieldDescription,
@@ -10,127 +10,112 @@ import {
   FieldGroup,
   FieldLabel,
   FieldSeparator,
-} from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
-import { useAuthStore } from '@/store/auth-store';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { MailIcon } from 'lucide-react';
-import { useTheme } from 'next-themes';
-import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import React from 'react';
-import { Controller, useForm } from 'react-hook-form';
-import { toast } from 'sonner';
-import { signUpUserAction } from '../actions/auth.actions';
-import { signUpUserSchema, SignUpUserValues } from '../schema/auth.schema';
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
+import { cn } from "@/lib/utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { MailIcon } from "lucide-react";
+import { useTheme } from "next-themes";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import React from "react";
+import { Controller, useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { signUpUserAction } from "../actions/auth.actions";
+import { signUpUserSchema, SignUpUserValues } from "../schema/auth.schema";
 
 type VerificationStatus =
-  'idle' | 'creating' | 'redirecting' | 'completed' | 'error';
+  | "idle"
+  | "creating"
+  | "redirecting"
+  | "completed"
+  | "error";
 
 export function SignUpForm({
   className,
   ...props
-}: React.ComponentProps<'div'>) {
+}: React.ComponentProps<"div">) {
   const router = useRouter();
-  const { updateAuthSession } = useAuthStore();
   const searchParams = useSearchParams();
-  const callbackURL = searchParams.get('callbackURL');
+  const callbackURL = searchParams.get("callbackURL");
   const { theme } = useTheme();
 
-  const [status, setStatus] = React.useState<VerificationStatus>('idle');
+  const [status, setStatus] = React.useState<VerificationStatus>("idle");
 
   const signInLink = new URL(`${process.env.NEXT_PUBLIC_SERVER_URL!}/signin`);
 
+  const verificationLink = new URL(
+    `${process.env.NEXT_PUBLIC_SERVER_URL!}/verify-account`,
+  );
+
   if (callbackURL) {
-    signInLink.searchParams.append('callbackURL', callbackURL);
+    signInLink.searchParams.append("callbackURL", callbackURL);
+    verificationLink.searchParams.append("callbackURL", callbackURL);
   }
 
-  const { control, handleSubmit } = useForm<SignUpUserValues>({
+  const { control, handleSubmit, getValues } = useForm<SignUpUserValues>({
     resolver: zodResolver(signUpUserSchema),
     defaultValues: {
-      name: '',
-      firstName: '',
-      lastName: '',
-      username: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
+      name: "",
+      firstName: "",
+      lastName: "",
+      username: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
       rememberMe: false,
-      callbackURL: '/verification/email-confirmation',
+      callbackURL: verificationLink.toString(),
     },
   });
 
   async function onSubmit(values: SignUpUserValues) {
-    setStatus('creating');
+    setStatus("creating");
 
     const { data, error } = await signUpUserAction(values);
 
     if (error) {
       toast.error(error.message);
-      setStatus('error');
+      setStatus("error");
       return;
     }
 
-    localStorage.setItem('pendingVerificationEmail', data.user.email);
-
-    router.refresh();
-    router.replace(`/verify-account?email=${data.user.email}`);
+    setStatus("redirecting");
   }
 
   React.useEffect(() => {
-    const pendingVerification = localStorage.getItem(
-      'pendingVerificationEmail'
-    );
+    if (status !== "redirecting") return;
 
-    if (!pendingVerification) return;
-
-    setStatus('redirecting');
-  }, []);
-
-  React.useEffect(() => {
-    const verificationEmail = localStorage.getItem('pendingVerificationEmail');
-
-    if (!verificationEmail) return;
-
-    setStatus('redirecting');
+    verificationLink.searchParams.append("email", getValues("email"));
 
     const timer = setTimeout(() => {
       router.refresh();
-      router.replace(
-        `/verify-account?email=${encodeURIComponent(verificationEmail)}`
-      );
+      router.replace(verificationLink.toString());
     }, 2500);
 
     return () => clearTimeout(timer);
-  }, [router]);
+  }, [status, router]);
 
-  if (status === 'redirecting') {
+  if (status === "redirecting") {
     return (
-      <Card>
-        <CardContent>
-          <Empty className="border-none p-4">
-            <EmptyHeader>
-              <MailIcon className="text-muted-foreground size-10" />
+      <Empty className="border-none p-4">
+        <EmptyHeader>
+          <MailIcon className="text-muted-foreground size-10" />
 
-              <h2 className="text-2xl font-bold">Verification in Progress</h2>
+          <h2 className="text-2xl font-bold">Verification in Progress</h2>
 
-              <EmptyDescription>
-                We found a pending email verification for your account.
-              </EmptyDescription>
+          <EmptyDescription>
+            Redirecting you to continue verification…
+          </EmptyDescription>
 
-              <p className="text-muted-foreground mt-2 text-xs">
-                Redirecting you to continue verification…
-              </p>
-            </EmptyHeader>
-          </Empty>
-        </CardContent>
-      </Card>
+          <Spinner />
+        </EmptyHeader>
+      </Empty>
     );
   }
 
   return (
-    <div className={cn('flex flex-col gap-6', className)} {...props}>
+    <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="overflow-hidden p-0">
         <CardContent className="grid p-0 md:grid-cols-2">
           <form className="p-6 md:p-8" onSubmit={handleSubmit(onSubmit)}>
@@ -257,7 +242,7 @@ export function SignUpForm({
                 </Button>
               </Field>
               <FieldDescription className="text-center">
-                Already have an account?{' '}
+                Already have an account?{" "}
                 <Link href={signInLink.toString()}>Sign in</Link>
               </FieldDescription>
             </FieldGroup>
@@ -266,10 +251,11 @@ export function SignUpForm({
             <div className="h-48 w-48">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                fill={theme === 'light' ? '#000000' : '#ffff'}
+                fill={theme === "light" ? "#000000" : "#ffff"}
                 width="100%"
                 height="100%"
-                viewBox="0 0 48 48">
+                viewBox="0 0 48 48"
+              >
                 <path d="M12.664062 4.0644531C10.733436 3.9724031 9.4312803 6.2487539 10.4375 7.8789062C10.4375 7.8789062 10.4375 7.8808594 10.4375 7.8808594L13.861328 13.673828L7.3691406 33.191406 A 1.50015 1.50015 0 0 0 7.3652344 33.205078C5.8221031 38.005535 9.463671 43 14.505859 43L33.484375 43C38.527324 43 42.168135 38.00553 40.625 33.205078 A 1.50015 1.50015 0 0 0 40.621094 33.191406L34.462891 14.650391 A 1.50015 1.50015 0 0 0 34.560547 14.560547L37.6875 11.433594C38.138623 11.785314 38.707718 12.286991 39.328125 13.0625C40.645287 14.708953 42 17.333333 42 21.5 A 1.50015 1.50015 0 1 0 45 21.5C45 16.666667 43.354713 13.291047 41.671875 11.1875C39.989037 9.083953 38.169922 8.1582031 38.169922 8.1582031 A 1.50015 1.50015 0 0 0 36.439453 8.4394531L34.011719 10.867188L34.011719 9.2695312C34.011719 7.5144483 32.688976 6.0084784 30.947266 5.7949219C21.106626 4.5881646 15.374812 4.1935848 12.664062 4.0644531 z M 13.490234 7.1523438C16.282253 7.2986664 21.327227 7.636568 30.582031 8.7714844C30.83032 8.8019284 31.011719 9.0006144 31.011719 9.2695312L31.011719 12L16.355469 12L13.490234 7.1523438 z M 16.582031 15L31.417969 15L34.40625 24L18.083984 24C17.214984 24 16.445687 24.561672 16.179688 25.388672L13.076172 35.039062C12.871172 35.675063 12.282438 36.082031 11.648438 36.082031C11.496438 36.082031 11.341453 36.058766 11.189453 36.009766C10.40369 35.756808 9.9714093 34.918034 10.21875 34.132812C10.219573 34.130198 10.219865 34.127613 10.220703 34.125L10.220703 34.123047L16.582031 15 z" />
               </svg>
             </div>
@@ -277,7 +263,7 @@ export function SignUpForm({
         </CardContent>
       </Card>
       <FieldDescription className="px-6 text-center">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{' '}
+        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
         and <a href="#">Privacy Policy</a>.
       </FieldDescription>
     </div>

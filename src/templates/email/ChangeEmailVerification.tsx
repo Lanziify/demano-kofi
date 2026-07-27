@@ -1,4 +1,4 @@
-import { User } from 'better-auth';
+import { User } from "better-auth";
 import {
   Body,
   Button,
@@ -11,14 +11,17 @@ import {
   Section,
   Tailwind,
   Text,
-} from 'react-email';
+} from "react-email";
 
 type ChangeEmailVerificationProps = {
   user: User | null;
   url: string | null;
 };
 
-export function ChangeEmailVerification({ user, url }: ChangeEmailVerificationProps) {
+export function ChangeEmailVerification({
+  user,
+  url,
+}: ChangeEmailVerificationProps) {
   return (
     <Html>
       <Head />
@@ -48,8 +51,9 @@ export function ChangeEmailVerification({ user, url }: ChangeEmailVerificationPr
 
               <Section className="my-8 text-center">
                 <Button
-                  href={url ?? ''}
-                  className="rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white no-underline">
+                  href={url ?? ""}
+                  className="rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white no-underline"
+                >
                   Verify New Email
                 </Button>
               </Section>

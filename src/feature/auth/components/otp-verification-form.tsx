@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -8,32 +8,121 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Field } from '@/components/ui/field';
+} from "@/components/ui/card";
+import { Field } from "@/components/ui/field";
 import {
   InputOTP,
   InputOTPGroup,
   InputOTPSlot,
-} from '@/components/ui/input-otp';
-import { cn } from '@/lib/utils';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Controller, useForm } from 'react-hook-form';
-import { otpSchema, OTPSchemaValues } from '../schema/auth.schema';
+} from "@/components/ui/input-otp";
+import { Spinner } from "@/components/ui/spinner";
+import { cn } from "@/lib/utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter, useSearchParams } from "next/navigation";
+import React from "react";
+import { Controller, useForm } from "react-hook-form";
+import { toast } from "sonner";
+import {
+  sendVerificationOTPAction,
+  SendVerificationOTPBody,
+  verifyEmailOTPAction,
+  VerifyEmailOTPBody,
+} from "../actions/auth.actions";
+import { useAuthQueries } from "../hooks/use-auth-queries";
+import { otpSchema, OTPSchemaValues } from "../schema/auth.schema";
 
-export function OTPVerificationForm() {
+type OTPVerificationFormProps = {
+  email: string;
+};
+
+export function OTPVerificationForm({ email }: OTPVerificationFormProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackURL = searchParams.get("callbackURL");
+
+  const { verification } = useAuthQueries({
+    email,
+  });
+
+  const [timeLeft, setTimeLeft] = React.useState(0);
+
   const {
     control,
     handleSubmit,
-    formState: { isDirty, isSubmitting },
+    formState: { isSubmitting },
   } = useForm<OTPSchemaValues>({
     resolver: zodResolver(otpSchema),
     defaultValues: {
-      otp: '',
+      otp: "",
     },
   });
 
-  async function onSubmit(values: OTPSchemaValues) {
-    console.log(values);
+  async function onSubmit({ otp }: OTPSchemaValues) {
+    const transformedValues = {
+      email,
+      otp,
+      type: "email-verification",
+    } as VerifyEmailOTPBody;
+
+    const { data, error } = await verifyEmailOTPAction(transformedValues);
+
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+
+    router.refresh();
+    router.replace(callbackURL ?? "/dashboard");
+  }
+
+  async function onResendSubmit() {
+    if (timeLeft > 0) return;
+
+    const values = {
+      email,
+      type: "email-verification",
+    } as SendVerificationOTPBody;
+
+    const { error } = await sendVerificationOTPAction(values);
+
+    if (error) {
+      toast.error(error.message);
+    }
+
+    await verification.refetch();
+  }
+
+  React.useEffect(() => {
+    if (!verification.data?.resendAvailableAt) return;
+
+    const interval = setInterval(() => {
+      const seconds = Math.max(
+        0,
+        Math.ceil(
+          (new Date(verification.data.resendAvailableAt).getTime() -
+            Date.now()) /
+            1000,
+        ),
+      );
+
+      setTimeLeft(seconds);
+    }, 1000);
+
+    // initialize immediately
+    const seconds = Math.max(
+      0,
+      Math.ceil(
+        (new Date(verification.data.resendAvailableAt).getTime() - Date.now()) /
+          1000,
+      ),
+    );
+
+    setTimeLeft(seconds);
+
+    return () => clearInterval(interval);
+  }, [verification.data?.resendAvailableAt]);
+  if (verification.isPending) {
+    return <Spinner />;
   }
 
   return (
@@ -54,9 +143,13 @@ export function OTPVerificationForm() {
                 <InputOTP maxLength={6} onChange={field.onChange}>
                   <InputOTPGroup
                     className={cn(
-                      '*:data-[slot=input-otp-slot]:bg-muted gap-2 *:data-[slot=input-otp-slot]:rounded-lg *:data-[slot=input-otp-slot]:border-transparent',
-                      {"*:data-[slot=input-otp-slot]:ring-red-500": fieldState.invalid}
-                    )}>
+                      "*:data-[slot=input-otp-slot]:bg-muted gap-2 *:data-[slot=input-otp-slot]:rounded-lg *:data-[slot=input-otp-slot]:border-transparent",
+                      {
+                        "*:data-[slot=input-otp-slot]:ring-red-500":
+                          fieldState.invalid,
+                      },
+                    )}
+                  >
                     <InputOTPSlot index={0} />
                     <InputOTPSlot index={1} />
                     <InputOTPSlot index={2} />
@@ -75,13 +168,19 @@ export function OTPVerificationForm() {
           <Button
             type="submit"
             form="otp-verification-form"
-            disabled={isSubmitting}>
+            disabled={isSubmitting}
+          >
             Verify
           </Button>
           <div className="text-muted-foreground text-center text-sm">
-            Didn't receive a code?{' '}
-            <Button variant="link" className="p-0">
-              Resend
+            Didn't receive a code?{" "}
+            <Button
+              variant="link"
+              className="p-0"
+              onClick={onResendSubmit}
+              disabled={timeLeft > 0}
+            >
+              {timeLeft > 0 ? `Resend in ${timeLeft}s` : "Resend"}
             </Button>
           </div>
         </Field>

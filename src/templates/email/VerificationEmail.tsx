@@ -1,5 +1,5 @@
-import { User } from 'better-auth';
-import { UserWithRole } from 'better-auth/plugins';
+import { User } from "better-auth";
+import { UserWithRole } from "better-auth/plugins";
 import {
   Body,
   Button,
@@ -12,7 +12,7 @@ import {
   Section,
   Tailwind,
   Text,
-} from 'react-email';
+} from "react-email";
 
 type VerificationEmailProps = {
   otp: string;
@@ -35,9 +35,7 @@ export function VerificationEmail({ otp, email }: VerificationEmailProps) {
             </Section>
 
             <Section className="px-8 py-10">
-              <Text className="text-base text-slate-700">
-                Hi!,
-              </Text>
+              <Text className="text-base text-slate-700">Hi!,</Text>
 
               <Text className="text-base leading-7 text-slate-700">
                 Thanks for creating your account. Please enter the verification

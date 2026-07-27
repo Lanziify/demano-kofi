@@ -106,6 +106,7 @@ export interface Verification {
   expiresAt: Timestamp;
   id: string;
   identifier: string;
+  resendAvailableAt: Timestamp;
   updatedAt: Generated<Timestamp>;
   value: string;
 }

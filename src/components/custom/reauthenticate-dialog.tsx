@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Controller, useForm } from 'react-hook-form';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller, useForm } from "react-hook-form";
 
 import {
   Dialog,
@@ -10,15 +10,15 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   reauthenticateSchema,
   ReauthenticateSchemaValues,
-} from '@/feature/auth/schema/account.schema';
-import { Button } from '../ui/button';
-import { Field, FieldError, FieldGroup, FieldLabel } from '../ui/field';
-import { Input } from '../ui/input';
-import { Spinner } from '../ui/spinner';
+} from "@/feature/auth/schema/account.schema";
+import { Button } from "../ui/button";
+import { Field, FieldError, FieldGroup, FieldLabel } from "../ui/field";
+import { Input } from "../ui/input";
+import { Spinner } from "../ui/spinner";
 
 interface CreateCampusDialogProps {
   open: boolean;
@@ -39,11 +39,11 @@ export function ReauthenticateDialog({
   } = useForm<ReauthenticateSchemaValues>({
     resolver: zodResolver(reauthenticateSchema),
     defaultValues: {
-      password: '',
+      password: "",
     },
   });
 
-  const onSubmit = async ({password}: ReauthenticateSchemaValues) => {
+  const onSubmit = async ({ password }: ReauthenticateSchemaValues) => {
     try {
       await onConfirm(password);
 
@@ -96,14 +96,16 @@ export function ReauthenticateDialog({
                 reset();
                 onOpenChange(false);
               }}
-              disabled={isSubmitting}>
+              disabled={isSubmitting}
+            >
               Cancel
             </Button>
 
             <Button
               type="submit"
               form="reauthenticate-form"
-              disabled={isSubmitting}>
+              disabled={isSubmitting}
+            >
               {isSubmitting && <Spinner />}
               Confirm
             </Button>

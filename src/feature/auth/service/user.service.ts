@@ -1,11 +1,11 @@
-import { DatabaseError } from '@/lib/errors/app-error';
-import { auth } from '@/utils/auth';
-import { db } from '@/utils/db';
-import { toDate } from 'date-fns';
-import { headers } from 'next/headers';
-import { UserRepository } from '../repository/user.repository';
-import { ChangeEmailSchemaValues } from '../schema/account.schema';
-import { ProfileSchemaValues } from '../schema/profile.schema';
+import { DatabaseError } from "@/lib/errors/app-error";
+import { auth } from "@/utils/auth";
+import { db } from "@/utils/db";
+import { toDate } from "date-fns";
+import { headers } from "next/headers";
+import { UserRepository } from "../repository/user.repository";
+import { ChangeEmailSchemaValues } from "../schema/account.schema";
+import { ProfileSchemaValues } from "../schema/profile.schema";
 
 export class UserService {
   constructor(private repository: UserRepository) {}
@@ -23,7 +23,7 @@ export class UserService {
     const user = await this.repository.findUserProfile(userId);
 
     if (!user) {
-      throw new DatabaseError('Could not find user');
+      throw new DatabaseError("Could not find user");
     }
 
     const authUpdates: {
@@ -73,7 +73,7 @@ export class UserService {
     return await auth.api.changeEmail({
       body: values,
       params: {
-        type: 'email-change',
+        type: "email-change",
       },
       headers: await headers(),
     });

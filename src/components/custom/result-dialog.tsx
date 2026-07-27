@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { CheckCircle2, Info, Loader2, XCircle } from 'lucide-react';
+import { CheckCircle2, Info, Loader2, XCircle } from "lucide-react";
 
 import {
   Dialog,
@@ -8,11 +8,11 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 
-type ResultDialogVariant = 'idle' | 'loading' | 'success' | 'error';
+type ResultDialogVariant = "idle" | "loading" | "success" | "error";
 
 export type ResultDialogProps = {
   open: boolean;
@@ -29,9 +29,9 @@ export function ResultDialog({
   variant,
   title,
   description,
-  closeText = 'Close',
+  closeText = "Close",
 }: ResultDialogProps) {
-  const isLoading = variant === 'loading';
+  const isLoading = variant === "loading";
 
   const icon = {
     idle: <Info className="size-8 animate-spin" />,

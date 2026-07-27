@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Controller, useForm } from 'react-hook-form';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller, useForm } from "react-hook-form";
 
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -11,25 +11,25 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from "@/components/ui/card";
 import {
   Field,
   FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
-} from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 
-import { Spinner } from '@/components/ui/spinner';
-import { useAuthStore } from '@/store/auth-store';
+import { Spinner } from "@/components/ui/spinner";
+import { useAuthStore } from "@/store/auth-store";
 
-import { useUpdateUsername } from '@/feature/auth/mutations/user.mutation';
+import { useUpdateUsername } from "@/feature/auth/mutations/user.mutation";
 import {
   usernameUpdateSchema,
   type UsernameUpdateSchemaValues,
-} from '@/feature/auth/schema/account.schema';
-import { toast } from 'sonner';
+} from "@/feature/auth/schema/account.schema";
+import { toast } from "sonner";
 
 export default function AccountUsernameForm() {
   const user = useAuthStore((state) => state.user);
@@ -38,7 +38,7 @@ export default function AccountUsernameForm() {
   const form = useForm<UsernameUpdateSchemaValues>({
     resolver: zodResolver(usernameUpdateSchema),
     defaultValues: {
-      username: '',
+      username: "",
     },
   });
 
@@ -55,7 +55,7 @@ export default function AccountUsernameForm() {
       toast.error(updateUsername.error.message);
     }
 
-    toast.success('Profile updated!');
+    toast.success("Profile updated!");
   }
 
   return (
@@ -97,7 +97,8 @@ export default function AccountUsernameForm() {
           <Button
             type="submit"
             form="username-change-form"
-            disabled={isSubmitting}>
+            disabled={isSubmitting}
+          >
             {isSubmitting && <Spinner />}
             Update Username
           </Button>
