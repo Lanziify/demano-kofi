@@ -1,26 +1,39 @@
-import { AxiosError } from "axios";
-import { AppError } from "./app-error";
+import axios from 'axios';
+import { ApiErrorResponse } from './api-error-parser';
+import { AppError } from './app-error';
+import { ErrorCode } from './error-codes';
 
-export class ClientRequestError extends AppError {
-  constructor(
-    message: string,
-    options?: {
-      statusCode?: number;
-      details?: Record<string, unknown>;
-      cause?: unknown;
-    },
-  ) {
+export interface ClientErrorOptions extends ErrorOptions {
+  errorCode: ErrorCode;
+  statusCode: number;
+  details?: Record<string, unknown> | unknown;
+}
+
+export class ClientRequestError extends Error {
+  readonly errorCode: string;
+  readonly statusCode: number;
+  readonly details?: Record<string, unknown> | unknown;
+
+  constructor(message: string, options: ClientErrorOptions) {
     super(message, {
-      errorCode: "CLIENT_REQUEST_ERROR",
-      statusCode: options?.statusCode ?? 500,
-      details: options?.details,
       cause: options?.cause,
     });
+
+    this.name = new.target.name;
+    this.errorCode = options.errorCode;
+    this.statusCode = options.statusCode;
+    this.details = options.details;
+
+    Object.setPrototypeOf(this, new.target.prototype);
+
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, this.constructor);
+    }
   }
 }
 
 export function withClientErrorHandling<TArgs extends unknown[], TResult>(
-  fn: (...args: TArgs) => Promise<TResult>,
+  fn: (...args: TArgs) => Promise<TResult>
 ) {
   return async (...args: TArgs): Promise<TResult> => {
     try {
@@ -30,16 +43,19 @@ export function withClientErrorHandling<TArgs extends unknown[], TResult>(
         throw error;
       }
 
-      const axiosError = error as AxiosError<{ message?: string }>;
+      if (axios.isAxiosError<ApiErrorResponse>(error)) {
+        throw new ClientRequestError(
+          error.response?.data?.message ?? error.message,
+          {
+            errorCode: error.response?.data?.errorCode ?? 'UNEXPECTED_ERROR',
+            statusCode: error.response?.status ?? 500,
+            details: error.response?.data?.details,
+            cause: error,
+          }
+        );
+      }
 
-      const message =
-        axiosError.response?.data?.message ??
-        (error instanceof Error ? error.message : "Unexpected error");
-
-      throw new ClientRequestError(message, {
-        statusCode: axiosError.response?.status ?? 500,
-        cause: error,
-      });
+      throw error;
     }
   };
 }

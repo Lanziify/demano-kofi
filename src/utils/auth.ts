@@ -77,7 +77,7 @@ export const auth = betterAuth({
     additionalFields: {
       resendAvailableAt: {
         type: "date",
-        defaultValue: new Date(Date.now() + 60_000),
+        defaultValue: () => new Date(Date.now() + 60_000),
       },
     },
   },
@@ -91,6 +91,7 @@ export const auth = betterAuth({
     emailOTP({
       sendVerificationOnSignUp: true,
       allowedAttempts: 5,
+      expiresIn: 60 * 30,
       async sendVerificationOTP({ email, otp, type }) {
         if (type === "email-verification") {
           const template = VerificationEmail({ email, otp });

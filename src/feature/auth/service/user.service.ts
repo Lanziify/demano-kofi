@@ -1,11 +1,17 @@
-import { DatabaseError } from "@/lib/errors/app-error";
-import { auth } from "@/utils/auth";
-import { db } from "@/utils/db";
-import { toDate } from "date-fns";
-import { headers } from "next/headers";
-import { UserRepository } from "../repository/user.repository";
-import { ChangeEmailSchemaValues } from "../schema/account.schema";
-import { ProfileSchemaValues } from "../schema/profile.schema";
+import { DatabaseError, NotFoundError } from '@/lib/errors/app-error';
+import { auth } from '@/utils/auth';
+import { db } from '@/utils/db';
+import { toDate } from 'date-fns';
+import { headers } from 'next/headers';
+import { UserRepository } from '../repository/user.repository';
+import { ChangeEmailSchemaValues } from '../schema/account.schema';
+import { ProfileSchemaValues } from '../schema/profile.schema';
+
+export type UserFilters = {
+  id?: string;
+  email?: string;
+  username?: string;
+};
 
 export class UserService {
   constructor(private repository: UserRepository) {}
@@ -16,6 +22,32 @@ export class UserService {
     return profile;
   }
 
+  async getUser(filters: UserFilters) {
+    const filterMap = {
+      id: 'user.id',
+      email: 'user.email',
+      username: 'user.username',
+    } as const;
+
+    let query = db.selectFrom('user').selectAll();
+
+    for (const [key, column] of Object.entries(filterMap)) {
+      const value = filters[key as keyof UserFilters];
+
+      if (value) {
+        query = query.where(column, '=', value);
+      }
+    }
+
+    const user = await query.executeTakeFirst();
+
+    if (!user) {
+      throw new NotFoundError("User not found", {errorCode: 'USER_NOT_FOUND'});
+    }
+
+    return user
+  }
+
   //#region UPDATES
   async updateUserProfile(values: ProfileSchemaValues & { userId: string }) {
     const { userId, image, ...profile } = values;
@@ -23,7 +55,7 @@ export class UserService {
     const user = await this.repository.findUserProfile(userId);
 
     if (!user) {
-      throw new DatabaseError("Could not find user");
+      throw new DatabaseError('Could not find user');
     }
 
     const authUpdates: {
@@ -60,20 +92,13 @@ export class UserService {
     });
   }
 
-  async updateUsername(username: string) {
-    return await auth.api.updateUser({
-      body: {
-        username,
-      },
-      headers: await headers(),
-    });
-  }
+  async updateUsername(username: string) {}
 
   async updateEmail(values: ChangeEmailSchemaValues) {
     return await auth.api.changeEmail({
       body: values,
       params: {
-        type: "email-change",
+        type: 'email-change',
       },
       headers: await headers(),
     });

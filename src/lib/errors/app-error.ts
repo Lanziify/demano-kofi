@@ -1,15 +1,15 @@
 import { ErrorCode } from "./error-codes";
 
-interface AppErrorOptions extends ErrorOptions {
+export interface AppErrorOptions extends ErrorOptions {
   errorCode: ErrorCode;
   statusCode: number;
-  details?: Record<string, unknown>;
+  details?: Record<string, unknown> | unknown;
 }
 
 export abstract class AppError extends Error {
   readonly errorCode: ErrorCode;
   readonly statusCode: number;
-  readonly details?: Record<string, unknown>;
+  readonly details?: Record<string, unknown> | unknown;
 
   constructor(message: string, options: AppErrorOptions) {
     super(message, {
@@ -46,6 +46,23 @@ export class BadRequestError extends AppError {
     });
   }
 }
+export class NotFoundError extends AppError {
+  constructor(
+    message = "Not found.",
+    options?: {
+      errorCode?: ErrorCode;
+      cause?: unknown;
+      details?: Record<string, unknown>;
+    },
+  ) {
+    super(message, {
+      statusCode: 404,
+      errorCode: options?.errorCode ?? "REQUEST_NOT_FOUND",
+      cause: options?.cause instanceof Error ? options.cause : undefined,
+      details: options?.details,
+    });
+  }
+}
 
 export class UnAuthorizedError extends AppError {
   constructor(
@@ -58,7 +75,7 @@ export class UnAuthorizedError extends AppError {
   ) {
     super(message, {
       statusCode: 401,
-      errorCode: options?.errorCode ?? "UNAUTHORIZED",
+      errorCode: options?.errorCode ?? "UNAUTHORIZED_REQUEST",
       cause: options?.cause instanceof Error ? options.cause : undefined,
       details: options?.details,
     });
@@ -75,7 +92,7 @@ export class ServerError extends AppError {
   ) {
     super(message, {
       statusCode: 500,
-      errorCode: options?.errorCode ?? "INTERNAL_SERVER_ERROR",
+      errorCode: options?.errorCode ?? "UNEXPECTED_ERROR",
       cause: options?.cause instanceof Error ? options.cause : undefined,
       details: options?.details,
     });

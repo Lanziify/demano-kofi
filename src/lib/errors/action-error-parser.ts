@@ -4,16 +4,16 @@ import { APIError, isAPIError } from "better-auth/api";
 import { NoResultError } from "kysely";
 import { AppError } from "./app-error";
 
-type ParsedActionError = {
-  code: string;
-  message: string;
+export type ActionErrorResponse = {
+  errorCode?: string;
+  message?: string;
   details?: Record<string, unknown> | unknown;
 };
 
-export function actionErrorParser(error: unknown): ParsedActionError {
+export function actionErrorParser(error: unknown): ActionErrorResponse {
   if (error instanceof ZodError) {
     return {
-      code: "VALIDATION_ERROR",
+      errorCode: "VALIDATION_ERROR",
       message: "Invalid request body",
       details: z.flattenError(error),
     };
@@ -21,7 +21,7 @@ export function actionErrorParser(error: unknown): ParsedActionError {
 
   if (error instanceof APIError || isAPIError(error)) {
     return {
-      code: error.body?.code ?? "AUTH_ERROR",
+      errorCode: error.body?.code ?? "UNEXPECTED_ERROR",
       message: error.body?.message ?? "Authentication failed",
       details: error.cause,
     };
@@ -29,7 +29,7 @@ export function actionErrorParser(error: unknown): ParsedActionError {
 
   if (error instanceof AppError) {
     return {
-      code: error.errorCode,
+      errorCode: error.errorCode,
       message: error.message,
       details: error.details,
     };
@@ -37,14 +37,14 @@ export function actionErrorParser(error: unknown): ParsedActionError {
 
   if (error instanceof NoResultError) {
     return {
-      code: error.name,
+      errorCode: error.name,
       message: error.message,
       details: error.stack,
     };
   }
 
   return {
-    code: "INTERNAL_SERVER_ERROR",
+    errorCode: "INTERNAL_SERVER_ERROR",
     message: "Something went wrong",
   };
 }

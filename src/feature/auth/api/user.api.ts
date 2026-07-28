@@ -12,6 +12,12 @@ import {
 } from "../schema/account.schema";
 import { ProfileSchemaWithUserIdValues } from "../schema/profile.schema";
 
+export const getUser = withClientErrorHandling(async (email: string) => {
+  const { data } = await axios.get<UserProfileApiResponse>(`/api/users?${email}`);
+
+  return data;
+});
+
 export const getUserProfile = withClientErrorHandling(async () => {
   const { data } = await axios.get<UserProfileApiResponse>("/api/users/me");
 

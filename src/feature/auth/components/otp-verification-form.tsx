@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -8,28 +8,28 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Field } from "@/components/ui/field";
+} from '@/components/ui/card';
+import { Field } from '@/components/ui/field';
 import {
   InputOTP,
   InputOTPGroup,
   InputOTPSlot,
-} from "@/components/ui/input-otp";
-import { Spinner } from "@/components/ui/spinner";
-import { cn } from "@/lib/utils";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter, useSearchParams } from "next/navigation";
-import React from "react";
-import { Controller, useForm } from "react-hook-form";
-import { toast } from "sonner";
+} from '@/components/ui/input-otp';
+import { Spinner } from '@/components/ui/spinner';
+import { cn } from '@/lib/utils';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter, useSearchParams } from 'next/navigation';
+import React from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 import {
   sendVerificationOTPAction,
   SendVerificationOTPBody,
   verifyEmailOTPAction,
   VerifyEmailOTPBody,
-} from "../actions/auth.actions";
-import { useAuthQueries } from "../hooks/use-auth-queries";
-import { otpSchema, OTPSchemaValues } from "../schema/auth.schema";
+} from '../actions/auth.actions';
+import { useAuthQueries } from '../hooks/use-auth-queries';
+import { otpSchema, OTPSchemaValues } from '../schema/auth.schema';
 
 type OTPVerificationFormProps = {
   email: string;
@@ -38,11 +38,12 @@ type OTPVerificationFormProps = {
 export function OTPVerificationForm({ email }: OTPVerificationFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackURL = searchParams.get("callbackURL");
+  const callbackURL = searchParams.get('callbackURL');
 
   const { verification } = useAuthQueries({
     email,
   });
+
 
   const [timeLeft, setTimeLeft] = React.useState(0);
 
@@ -53,7 +54,7 @@ export function OTPVerificationForm({ email }: OTPVerificationFormProps) {
   } = useForm<OTPSchemaValues>({
     resolver: zodResolver(otpSchema),
     defaultValues: {
-      otp: "",
+      otp: '',
     },
   });
 
@@ -61,18 +62,20 @@ export function OTPVerificationForm({ email }: OTPVerificationFormProps) {
     const transformedValues = {
       email,
       otp,
-      type: "email-verification",
+      type: 'email-verification',
     } as VerifyEmailOTPBody;
 
-    const { data, error } = await verifyEmailOTPAction(transformedValues);
+    const { error } = await verifyEmailOTPAction(transformedValues);
 
     if (error) {
       toast.error(error.message);
       return;
     }
 
+    toast.success('Signed in successfully');
+
     router.refresh();
-    router.replace(callbackURL ?? "/dashboard");
+    router.replace(callbackURL ?? '/dashboard');
   }
 
   async function onResendSubmit() {
@@ -80,7 +83,7 @@ export function OTPVerificationForm({ email }: OTPVerificationFormProps) {
 
     const values = {
       email,
-      type: "email-verification",
+      type: 'email-verification',
     } as SendVerificationOTPBody;
 
     const { error } = await sendVerificationOTPAction(values);
@@ -93,7 +96,7 @@ export function OTPVerificationForm({ email }: OTPVerificationFormProps) {
   }
 
   React.useEffect(() => {
-    if (!verification.data?.resendAvailableAt) return;
+    if (!verification.data) return;
 
     const interval = setInterval(() => {
       const seconds = Math.max(
@@ -101,8 +104,8 @@ export function OTPVerificationForm({ email }: OTPVerificationFormProps) {
         Math.ceil(
           (new Date(verification.data.resendAvailableAt).getTime() -
             Date.now()) /
-            1000,
-        ),
+            1000
+        )
       );
 
       setTimeLeft(seconds);
@@ -113,14 +116,15 @@ export function OTPVerificationForm({ email }: OTPVerificationFormProps) {
       0,
       Math.ceil(
         (new Date(verification.data.resendAvailableAt).getTime() - Date.now()) /
-          1000,
-      ),
+          1000
+      )
     );
 
     setTimeLeft(seconds);
 
     return () => clearInterval(interval);
-  }, [verification.data?.resendAvailableAt]);
+  }, [verification.data]);
+
   if (verification.isPending) {
     return <Spinner />;
   }
@@ -143,13 +147,12 @@ export function OTPVerificationForm({ email }: OTPVerificationFormProps) {
                 <InputOTP maxLength={6} onChange={field.onChange}>
                   <InputOTPGroup
                     className={cn(
-                      "*:data-[slot=input-otp-slot]:bg-muted gap-2 *:data-[slot=input-otp-slot]:rounded-lg *:data-[slot=input-otp-slot]:border-transparent",
+                      '*:data-[slot=input-otp-slot]:bg-muted gap-2 *:data-[slot=input-otp-slot]:rounded-lg *:data-[slot=input-otp-slot]:border-transparent',
                       {
-                        "*:data-[slot=input-otp-slot]:ring-red-500":
+                        '*:data-[slot=input-otp-slot]:ring-red-500':
                           fieldState.invalid,
-                      },
-                    )}
-                  >
+                      }
+                    )}>
                     <InputOTPSlot index={0} />
                     <InputOTPSlot index={1} />
                     <InputOTPSlot index={2} />
@@ -168,19 +171,18 @@ export function OTPVerificationForm({ email }: OTPVerificationFormProps) {
           <Button
             type="submit"
             form="otp-verification-form"
-            disabled={isSubmitting}
-          >
+            disabled={isSubmitting}>
             Verify
           </Button>
           <div className="text-muted-foreground text-center text-sm">
-            Didn't receive a code?{" "}
+            Didn't receive a code?{' '}
             <Button
+              type="button"
               variant="link"
               className="p-0"
               onClick={onResendSubmit}
-              disabled={timeLeft > 0}
-            >
-              {timeLeft > 0 ? `Resend in ${timeLeft}s` : "Resend"}
+              disabled={timeLeft > 0}>
+              {timeLeft > 0 ? `Resend in ${timeLeft}s` : 'Resend'}
             </Button>
           </div>
         </Field>

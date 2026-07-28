@@ -2,10 +2,10 @@ import { DB } from "@/types/db";
 import { db } from "@/utils/db";
 import { type Kysely, type Transaction } from "kysely";
 
-type Dastabase = Kysely<DB> | Transaction<DB>;
+type Database = Kysely<DB> | Transaction<DB>;
 
 export class AuthRepository {
-  constructor(private readonly database: Dastabase = db) {}
+  constructor(private readonly database: Database = db) {}
 
   withTransaction(trx: Transaction<DB>) {
     return new AuthRepository(trx);

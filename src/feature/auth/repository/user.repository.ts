@@ -3,10 +3,10 @@ import { db } from "@/utils/db";
 import { Updateable, type Kysely, type Transaction } from "kysely";
 import { jsonObjectFrom } from "kysely/helpers/postgres";
 
-type Dastabase = Kysely<DB> | Transaction<DB>;
+type Database = Kysely<DB> | Transaction<DB>;
 
 export class UserRepository {
-  constructor(private readonly database: Dastabase = db) {}
+  constructor(private readonly database: Database = db) {}
 
   withTransaction(trx: Transaction<DB>) {
     return new UserRepository(trx);
@@ -19,7 +19,7 @@ export class UserRepository {
         role: role,
       })
       .where("id", "=", userId)
-      .executeTakeFirstOrThrow();
+      .execute();
   }
 
   async findUserById(userId: string) {
@@ -79,6 +79,6 @@ export class UserRepository {
       .updateTable("userProfile")
       .set(values)
       .where("userId", "=", userId)
-      .executeTakeFirstOrThrow();
+      .executeTakeFirst();
   }
 }

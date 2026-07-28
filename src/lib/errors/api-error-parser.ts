@@ -1,40 +1,66 @@
-import z, { ZodError } from "zod";
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
+import z, { ZodError } from 'zod';
 
-import { APIError, isAPIError } from "better-auth/api";
-import { AppError } from "./app-error";
+import { APIError, isAPIError } from 'better-auth/api';
+import { AppError } from './app-error';
+import { isPostgresError, parsePostgresError } from './db-error-parser';
+import { ErrorCode, isErrorCode } from './error-codes';
 
-export function apiErrorParser(error: unknown): NextResponse {
+export type ApiErrorResponse = {
+  errorCode?: ErrorCode;
+  message?: string;
+  details?: Record<string, unknown> | unknown;
+};
+
+export function apiErrorParser(error: unknown): NextResponse<ApiErrorResponse> {
   if (error instanceof ZodError) {
     return NextResponse.json(
       {
-        code: "VALIDATION_ERROR",
-        message: "Invalid request body",
+        errorCode: 'VALIDATION_ERROR',
+        message: 'Invalid request body',
         details: z.flattenError(error),
       },
-      { status: 400 },
+      { status: 400 }
     );
   }
 
   if (error instanceof APIError || isAPIError(error)) {
     return NextResponse.json(
       {
-        code: error.body?.code,
+        errorCode:
+          error.body?.code && isErrorCode(error.body?.code)
+            ? error.body?.code
+            : 'UNEXPECTED_ERROR',
         message: error.body?.message,
         details: error.cause,
       },
-      { status: error.statusCode },
+      { status: error.statusCode }
+    );
+  }
+
+  if (isPostgresError(error)) {
+    const parsed = parsePostgresError(error);
+
+    console.log(parsed)
+
+    return NextResponse.json(
+      {
+        errorCode: parsed.errorCode,
+        message: parsed.message,
+        details: parsed.details,
+      },
+      { status: parsed.statusCode }
     );
   }
 
   if (error instanceof AppError) {
     return NextResponse.json(
       {
-        code: error.errorCode,
+        errorCode: error.errorCode,
         message: error.message,
         details: error.details,
       },
-      { status: error.statusCode },
+      { status: error.statusCode }
     );
   }
 
@@ -42,19 +68,19 @@ export function apiErrorParser(error: unknown): NextResponse {
     return NextResponse.json(
       {
         status: 500,
-        code: "INTERNAL_SERVER_ERROR",
+        errorCode: 'UNEXPECTED_ERROR',
         message: error.message,
         details: error.cause,
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 
   return NextResponse.json(
     {
-      code: "INTERNAL_SERVER_ERROR",
-      message: "Something went wrong",
+      errorCode: 'UNEXPECTED_ERROR',
+      message: 'Something went wrong',
     },
-    { status: 500 },
+    { status: 500 }
   );
 }
