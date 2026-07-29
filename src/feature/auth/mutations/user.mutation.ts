@@ -1,11 +1,12 @@
-import { useAuthStore } from "@/store/auth-store";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuthStore } from '@/store/auth-store';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
+  changePassword,
   updateEmailAddress,
   updateUsername,
   updateUserProfile,
   verifyUserPassword,
-} from "../api/user.api";
+} from '../api/user.api';
 
 export const useUpdateUserProfile = () => {
   const queryClient = useQueryClient();
@@ -14,7 +15,7 @@ export const useUpdateUserProfile = () => {
     mutationFn: updateUserProfile,
     onSuccess() {
       queryClient.invalidateQueries({
-        queryKey: ["me"],
+        queryKey: ['me'],
       });
       useAuthStore.getState().updateAuthSession();
     },
@@ -36,6 +37,12 @@ export const useUpdateEmailAddress = () => {
     onSuccess() {
       useAuthStore.getState().updateAuthSession();
     },
+  });
+};
+
+export const useChangePassword = () => {
+  return useMutation({
+    mutationFn: changePassword,
   });
 };
 

@@ -4,7 +4,10 @@ import { db } from '@/utils/db';
 import { toDate } from 'date-fns';
 import { headers } from 'next/headers';
 import { UserRepository } from '../repository/user.repository';
-import { ChangeEmailSchemaValues } from '../schema/account.schema';
+import {
+  ChangeEmailSchemaValues,
+  ChangePasswordApiSchemaValues,
+} from '../schema/account.schema';
 import { ProfileSchemaValues } from '../schema/profile.schema';
 
 export type UserFilters = {
@@ -42,10 +45,12 @@ export class UserService {
     const user = await query.executeTakeFirst();
 
     if (!user) {
-      throw new NotFoundError("User not found", {errorCode: 'USER_NOT_FOUND'});
+      throw new NotFoundError('User not found', {
+        errorCode: 'USER_NOT_FOUND',
+      });
     }
 
-    return user
+    return user;
   }
 
   //#region UPDATES
@@ -92,14 +97,25 @@ export class UserService {
     });
   }
 
-  async updateUsername(username: string) {}
+  async updateUsername(username: string) {
+    return await auth.api.updateUser({
+      body: {
+        username,
+      },
+      headers: await headers(),
+    });
+  }
 
   async updateEmail(values: ChangeEmailSchemaValues) {
     return await auth.api.changeEmail({
       body: values,
-      params: {
-        type: 'email-change',
-      },
+      headers: await headers(),
+    });
+  }
+
+  async updateUserPassword(values: ChangePasswordApiSchemaValues) {
+    return await auth.api.changePassword({
+      body: values,
       headers: await headers(),
     });
   }
