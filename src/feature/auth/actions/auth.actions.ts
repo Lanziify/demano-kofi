@@ -1,15 +1,25 @@
-"use server";
+'use server';
 
-import { APP_ROLES } from "@/lib/auth/roles";
-import { actionErrorParser } from "@/lib/errors/action-error-parser";
-import { safeCatch } from "@/lib/errors/safe-catch";
-import { ApiBody } from "@/types/api";
-import { auth } from "@/utils/auth";
-import { headers } from "next/headers";
-import { AuthRepository } from "../repository/auth.repository";
-import { UserRepository } from "../repository/user.repository";
-import { SignUpUserValues } from "../schema/auth.schema";
-import { AuthService } from "../service/auth.service";
+import { APP_ROLES } from '@/lib/auth/roles';
+import { actionErrorParser } from '@/lib/errors/action-error-parser';
+import { safeCatch } from '@/lib/errors/safe-catch';
+import { ApiBody } from '@/types/api';
+import { auth } from '@/utils/auth';
+import { headers } from 'next/headers';
+import { AuthRepository } from '../repository/auth.repository';
+import { UserRepository } from '../repository/user.repository';
+import {
+  requestPasswordResetSchema,
+  RequestPasswordResetSchemaValues,
+  resetPasswordSchema,
+  ResetPasswordSchemaValues,
+  sendVerificationOTPSchema,
+  SendVerificationOTPSchemaValues,
+  SignUpUserValues,
+  verifyEmailOTPSchema,
+  VerifyEmailOTPSchemaValues,
+} from '../schema/auth.schema';
+import { AuthService } from '../service/auth.service';
 
 export type SignUpBody = ApiBody<typeof auth.api.signUpEmail>;
 export type SignInBody = ApiBody<typeof auth.api.signInUsername>;
@@ -27,7 +37,7 @@ export async function signUpAdminAction(values: SignUpBody) {
 
       return response;
     },
-    { parser: actionErrorParser },
+    { parser: actionErrorParser }
   );
 }
 
@@ -45,7 +55,7 @@ export const signUpUserAction = async (values: SignUpUserValues) => {
         },
       });
     },
-    { parser: actionErrorParser },
+    { parser: actionErrorParser }
   );
 
   // if (!userResult.data || userResult.error) {
@@ -58,14 +68,14 @@ export const signUpUserAction = async (values: SignUpUserValues) => {
       async () => {
         const result = await repository.createUserProfile(
           userResult.data.user.id,
-          { firstName, lastName },
+          { firstName, lastName }
         );
 
         console.log(result);
 
         return result;
       },
-      { parser: actionErrorParser },
+      { parser: actionErrorParser }
     );
 
     console.log(userProfileResult);
@@ -85,7 +95,7 @@ export const signInUserAction = async (values: SignInBody) => {
         body: values,
       });
     },
-    { parser: actionErrorParser },
+    { parser: actionErrorParser }
   );
 };
 
@@ -96,7 +106,7 @@ export const signOutUserAction = async () => {
         headers: await headers(),
       });
     },
-    { parser: actionErrorParser },
+    { parser: actionErrorParser }
   );
 };
 
@@ -112,41 +122,73 @@ export const verifyEmailOTPExistenceAction = async (email: string) => {
 
       return result;
     },
-    { parser: actionErrorParser },
+    { parser: actionErrorParser }
   );
 };
 
-export type VerifyEmailOTPBody = ApiBody<typeof auth.api.checkVerificationOTP>;
-
-export const verifyEmailOTPAction = async (values: VerifyEmailOTPBody) => {
-  return await safeCatch(
-    async () => {
-      const checkResult = await auth.api.checkVerificationOTP({ body: values });
-
-      if (checkResult.success) {
-        return await auth.api.verifyEmailOTP({
-          body: {
-            email: values.email,
-            otp: values.otp,
-          },
-        });
-      }
-    },
-    { parser: actionErrorParser },
-  );
-};
-
-export type SendVerificationOTPBody = ApiBody<
-  typeof auth.api.sendVerificationOTP
->;
-
-export const sendVerificationOTPAction = async (
-  values: SendVerificationOTPBody,
+export const verifyEmailOTPAction = async (
+  values: VerifyEmailOTPSchemaValues
 ) => {
   return await safeCatch(
     async () => {
-      return await auth.api.sendVerificationOTP({ body: values });
+      const parsedValues = verifyEmailOTPSchema.parse(values);
+
+      const checkResult = await auth.api.checkVerificationOTP({
+        body: {
+          ...parsedValues,
+          type: 'email-verification',
+        },
+      });
+
+      if (checkResult.success) {
+        return await auth.api.verifyEmailOTP({
+          body: parsedValues,
+        });
+      }
     },
-    { parser: actionErrorParser },
+    { parser: actionErrorParser }
+  );
+};
+
+export const sendVerificationOTPAction = async (
+  values: SendVerificationOTPSchemaValues
+) => {
+  return await safeCatch(
+    async () => {
+      const parsedValues = sendVerificationOTPSchema.parse(values);
+
+      return await auth.api.sendVerificationOTP({ body: parsedValues });
+    },
+    { parser: actionErrorParser }
+  );
+};
+
+export const requestPasswordResetAction = async (
+  values: RequestPasswordResetSchemaValues
+) => {
+  return await safeCatch(
+    async () => {
+      const authRepository = new AuthRepository();
+      const userRepository = new UserRepository();
+      const service = new AuthService(authRepository, userRepository);
+
+      const parsedValues = requestPasswordResetSchema.parse(values);
+      return await service.requestPasswordReset(parsedValues);
+    },
+    { parser: actionErrorParser }
+  );
+};
+
+export const resetPasswordAction = async (values: ResetPasswordSchemaValues) => {
+  return await safeCatch(
+    async () => {
+      const repository = new AuthRepository();
+      const service = new AuthService(repository);
+
+      const parsedValues = resetPasswordSchema.parse(values)
+
+      return await service.resetPassword(parsedValues)
+    },
+    { parser: actionErrorParser }
   );
 };

@@ -24,12 +24,13 @@ import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import {
   sendVerificationOTPAction,
-  SendVerificationOTPBody,
   verifyEmailOTPAction,
-  VerifyEmailOTPBody,
 } from '../actions/auth.actions';
 import { useAuthQueries } from '../hooks/use-auth-queries';
-import { otpSchema, OTPSchemaValues } from '../schema/auth.schema';
+import {
+  verifyEmailOTPSchema,
+  VerifyEmailOTPSchemaValues,
+} from '../schema/auth.schema';
 
 type OTPVerificationFormProps = {
   email: string;
@@ -44,28 +45,22 @@ export function OTPVerificationForm({ email }: OTPVerificationFormProps) {
     email,
   });
 
-
   const [timeLeft, setTimeLeft] = React.useState(0);
 
   const {
     control,
     handleSubmit,
     formState: { isSubmitting },
-  } = useForm<OTPSchemaValues>({
-    resolver: zodResolver(otpSchema),
+  } = useForm<VerifyEmailOTPSchemaValues>({
+    resolver: zodResolver(verifyEmailOTPSchema),
     defaultValues: {
+      email,
       otp: '',
     },
   });
 
-  async function onSubmit({ otp }: OTPSchemaValues) {
-    const transformedValues = {
-      email,
-      otp,
-      type: 'email-verification',
-    } as VerifyEmailOTPBody;
-
-    const { error } = await verifyEmailOTPAction(transformedValues);
+  async function onSubmit(values: VerifyEmailOTPSchemaValues) {
+    const { error } = await verifyEmailOTPAction(values);
 
     if (error) {
       toast.error(error.message);
@@ -81,12 +76,10 @@ export function OTPVerificationForm({ email }: OTPVerificationFormProps) {
   async function onResendSubmit() {
     if (timeLeft > 0) return;
 
-    const values = {
+    const { error } = await sendVerificationOTPAction({
       email,
       type: 'email-verification',
-    } as SendVerificationOTPBody;
-
-    const { error } = await sendVerificationOTPAction(values);
+    });
 
     if (error) {
       toast.error(error.message);

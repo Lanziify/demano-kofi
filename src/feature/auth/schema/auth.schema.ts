@@ -2,6 +2,7 @@ import { ApiBody } from '@/types/api';
 import { auth } from '@/utils/auth';
 import { z } from 'zod';
 import { SignInBody } from '../actions/auth.actions';
+import { passwordSchema } from './shared.schema';
 
 const nameSchema = z
   .string()
@@ -64,8 +65,86 @@ export const otpSchema = z.object({
 
 export type OTPSchemaValues = z.infer<typeof otpSchema>;
 
-export const forgotPasswordSchema = z.object({
-  email: z.email('Invalid email address'),
-}) satisfies z.ZodType<ApiBody<typeof auth.api.requestPasswordResetEmailOTP>>;
+/**
+ * Verify OTP
+ */
+export const verifyEmailOTPSchema = z.object({
+  email: z.email('Please enter a valid email address'),
+  otp: z.string().length(6, 'Enter the 6-digit verification code'),
+}) satisfies z.ZodType<ApiBody<typeof auth.api.verifyEmailOTP>>;
 
-export type ForgotPasswordValues = z.infer<typeof forgotPasswordSchema>
+export type VerifyEmailOTPSchemaValues = z.infer<typeof verifyEmailOTPSchema>;
+
+/**
+ * Send Verify OTP
+ */
+export const sendVerificationOTPSchema = z.object({
+  email: z.email('Please enter a valid email address'),
+  type: z.enum({
+    'sign-in': 'sign-in',
+    'change-email': 'change-email',
+    'email-verification': 'email-verification',
+    'forget-password': 'forget-password',
+  }),
+}) satisfies z.ZodType<ApiBody<typeof auth.api.sendVerificationOTP>>;
+
+export type SendVerificationOTPSchemaValues = z.infer<
+  typeof sendVerificationOTPSchema
+>;
+
+/**
+ * Change Password (authenticated user)
+ */
+export const changePasswordApiSchema = z.object({
+  currentPassword: passwordSchema,
+  newPassword: passwordSchema,
+  revokeOtherSessions: z.boolean().optional(),
+}) satisfies z.ZodType<ApiBody<typeof auth.api.changePassword>>;
+
+export type ChangePasswordApiSchemaValues = z.infer<
+  typeof changePasswordApiSchema
+>;
+
+/**
+ * Change Password (unauthenticated user)
+ */
+export const requestPasswordResetSchema = z.object({
+  email: z.email('Invalid email address'),
+  redirectTo: z.string().optional(),
+}) satisfies z.ZodType<ApiBody<typeof auth.api.requestPasswordReset>>;
+
+export type RequestPasswordResetSchemaValues = z.infer<
+  typeof requestPasswordResetSchema
+>;
+
+/**
+ * Reset Password
+ */
+export const resetPasswordSchema = z.object({
+  newPassword: passwordSchema,
+  token: z.string().optional(),
+}) satisfies z.ZodType<ApiBody<typeof auth.api.resetPassword>>;
+
+export type ResetPasswordSchemaValues = z.infer<typeof resetPasswordSchema>;
+
+/**
+ * Password with Confirmation
+ */
+export const passwordWithConfirmationSchema = z
+  .object({
+    password: passwordSchema,
+    confirmPassword: z.string().min(1, 'Please confirm your password'),
+  })
+  .superRefine(({ password, confirmPassword }, ctx) => {
+    if (password !== confirmPassword) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Passwords do not match',
+        path: ['confirmPassword'],
+      });
+    }
+  });
+
+export type PasswordWithConfirmationSchemaValues = z.infer<
+  typeof passwordWithConfirmationSchema
+>;

@@ -20,16 +20,22 @@ import { useTheme } from 'next-themes';
 import Link from 'next/link';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { requestPasswordResetAction } from '../actions/auth.actions';
+
+import { resetPasswordAction } from '../actions/auth.actions';
 import {
-  RequestPasswordResetSchemaValues,
-  requestPasswordResetSchema,
+  PasswordWithConfirmationSchemaValues,
+  passwordWithConfirmationSchema,
 } from '../schema/auth.schema';
 
-export function ForgotPasswordForm({
+interface ResetPasswordFormProps extends React.ComponentProps<'div'> {
+  token: string;
+}
+
+export function ResetPasswordForm({
   className,
+  token,
   ...props
-}: React.ComponentProps<'div'>) {
+}: ResetPasswordFormProps) {
   const { theme } = useTheme();
 
   const [resultDialog, setResultDialog] = React.useState<
@@ -43,28 +49,31 @@ export function ForgotPasswordForm({
   });
 
   const { control, handleSubmit, reset } =
-    useForm<RequestPasswordResetSchemaValues>({
-      resolver: zodResolver(requestPasswordResetSchema),
+    useForm<PasswordWithConfirmationSchemaValues>({
+      resolver: zodResolver(passwordWithConfirmationSchema),
       defaultValues: {
-        email: '',
-        redirectTo: '/reset-password',
+        password: '',
+        confirmPassword: '',
       },
     });
 
-  async function onSubmit(values: RequestPasswordResetSchemaValues) {
+  async function onSubmit(values: PasswordWithConfirmationSchemaValues) {
     setResultDialog({
       open: true,
       variant: 'loading',
-      title: 'Verifying your account',
+      title: 'Updating your password',
     });
 
-    const result = await requestPasswordResetAction(values);
+    const result = await resetPasswordAction({
+      newPassword: values.password,
+      token,
+    });
 
     if (result.error) {
       setResultDialog({
         open: true,
         variant: 'error',
-        title: "Something wen't wrong",
+        title: 'Something went wrong',
         description: `Details: ${result.error.message}`,
         closeText: 'Close',
       });
@@ -75,9 +84,10 @@ export function ForgotPasswordForm({
     setResultDialog({
       open: true,
       variant: 'success',
-      title: "We've sent you an email",
+      title: 'Password updated!',
       description:
-        'Please check your new email inbox and click the reset link to complete the change.',
+        'Your password has been successfully changed. You can now sign in using your new password.',
+      closeText: 'Continue',
     });
 
     reset();
@@ -92,26 +102,46 @@ export function ForgotPasswordForm({
           <form onSubmit={handleSubmit(onSubmit)}>
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
-                <h1 className="text-2xl font-bold">Forgot Password?</h1>
+                <h1 className="text-2xl font-bold">Reset Password</h1>
 
                 <p className="text-muted-foreground text-balance">
-                  Enter your email address and we'll send you a password reset
-                  link.
+                  Create a new password for your account.
                 </p>
               </div>
 
               <Controller
-                name="email"
+                name="password"
                 control={control}
                 render={({ field, fieldState }) => (
                   <Field>
-                    <FieldLabel>Email Address</FieldLabel>
+                    <FieldLabel>New Password</FieldLabel>
 
                     <Input
                       {...field}
-                      type="email"
-                      placeholder="you@example.com"
-                      autoComplete="email"
+                      type="password"
+                      placeholder="Enter your new password"
+                      autoComplete="new-password"
+                    />
+
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+
+              <Controller
+                name="confirmPassword"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field>
+                    <FieldLabel>Confirm Password</FieldLabel>
+
+                    <Input
+                      {...field}
+                      type="password"
+                      placeholder="Confirm your password"
+                      autoComplete="new-password"
                     />
 
                     {fieldState.invalid && (
@@ -123,12 +153,11 @@ export function ForgotPasswordForm({
 
               <Field>
                 <Button type="submit" className="w-full">
-                  Send Reset Link
+                  Reset Password
                 </Button>
               </Field>
 
               <FieldDescription className="text-center">
-                Remember your password?{' '}
                 <Link href="/signin">Back to Sign In</Link>
               </FieldDescription>
             </FieldGroup>
@@ -137,7 +166,7 @@ export function ForgotPasswordForm({
       </Card>
 
       <FieldDescription className="px-6 text-center">
-        We'll never share your email with anyone else.
+        Choose a strong password that you haven't used before.
       </FieldDescription>
 
       <ResultDialog

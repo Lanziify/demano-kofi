@@ -1,13 +1,5 @@
-import { z } from "zod";
-
-const nameSchema = z
-  .string()
-  .min(2, "Must be at least 2 characters")
-  .max(50, "Must be at most 50 characters")
-  .regex(
-    /^[a-zA-Z\s'-]+$/,
-    "Can only contain letters, spaces, hyphens, and apostrophes",
-  );
+import { z } from 'zod';
+import { nameSchema } from './shared.schema';
 
 export const profileSchema = z.object({
   image: z.string().optional(),
@@ -16,9 +8,9 @@ export const profileSchema = z.object({
   bio: z.string().optional(),
   phone: z
     .string()
-    .transform((v) => v || "")
+    .transform((v) => v || '')
     .refine((v) => !v || /^(\+63|0)9\d{9}$/.test(v), {
-      message: "Please enter a valid phone number.",
+      message: 'Please enter a valid phone number.',
     }),
   dateOfBirth: z.string().optional(),
   building: z.string().optional(),

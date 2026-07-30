@@ -30,6 +30,14 @@ export class UserRepository {
       .executeTakeFirst();
   }
 
+  async findUserByEmail(email: string) {
+    return this.database
+      .selectFrom("user")
+      .selectAll()
+      .where("email", "=", email)
+      .executeTakeFirst();
+  }
+
   async createUserProfile(
     userId: string,
     values: Omit<Updateable<UserProfile>, "username" | "image">,

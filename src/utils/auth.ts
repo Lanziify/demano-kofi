@@ -1,15 +1,16 @@
-import { appRoles, platformAccessControl } from "@/lib/auth/permissions";
+import { appRoles, platformAccessControl } from '@/lib/auth/permissions';
 import {
   ChangeEmailConfirmationEmail,
   ChangeEmailVerification,
+  ResetPasswordEmail,
   VerificationEmail,
-} from "@/templates/email";
-import { betterAuth } from "better-auth";
-import { nextCookies } from "better-auth/next-js";
-import { admin, emailOTP, organization, username } from "better-auth/plugins";
-import { render } from "react-email";
-import { db } from "./db";
-import { transporter } from "./email";
+} from '@/templates/email';
+import { betterAuth } from 'better-auth';
+import { nextCookies } from 'better-auth/next-js';
+import { admin, emailOTP, organization, username } from 'better-auth/plugins';
+import { render } from 'react-email';
+import { db } from './db';
+import { transporter } from './email';
 
 export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL!,
@@ -22,13 +23,13 @@ export const auth = betterAuth({
             user,
             newEmail,
             url,
-          }),
+          })
         );
 
         await transporter.sendMail({
           from: process.env.ADMIN_FROM!,
           to: user.email,
-          subject: "Confirm email change",
+          subject: 'Confirm email change',
           html: email,
         });
       },
@@ -37,6 +38,16 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
+    sendResetPassword: async ({ user, url, token }) => {
+      const template = ResetPasswordEmail({ user, url });
+
+      await transporter.sendMail({
+        from: process.env.ADMIN_FROM!,
+        to: user.email,
+        subject: 'Reset your password',
+        html: await render(template),
+      });
+    },
   },
   emailVerification: {
     sendOnSignUp: false,
@@ -47,7 +58,7 @@ export const auth = betterAuth({
       await transporter.sendMail({
         from: process.env.ADMIN_FROM!,
         to: user.email,
-        subject: "Verify your new email address",
+        subject: 'Verify your new email address',
         html: await render(template),
       });
     },
@@ -57,13 +68,13 @@ export const auth = betterAuth({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
       authorizationParams: {
-        prompt: "select_account",
+        prompt: 'select_account',
       },
     },
   },
   database: {
     db: db,
-    type: "postgres",
+    type: 'postgres',
   },
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days
@@ -76,7 +87,7 @@ export const auth = betterAuth({
   verification: {
     additionalFields: {
       resendAvailableAt: {
-        type: "date",
+        type: 'date',
         defaultValue: () => new Date(Date.now() + 60_000),
       },
     },
@@ -93,13 +104,13 @@ export const auth = betterAuth({
       allowedAttempts: 5,
       expiresIn: 60 * 30,
       async sendVerificationOTP({ email, otp, type }) {
-        if (type === "email-verification") {
+        if (type === 'email-verification') {
           const template = VerificationEmail({ email, otp });
 
           await transporter.sendMail({
             from: process.env.ADMIN_FROM!,
             to: email,
-            subject: "Verify your account",
+            subject: 'Verify your account',
             html: await render(template),
           });
         }

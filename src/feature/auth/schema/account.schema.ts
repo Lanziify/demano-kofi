@@ -1,6 +1,7 @@
 import { ApiBody } from '@/types/api';
 import { auth } from '@/utils/auth';
 import { z } from 'zod';
+import { passwordSchema } from './shared.schema';
 
 export const usernameUpdateSchema = z.object({
   username: z
@@ -36,14 +37,6 @@ export const changeEmailSchema = z.object({
 }) satisfies z.ZodType<ApiBody<typeof auth.api.changeEmail>>;
 
 export type ChangeEmailSchemaValues = z.infer<typeof changeEmailSchema>;
-
-const passwordSchema = z
-  .string()
-  .min(8, 'Password must be at least 8 characters')
-  .refine((val) => /[A-Z]/.test(val), 'Must contain an uppercase letter')
-  .refine((val) => /[a-z]/.test(val), 'Must contain a lowercase letter')
-  .refine((val) => /[0-9]/.test(val), 'Must contain a number')
-  .refine((val) => /[!@#$%^&*]/.test(val), 'Must contain a special character');
 
 export const passwordUpdateSchema = z
   .object({
