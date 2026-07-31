@@ -16,7 +16,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useTheme } from 'next-themes';
 import Link from 'next/link';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -30,8 +29,6 @@ export function ForgotPasswordForm({
   className,
   ...props
 }: React.ComponentProps<'div'>) {
-  const { theme } = useTheme();
-
   const [resultDialog, setResultDialog] = React.useState<
     Omit<ResultDialogProps, 'onOpenChange'>
   >({
@@ -58,14 +55,14 @@ export function ForgotPasswordForm({
       title: 'Verifying your account',
     });
 
-    const result = await requestPasswordResetAction(values);
+    const { error } = await requestPasswordResetAction(values);
 
-    if (result.error) {
+    if (error) {
       setResultDialog({
         open: true,
         variant: 'error',
         title: "Something wen't wrong",
-        description: `Details: ${result.error.message}`,
+        description: `Details: ${error.message}`,
         closeText: 'Close',
       });
 

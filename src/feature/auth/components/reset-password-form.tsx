@@ -25,7 +25,7 @@ import { resetPasswordAction } from '../actions/auth.actions';
 import {
   PasswordWithConfirmationSchemaValues,
   passwordWithConfirmationSchema,
-} from '../schema/auth.schema';
+} from '../schema/shared.schema';
 
 interface ResetPasswordFormProps extends React.ComponentProps<'div'> {
   token: string;
@@ -64,17 +64,17 @@ export function ResetPasswordForm({
       title: 'Updating your password',
     });
 
-    const result = await resetPasswordAction({
+    const { error } = await resetPasswordAction({
       newPassword: values.password,
       token,
     });
 
-    if (result.error) {
+    if (error) {
       setResultDialog({
         open: true,
         variant: 'error',
         title: 'Something went wrong',
-        description: `Details: ${result.error.message}`,
+        description: `Details: ${error.message}`,
         closeText: 'Close',
       });
 

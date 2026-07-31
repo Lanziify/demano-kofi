@@ -1,69 +1,56 @@
 import { ApiBody } from '@/types/api';
 import { auth } from '@/utils/auth';
 import { z } from 'zod';
-import { SignInBody } from '../actions/auth.actions';
-import { passwordSchema } from './shared.schema';
+import {
+  nameSchema,
+  passwordSchema,
+  passwordWithConfirmationSchema,
+} from './shared.schema';
+/**
+ * Signup Email
+ */
+export const signUpEmailSchema = z.object({
+  name: z.string(),
+  email: z.email(),
+  username: z
+    .string()
+    .min(3, 'Username must be at least 3 characters')
+    .max(30, 'Username must be at most 30 characters'),
+  password: passwordSchema,
+  callbackURL: z.string().optional(),
+  rememberMe: z.boolean().optional(),
+}) satisfies z.ZodType<ApiBody<typeof auth.api.signUpEmail>>;
 
-const nameSchema = z
-  .string()
-  .min(2, 'Must be at least 2 characters')
-  .max(50, 'Must be at most 50 characters')
-  .regex(
-    /^[a-zA-Z\s'-]+$/,
-    'Can only contain letters, spaces, hyphens, and apostrophes'
-  );
+export type SignUpEmailSchemaValues = z.infer<typeof signUpEmailSchema>;
 
-export const signUpUserSchema = z
+/**
+ * Signup
+ */
+export const signUpSchema = z
   .object({
-    name: z.string(),
     firstName: nameSchema,
     lastName: nameSchema,
-    username: z
-      .string()
-      .min(3, 'Username must be at least 3 characters')
-      .max(30, 'Username must be at most 30 characters'),
-    email: z.email('Invalid email address'),
-    password: z
-      .string()
-      .min(8, 'Password must be at least 8 characters')
-      .refine((val) => /[A-Z]/.test(val), 'Must contain an uppercase letter')
-      .refine((val) => /[a-z]/.test(val), 'Must contain a lowercase letter')
-      .refine((val) => /[0-9]/.test(val), 'Must contain a number')
-      .refine(
-        (val) => /[!@#$%^&*]/.test(val),
-        'Must contain a special character'
-      ),
-    confirmPassword: z.string().min(1, 'Please confirm your password'),
-    image: z.string().optional(),
-    callbackURL: z.string().optional(),
-    rememberMe: z.boolean().optional(),
   })
-  .superRefine(({ password, confirmPassword }, ctx) => {
-    if (password !== confirmPassword) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Passwords do not match',
-        path: ['confirmPassword'],
-      });
-    }
-  });
+  .extend(signUpEmailSchema.shape)
+  .extend(passwordWithConfirmationSchema.shape)
+  .transform((data) => ({
+    ...data,
+    name: `${data.firstName} ${data.lastName}`.trim(),
+  }));
 
-export type SignUpUserValues = z.input<typeof signUpUserSchema>;
+export type SignUpSchemaValues = z.infer<typeof signUpSchema>;
 
-export const signInUserSchema = z.object({
+/**
+ * Signin
+ */
+export const signInSchema = z.object({
   username: z.string().min(1, 'Username is required'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   callbackURL: z.string().optional(),
   rememberMe: z.boolean().optional(),
-}) satisfies z.ZodType<SignInBody>;
+}) satisfies z.ZodType<ApiBody<typeof auth.api.signInUsername>>;
 
-export type SignInUserValues = z.infer<typeof signInUserSchema>;
-
-export const otpSchema = z.object({
-  otp: z.string().length(6, 'Enter the 6-digit verification code'),
-});
-
-export type OTPSchemaValues = z.infer<typeof otpSchema>;
+export type SignInSchemaValues = z.infer<typeof signInSchema>;
 
 /**
  * Verify OTP
@@ -106,7 +93,7 @@ export type ChangePasswordApiSchemaValues = z.infer<
 >;
 
 /**
- * Change Password (unauthenticated user)
+ * Request Change Password (unauthenticated user)
  */
 export const requestPasswordResetSchema = z.object({
   email: z.email('Invalid email address'),
@@ -128,23 +115,10 @@ export const resetPasswordSchema = z.object({
 export type ResetPasswordSchemaValues = z.infer<typeof resetPasswordSchema>;
 
 /**
- * Password with Confirmation
+ * Reauthenticate
  */
-export const passwordWithConfirmationSchema = z
-  .object({
-    password: passwordSchema,
-    confirmPassword: z.string().min(1, 'Please confirm your password'),
-  })
-  .superRefine(({ password, confirmPassword }, ctx) => {
-    if (password !== confirmPassword) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Passwords do not match',
-        path: ['confirmPassword'],
-      });
-    }
-  });
+export const reauthenticateSchema = z.object({
+  password: passwordSchema,
+});
 
-export type PasswordWithConfirmationSchemaValues = z.infer<
-  typeof passwordWithConfirmationSchema
->;
+export type ReauthenticateSchemaValues = z.infer<typeof reauthenticateSchema>;

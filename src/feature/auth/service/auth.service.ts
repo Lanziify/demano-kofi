@@ -1,5 +1,6 @@
 import { BadRequestError, NotFoundError } from '@/lib/errors/app-error';
 import { auth } from '@/utils/auth';
+import { headers } from 'next/headers';
 import { AuthRepository } from '../repository/auth.repository';
 import { UserRepository } from '../repository/user.repository';
 import {
@@ -55,6 +56,15 @@ export class AuthService {
 
     return await auth.api.resetPassword({
       body: values,
+    });
+  }
+
+  async verifyUserPassword(password: string) {
+    return auth.api.verifyPassword({
+      body: {
+        password,
+      },
+      headers: await headers(),
     });
   }
 }

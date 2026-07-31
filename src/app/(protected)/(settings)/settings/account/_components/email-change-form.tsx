@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Controller, useForm } from 'react-hook-form';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -11,50 +11,48 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 import {
   Field,
   FieldError,
   FieldGroup,
   FieldLabel,
-} from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { Spinner } from "@/components/ui/spinner";
+} from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import { Spinner } from '@/components/ui/spinner';
 
-import { ReauthenticateDialog } from "@/components/custom/reauthenticate-dialog";
-import {
-  useUpdateEmailAddress,
-  useVerifyUserPassword,
-} from "@/feature/auth/mutations/user.mutation";
-import {
-  emailUpdateSchema,
-  type EmailUpdateSchemaValues,
-} from "@/feature/auth/schema/account.schema";
-import React from "react";
+import { ReauthenticateDialog } from '@/components/custom/reauthenticate-dialog';
 import {
   ResultDialog,
   ResultDialogProps,
-} from "@/components/custom/result-dialog";
+} from '@/components/custom/result-dialog';
+import { useVerifyUserPassword } from '@/feature/auth/mutations/auth.mutation';
+import { useUpdateEmailAddress } from '@/feature/auth/mutations/user.mutation';
+import {
+  emailChangeFormSchema,
+  EmailChangeFormSchemaValues,
+} from '@/feature/auth/schema/account.schema';
+import React from 'react';
 
 export default function AccountEmailForm() {
   const [isReauthDialogOpen, setIsReauthDialogOpen] = React.useState(false);
   const [resultDialog, setResultDialog] = React.useState<
-    Omit<ResultDialogProps, "onOpenChange">
+    Omit<ResultDialogProps, 'onOpenChange'>
   >({
     open: false,
-    variant: "idle",
-    title: "",
-    description: "",
-    closeText: "",
+    variant: 'idle',
+    title: '',
+    description: '',
+    closeText: '',
   });
   const verifyUserPassword = useVerifyUserPassword();
   const updateEmailAddress = useUpdateEmailAddress();
 
-  const form = useForm<EmailUpdateSchemaValues>({
-    resolver: zodResolver(emailUpdateSchema),
+  const form = useForm<EmailChangeFormSchemaValues>({
+    resolver: zodResolver(emailChangeFormSchema),
     defaultValues: {
-      email: "",
-      confirmEmail: "",
+      email: '',
+      confirmEmail: '',
     },
   });
 
@@ -73,8 +71,8 @@ export default function AccountEmailForm() {
     setIsReauthDialogOpen(false);
     setResultDialog({
       open: true,
-      variant: "loading",
-      title: "Verifying your account",
+      variant: 'loading',
+      title: 'Verifying your account...',
     });
 
     const passwordCheckResult = await verifyUserPassword.mutateAsync(password);
@@ -82,27 +80,27 @@ export default function AccountEmailForm() {
     if (!passwordCheckResult?.data && passwordCheckResult.error) {
       setResultDialog({
         open: true,
-        variant: "error",
-        title: "Could not verify your account",
+        variant: 'error',
+        title: 'We could not verify your account',
         description: `Details: ${passwordCheckResult.error.message}`,
-        closeText: "Close",
+        closeText: 'Close',
       });
 
       return;
     }
 
     const emailUpdateResult = await updateEmailAddress.mutateAsync({
-      newEmail: getValues("email"),
-      callbackURL: "/verification/email-change-confirmation",
+      newEmail: getValues('email'),
+      callbackURL: '/verification/email-change-confirmation',
     });
 
     if (!emailUpdateResult.data && emailUpdateResult.error) {
       setResultDialog({
         open: true,
-        variant: "error",
+        variant: 'error',
         title: "Something wen't while trying to change your email address",
         description: `Details: ${emailUpdateResult.error.message}`,
-        closeText: "Close",
+        closeText: 'Close',
       });
 
       return;
@@ -110,10 +108,10 @@ export default function AccountEmailForm() {
 
     setResultDialog({
       open: true,
-      variant: "success",
-      title: "Verification email sent",
+      variant: 'success',
+      title: 'Verification email sent',
       description:
-        "Your email address has been updated. Please check your new email inbox and click the verification link to complete the change.",
+        'Your email address has been updated. Please check your new email inbox and click the verification link to complete the change.',
     });
   }
 
@@ -172,8 +170,7 @@ export default function AccountEmailForm() {
             <Button
               type="submit"
               form="email-change-form"
-              disabled={isSubmitting}
-            >
+              disabled={isSubmitting}>
               {isSubmitting && <Spinner />}
               Update Email
             </Button>

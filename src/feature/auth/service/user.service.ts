@@ -4,11 +4,9 @@ import { db } from '@/utils/db';
 import { toDate } from 'date-fns';
 import { headers } from 'next/headers';
 import { UserRepository } from '../repository/user.repository';
-import {
-  ChangeEmailSchemaValues,
-  ChangePasswordApiSchemaValues,
-} from '../schema/account.schema';
 import { ProfileSchemaValues } from '../schema/profile.schema';
+import { ChangeEmailSchemaValues } from '../schema/account.schema';
+import { ChangePasswordApiSchemaValues } from '../schema/auth.schema';
 
 export type UserFilters = {
   id?: string;
@@ -120,13 +118,4 @@ export class UserService {
     });
   }
   //#endregion
-
-  async verifyUserPassword(password: string) {
-    return auth.api.verifyPassword({
-      body: {
-        password,
-      },
-      headers: await headers(),
-    });
-  }
 }

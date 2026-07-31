@@ -5,7 +5,6 @@ import {
   updateEmailAddress,
   updateUsername,
   updateUserProfile,
-  verifyUserPassword,
 } from '../api/user.api';
 
 export const useUpdateUserProfile = () => {
@@ -43,11 +42,5 @@ export const useUpdateEmailAddress = () => {
 export const useChangePassword = () => {
   return useMutation({
     mutationFn: changePassword,
-  });
-};
-
-export const useVerifyUserPassword = () => {
-  return useMutation({
-    mutationFn: verifyUserPassword,
   });
 };

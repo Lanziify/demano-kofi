@@ -16,3 +16,25 @@ export const passwordSchema = z
   .refine((val) => /[a-z]/.test(val), 'Must contain a lowercase letter')
   .refine((val) => /[0-9]/.test(val), 'Must contain a number')
   .refine((val) => /[!@#$%^&*]/.test(val), 'Must contain a special character');
+
+/**
+ * Password with Confirmation
+ */
+export const passwordWithConfirmationSchema = z
+  .object({
+    password: passwordSchema,
+    confirmPassword: z.string().min(1, 'Please confirm your password'),
+  })
+  .superRefine(({ password, confirmPassword }, ctx) => {
+    if (password !== confirmPassword) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Passwords do not match',
+        path: ['confirmPassword'],
+      });
+    }
+  });
+
+export type PasswordWithConfirmationSchemaValues = z.infer<
+  typeof passwordWithConfirmationSchema
+>;

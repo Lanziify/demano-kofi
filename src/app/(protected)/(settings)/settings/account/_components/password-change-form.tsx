@@ -50,8 +50,8 @@ export default function AccountPasswordForm() {
     resolver: zodResolver(passwordUpdateSchema),
     defaultValues: {
       currentPassword: '',
-      newPassword: '',
-      confirmNewPassword: '',
+      password: '',
+      confirmPassword: '',
     },
   });
 
@@ -65,7 +65,7 @@ export default function AccountPasswordForm() {
   async function onSubmit(values: PasswordUpdateSchemaValues) {
     const passwordChangeResult = await changePassword.mutateAsync({
       currentPassword: values.currentPassword,
-      newPassword: values.newPassword,
+      newPassword: values.password,
     });
 
     if (!passwordChangeResult?.data && passwordChangeResult.error) {
@@ -123,7 +123,7 @@ export default function AccountPasswordForm() {
                 )}
               />
               <Controller
-                name="newPassword"
+                name="password"
                 control={control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
@@ -141,7 +141,7 @@ export default function AccountPasswordForm() {
                 )}
               />
               <Controller
-                name="confirmNewPassword"
+                name="confirmPassword"
                 control={control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>

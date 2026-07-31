@@ -1,8 +1,14 @@
 import { ApiBody } from '@/types/api';
 import { auth } from '@/utils/auth';
 import { z } from 'zod';
-import { passwordSchema } from './shared.schema';
+import {
+  passwordSchema,
+  passwordWithConfirmationSchema,
+} from './shared.schema';
 
+/**
+ * Username update
+ */
 export const usernameUpdateSchema = z.object({
   username: z
     .string()
@@ -12,7 +18,10 @@ export const usernameUpdateSchema = z.object({
 
 export type UsernameUpdateSchemaValues = z.infer<typeof usernameUpdateSchema>;
 
-export const emailUpdateSchema = z
+/**
+ * Base
+ */
+export const emailChangeFormSchema = z
   .object({
     email: z.email('Please enter a valid email address'),
     confirmEmail: z
@@ -29,7 +38,7 @@ export const emailUpdateSchema = z
     }
   });
 
-export type EmailUpdateSchemaValues = z.infer<typeof emailUpdateSchema>;
+export type EmailChangeFormSchemaValues = z.infer<typeof emailChangeFormSchema>;
 
 export const changeEmailSchema = z.object({
   newEmail: z.email('Please enter a valid email address'),
@@ -38,34 +47,13 @@ export const changeEmailSchema = z.object({
 
 export type ChangeEmailSchemaValues = z.infer<typeof changeEmailSchema>;
 
+/**
+ * Password change (authenticated user)
+ */
 export const passwordUpdateSchema = z
   .object({
     currentPassword: passwordSchema,
-    newPassword: passwordSchema,
-    confirmNewPassword: z.string().min(1, 'Please confirm your password'),
   })
-  .superRefine(({ newPassword, confirmNewPassword }, ctx) => {
-    if (newPassword !== confirmNewPassword) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Passwords do not match',
-        path: ['confirmNewPassword'],
-      });
-    }
-  });
+  .extend(passwordWithConfirmationSchema.shape);
 
 export type PasswordUpdateSchemaValues = z.infer<typeof passwordUpdateSchema>;
-
-export const reauthenticateSchema = z.object({
-  password: passwordSchema,
-});
-
-export type ReauthenticateSchemaValues = z.infer<typeof reauthenticateSchema>;
-
-export const changePasswordApiSchema = z.object({
-  currentPassword: passwordSchema,
-  newPassword: passwordSchema,
-  revokeOtherSessions: z.boolean().optional(),
-}) as z.ZodType<ApiBody<typeof auth.api.changePassword>>;
-
-export type ChangePasswordApiSchemaValues = z.infer<typeof changePasswordApiSchema>

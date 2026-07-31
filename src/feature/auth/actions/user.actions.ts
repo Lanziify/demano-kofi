@@ -3,11 +3,11 @@
 import { actionErrorParser } from '@/lib/errors/action-error-parser';
 import { safeCatch } from '@/lib/errors/safe-catch';
 import { UserRepository } from '../repository/user.repository';
+import { ChangeEmailSchemaValues } from '../schema/account.schema';
 import {
-  ChangeEmailSchemaValues,
-  changePasswordApiSchema,
   ChangePasswordApiSchemaValues,
-} from '../schema/account.schema';
+  changePasswordApiSchema,
+} from '../schema/auth.schema';
 import { UserService } from '../service/user.service';
 
 const userRepository = new UserRepository();
@@ -37,23 +37,13 @@ export async function updateEmailAddressAction(
   return result;
 }
 
-export async function updateUserPasswordAction(values: ChangePasswordApiSchemaValues) {
-  const parsedValues = changePasswordApiSchema.parse(values);
-
+export async function updateUserPasswordAction(
+  values: ChangePasswordApiSchemaValues
+) {
   const result = await safeCatch(
     async () => {
+      const parsedValues = changePasswordApiSchema.parse(values);
       return await userService.updateUserPassword(parsedValues);
-    },
-    { parser: actionErrorParser }
-  );
-
-  return result
-}
-
-export async function verifyUserPasswordAction(password: string) {
-  const result = await safeCatch(
-    async () => {
-      return await userService.verifyUserPassword(password);
     },
     { parser: actionErrorParser }
   );

@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import { create } from "zustand";
+import { create } from 'zustand';
 
-import { SignInUserValues } from "@/feature/auth/schema/auth.schema";
+import { SignInSchemaValues } from '@/feature/auth/schema/auth.schema';
 
 import {
   signInUserAction,
   signOutUserAction,
-} from "@/feature/auth/actions/auth.actions";
+} from '@/feature/auth/actions/auth.actions';
 
-import { AuthType } from "@/utils/auth";
-import { authClient } from "@/utils/auth-client";
+import { AuthType } from '@/utils/auth';
+import { authClient } from '@/utils/auth-client';
 
-type AuthUser = AuthType["Session"]["user"];
-type AuthSession = AuthType["Session"]["session"];
+type AuthUser = AuthType['Session']['user'];
+type AuthSession = AuthType['Session']['session'];
 
 interface AuthStore {
   user: AuthUser | null;
@@ -23,12 +23,12 @@ interface AuthStore {
   isInitialized: boolean;
   isRefreshing: boolean;
 
-  setAuthSession(data: AuthType["Session"]): void;
+  setAuthSession(data: AuthType['Session']): void;
 
-  updateAuthSession: () => Promise<AuthType["Session"] | null>;
+  updateAuthSession: () => Promise<AuthType['Session'] | null>;
 
   signIn: (
-    credentials: SignInUserValues,
+    credentials: SignInSchemaValues
   ) => Promise<Awaited<ReturnType<typeof signInUserAction>>>;
 
   signOut: () => Promise<void>;

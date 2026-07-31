@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Controller, useForm } from 'react-hook-form';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -11,34 +11,49 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 import {
   Field,
   FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
-} from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
 
-import { Spinner } from "@/components/ui/spinner";
-import { useAuthStore } from "@/store/auth-store";
+import { Spinner } from '@/components/ui/spinner';
 
-import { useUpdateUsername } from "@/feature/auth/mutations/user.mutation";
+import { ConfirmationDialog } from '@/components/custom/confirmation-dialog';
+import {
+  ResultDialog,
+  ResultDialogProps,
+} from '@/components/custom/result-dialog';
+import { useUpdateUsername } from '@/feature/auth/mutations/user.mutation';
 import {
   usernameUpdateSchema,
   type UsernameUpdateSchemaValues,
-} from "@/feature/auth/schema/account.schema";
-import { toast } from "sonner";
+} from '@/feature/auth/schema/account.schema';
+import { useConfirmationDialog } from '@/hooks/user-confirmation-dialog';
+import React from 'react';
 
 export default function AccountUsernameForm() {
-  const user = useAuthStore((state) => state.user);
   const updateUsername = useUpdateUsername();
+  const confirmation = useConfirmationDialog();
+
+  // const [resultDialog, setResultDialog] = React.useState<
+  //   Omit<ResultDialogProps, 'onOpenChange'>
+  // >({
+  //   open: false,
+  //   variant: 'idle',
+  //   title: '',
+  //   description: '',
+  //   closeText: '',
+  // });
 
   const form = useForm<UsernameUpdateSchemaValues>({
     resolver: zodResolver(usernameUpdateSchema),
     defaultValues: {
-      username: "",
+      username: '',
     },
   });
 
@@ -49,61 +64,108 @@ export default function AccountUsernameForm() {
   } = form;
 
   async function onSubmit(values: UsernameUpdateSchemaValues) {
-    await updateUsername.mutateAsync(values);
+    // setResultDialog({
+    //   open: true,
+    //   variant: 'loading',
+    //   title: 'Updating your username...',
+    // });
 
-    if (updateUsername.isError) {
-      toast.error(updateUsername.error.message);
-    }
+    // const { error } = await updateUsername.mutateAsync(values);
 
-    toast.success("Profile updated!");
+    // if (error) {
+    //   setResultDialog({
+    //     open: true,
+    //     variant: 'error',
+    //     title: 'An error has occurred while trying to update your username',
+    //     description: `Details: ${error.message}`,
+    //     closeText: 'Close',
+    //   });
+
+    //   return;
+    // }
+
+    // setResultDialog({
+    //   open: true,
+    //   variant: 'success',
+    //   title: 'Username updated!',
+    //   description: 'Your username has been successfully updated.',
+    // });
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Username</CardTitle>
-        <CardDescription>
-          Manage your public username used to identify your account.
-        </CardDescription>
-      </CardHeader>
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>Username</CardTitle>
+          <CardDescription>
+            Manage your public username used to identify your account.
+          </CardDescription>
+        </CardHeader>
 
-      <CardContent>
-        <form id="username-change-form" onSubmit={handleSubmit(onSubmit)}>
-          <FieldGroup>
-            <Controller
-              name="username"
-              control={control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>New username</FieldLabel>
-                  <Input {...field} placeholder="New-username" />
+        <CardContent>
+          <form
+            id="username-change-form"
+            onSubmit={(e) => {
+              e.preventDefault();
 
-                  <FieldDescription>
-                    Username identifies your account and is used for signing in.
-                    Keep it unique and easy to remember.
-                  </FieldDescription>
+              form.handleSubmit((values) => {
+                confirmation.show({
+                  title: 'Update username?',
+                  description: 'Are you sure you want to update your username?.',
+                  confirmLabel: 'Save',
+                  confirmVariant: 'default',
+                  onConfirm: () => onSubmit(values),
+                });
+              })();
+            }}>
+            <FieldGroup>
+              <Controller
+                name="username"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>New username</FieldLabel>
+                    <Input {...field} placeholder="New-username" />
 
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-          </FieldGroup>
-        </form>
-      </CardContent>
-      <CardFooter>
-        <Field orientation="horizontal">
-          <Button
-            type="submit"
-            form="username-change-form"
-            disabled={isSubmitting}
-          >
-            {isSubmitting && <Spinner />}
-            Update Username
-          </Button>
-        </Field>
-      </CardFooter>
-    </Card>
+                    <FieldDescription>
+                      Username identifies your account and is used for signing
+                      in. Keep it unique and easy to remember.
+                    </FieldDescription>
+
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+            </FieldGroup>
+          </form>
+        </CardContent>
+        <CardFooter>
+          <Field orientation="horizontal">
+            <Button
+              type="submit"
+              form="username-change-form"
+              disabled={isSubmitting}>
+              {isSubmitting && <Spinner />}
+              Update Username
+            </Button>
+          </Field>
+        </CardFooter>
+      </Card>
+      {/* <ResultDialog
+        onOpenChange={(open) => setResultDialog({ ...resultDialog, open })}
+        {...resultDialog}
+      /> */}
+      <ConfirmationDialog
+        {...confirmation.dialog}
+        open={confirmation.dialog.open}
+        loading={confirmation.dialog.loading}
+        onOpenChange={(open) =>
+          confirmation.setDialog({ ...confirmation.dialog, open })
+        }
+        onConfirm={confirmation.confirm}
+      />
+    </>
   );
 }
