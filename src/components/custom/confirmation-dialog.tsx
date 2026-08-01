@@ -19,13 +19,13 @@ export type ConfirmationDialogOptions = {
   confirmLabel?: string;
   cancelLabel?: string;
   confirmVariant?: 'default' | 'destructive';
-  onConfirm: () => void | Promise<void>;
 };
 
 export type ConfirmationDialogProps = ConfirmationDialogOptions & {
   open: boolean;
   loading?: boolean;
   onOpenChange: (open: boolean) => void;
+  onConfirm: () => void | Promise<void>;
 };
 
 export function ConfirmationDialog({

@@ -51,8 +51,6 @@ export const signUpUserAction = async (values: SignUpSchemaValues) => {
         body: parsedValues,
       });
 
-      console.log(user);
-
       await repository.createUserProfile(user?.id, {
         firstName,
         lastName,
@@ -95,8 +93,6 @@ export const verifyEmailOTPExistenceAction = async (email: string) => {
   return await safeCatch(
     async () => {
       const result = await service.getPendingAccountVerification(email);
-
-      console.log(result);
 
       return result;
     },

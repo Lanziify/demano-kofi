@@ -1,23 +1,25 @@
 "use client";
 
-import * as React from "react";
 import { Camera } from "lucide-react";
+import * as React from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 type UploadProfileAvatarProps = {
-  value?: string | null;
+  imageUrl?: string | null;
+  value?: File;
   fallback?: string;
   onChange?: (file: File) => void;
 };
 
 export function UploadProfileAvatar({
+  imageUrl,
   value,
   fallback = "JD",
   onChange,
 }: UploadProfileAvatarProps) {
   const inputRef = React.useRef<HTMLInputElement>(null);
-  const [preview, setPreview] = React.useState(value);
+  const [preview, setPreview] = React.useState<string | undefined>();
 
   const handleClick = () => {
     inputRef.current?.click();
@@ -28,11 +30,21 @@ export function UploadProfileAvatar({
 
     if (!file) return;
 
-    const url = URL.createObjectURL(file);
-
-    setPreview(url);
     onChange?.(file);
   };
+
+  React.useEffect(() => {
+    if (!value) {
+      setPreview(imageUrl ?? undefined);
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(value);
+
+    setPreview(objectUrl);
+
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [value, imageUrl]);
 
   React.useEffect(() => {
     return () => {
@@ -70,7 +82,7 @@ export function UploadProfileAvatar({
       <input
         ref={inputRef}
         type="file"
-        accept="image/*"
+        accept="image/png,image/jpeg,image/webp"
         className="hidden"
         onChange={handleChange}
       />

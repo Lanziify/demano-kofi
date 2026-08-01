@@ -1,9 +1,10 @@
+import { NextResponse } from "next/server";
 import { UserRepository } from "@/feature/auth/repository/user.repository";
 import { profileSchemaWithUserId } from "@/feature/auth/schema/profile.schema";
 import { UserService } from "@/feature/auth/service/user.service";
 import { apiErrorHandler, requiredSession } from "@/lib/api-handler";
+import { formDataToObject } from "@/utils/api-helpers";
 import { auth } from "@/utils/auth";
-import { NextResponse } from "next/server";
 
 const repository = new UserRepository();
 const service = new UserService(repository);
@@ -27,10 +28,15 @@ export const GET = apiErrorHandler(
   },
 );
 
+export type UpdateUserProfileApiResponse = Awaited<
+  ReturnType<UserService["updateUserProfile"]>
+>;
+
 export const PATCH = apiErrorHandler(
   async (req) => {
-    const values = await req.json();
+    const formData = await req.formData();
 
+    const values = formDataToObject(formData);
     const parsedValues = profileSchemaWithUserId.parse(values);
 
     const result = await service.updateUserProfile(parsedValues);

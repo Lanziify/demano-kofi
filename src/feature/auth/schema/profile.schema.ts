@@ -1,16 +1,28 @@
-import { z } from 'zod';
-import { nameSchema } from './shared.schema';
+import { z } from "zod";
+import { nameSchema } from "./shared.schema";
 
 export const profileSchema = z.object({
-  image: z.string().optional(),
+  image: z
+    .file()
+    .optional()
+    .refine((file) => !file || file.size <= 5_000_000, {
+      message: "Image must be less than 5 MB",
+    })
+    .refine(
+      (file) =>
+        !file || ["image/jpeg", "image/png", "image/webp"].includes(file.type),
+      {
+        message: "Only JPG, PNG, and WebP images are allowed",
+      },
+    ),
   firstName: nameSchema,
   lastName: nameSchema,
   bio: z.string().optional(),
   phone: z
     .string()
-    .transform((v) => v || '')
+    .transform((v) => v || "")
     .refine((v) => !v || /^(\+63|0)9\d{9}$/.test(v), {
-      message: 'Please enter a valid phone number.',
+      message: "Please enter a valid phone number.",
     }),
   dateOfBirth: z.string().optional(),
   building: z.string().optional(),

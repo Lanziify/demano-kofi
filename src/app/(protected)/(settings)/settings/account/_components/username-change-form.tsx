@@ -1,9 +1,16 @@
-'use client';
+"use client";
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Controller, useForm } from 'react-hook-form';
-
-import { Button } from '@/components/ui/button';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller, useForm } from "react-hook-form";
+import {
+  ConfirmationDialog,
+  type ConfirmationDialogOptions,
+} from "@/components/custom/confirmation-dialog";
+import {
+  ResultDialog,
+  type ResultDialogOptions,
+} from "@/components/custom/result-dialog";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -11,85 +18,90 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from "@/components/ui/card";
 import {
   Field,
   FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
-} from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
-
-import { Spinner } from '@/components/ui/spinner';
-
-import { ConfirmationDialog } from '@/components/custom/confirmation-dialog';
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
+import { useUpdateUsername } from "@/feature/auth/mutations/user.mutation";
 import {
-  ResultDialog,
-  ResultDialogProps,
-} from '@/components/custom/result-dialog';
-import { useUpdateUsername } from '@/feature/auth/mutations/user.mutation';
-import {
-  usernameUpdateSchema,
   type UsernameUpdateSchemaValues,
-} from '@/feature/auth/schema/account.schema';
-import { useConfirmationDialog } from '@/hooks/user-confirmation-dialog';
-import React from 'react';
+  usernameUpdateSchema,
+} from "@/feature/auth/schema/account.schema";
+import { useDialog } from "@/hooks/use-dialog";
 
 export default function AccountUsernameForm() {
   const updateUsername = useUpdateUsername();
-  const confirmation = useConfirmationDialog();
-
-  // const [resultDialog, setResultDialog] = React.useState<
-  //   Omit<ResultDialogProps, 'onOpenChange'>
-  // >({
-  //   open: false,
-  //   variant: 'idle',
-  //   title: '',
-  //   description: '',
-  //   closeText: '',
-  // });
+  const confirmationDialog = useDialog<ConfirmationDialogOptions>();
+  const resultDialog = useDialog<ResultDialogOptions>();
 
   const form = useForm<UsernameUpdateSchemaValues>({
     resolver: zodResolver(usernameUpdateSchema),
     defaultValues: {
-      username: '',
+      username: "",
     },
   });
 
   const {
     control,
     handleSubmit,
+    reset,
     formState: { isSubmitting },
   } = form;
 
-  async function onSubmit(values: UsernameUpdateSchemaValues) {
-    // setResultDialog({
-    //   open: true,
-    //   variant: 'loading',
-    //   title: 'Updating your username...',
-    // });
+  async function onSubmit() {
+    confirmationDialog.show({
+      title: "Update username?",
+      description: "Are you sure you want to update your username?.",
+      confirmLabel: "Save",
+      confirmVariant: "default",
+    });
+  }
 
-    // const { error } = await updateUsername.mutateAsync(values);
+  async function handleConfirmSubmit(values: UsernameUpdateSchemaValues) {
+    resultDialog.setDialog(null);
 
-    // if (error) {
-    //   setResultDialog({
-    //     open: true,
-    //     variant: 'error',
-    //     title: 'An error has occurred while trying to update your username',
-    //     description: `Details: ${error.message}`,
-    //     closeText: 'Close',
-    //   });
+    resultDialog.show({
+      variant: "loading",
+      title: "Updating",
+      description: "Updating username please wait...",
+    });
 
-    //   return;
-    // }
+    const { error } = await updateUsername.mutateAsync(values);
 
-    // setResultDialog({
-    //   open: true,
-    //   variant: 'success',
-    //   title: 'Username updated!',
-    //   description: 'Your username has been successfully updated.',
-    // });
+    if (error) {
+      resultDialog.setDialog((prev) =>
+        prev
+          ? {
+              ...prev,
+              variant: "error",
+              title:
+                "An error has occurred while trying to update your username",
+              description: `Details: ${error.message}`,
+            }
+          : prev,
+      );
+
+      return;
+    }
+
+    resultDialog.setDialog((prev) =>
+      prev
+        ? {
+            ...prev,
+            variant: "success",
+            title: "Username updated!",
+            description: "Your username has been successfully updated.",
+          }
+        : prev,
+    );
+
+    reset();
   }
 
   return (
@@ -103,21 +115,7 @@ export default function AccountUsernameForm() {
         </CardHeader>
 
         <CardContent>
-          <form
-            id="username-change-form"
-            onSubmit={(e) => {
-              e.preventDefault();
-
-              form.handleSubmit((values) => {
-                confirmation.show({
-                  title: 'Update username?',
-                  description: 'Are you sure you want to update your username?.',
-                  confirmLabel: 'Save',
-                  confirmVariant: 'default',
-                  onConfirm: () => onSubmit(values),
-                });
-              })();
-            }}>
+          <form id="username-change-form" onSubmit={handleSubmit(onSubmit)}>
             <FieldGroup>
               <Controller
                 name="username"
@@ -146,26 +144,41 @@ export default function AccountUsernameForm() {
             <Button
               type="submit"
               form="username-change-form"
-              disabled={isSubmitting}>
+              disabled={isSubmitting}
+            >
               {isSubmitting && <Spinner />}
               Update Username
             </Button>
           </Field>
         </CardFooter>
       </Card>
-      {/* <ResultDialog
-        onOpenChange={(open) => setResultDialog({ ...resultDialog, open })}
-        {...resultDialog}
-      /> */}
-      <ConfirmationDialog
-        {...confirmation.dialog}
-        open={confirmation.dialog.open}
-        loading={confirmation.dialog.loading}
-        onOpenChange={(open) =>
-          confirmation.setDialog({ ...confirmation.dialog, open })
-        }
-        onConfirm={confirmation.confirm}
-      />
+
+      {resultDialog.dialog && (
+        <ResultDialog
+          {...resultDialog.dialog}
+          onOpenChange={(open) => {
+            resultDialog.setDialog((prev) => (prev ? { ...prev, open } : prev));
+          }}
+        />
+      )}
+
+      {confirmationDialog.dialog && (
+        <ConfirmationDialog
+          {...confirmationDialog.dialog}
+          onOpenChange={(open) => {
+            confirmationDialog.setDialog((prev) =>
+              prev ? { ...prev, open } : prev,
+            );
+          }}
+          onConfirm={() => {
+            confirmationDialog.setDialog((prev) =>
+              prev ? { ...prev, open: false } : prev,
+            );
+
+            handleConfirmSubmit(form.getValues());
+          }}
+        />
+      )}
     </>
   );
 }

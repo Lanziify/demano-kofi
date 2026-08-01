@@ -1,9 +1,13 @@
-'use client';
+"use client";
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Controller, useForm } from 'react-hook-form';
+import { zodResolver } from "@hookform/resolvers/zod";
 
-import { Button } from '@/components/ui/button';
+import { Controller, useForm } from "react-hook-form";
+import {
+  ResultDialog,
+  type ResultDialogOptions,
+} from "@/components/custom/result-dialog";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -11,47 +15,32 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from "@/components/ui/card";
 import {
   Field,
   FieldError,
   FieldGroup,
   FieldLabel,
-} from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
-
-import { Spinner } from '@/components/ui/spinner';
-
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
+import { useChangePassword } from "@/feature/auth/mutations/user.mutation";
 import {
-  ResultDialog,
-  ResultDialogProps,
-} from '@/components/custom/result-dialog';
-import { useChangePassword } from '@/feature/auth/mutations/user.mutation';
-import {
-  passwordUpdateSchema,
   type PasswordUpdateSchemaValues,
-} from '@/feature/auth/schema/account.schema';
-import React from 'react';
+  passwordUpdateSchema,
+} from "@/feature/auth/schema/account.schema";
+import { useDialog } from "@/hooks/use-dialog";
 
 export default function AccountPasswordForm() {
   const changePassword = useChangePassword();
-
-  const [resultDialog, setResultDialog] = React.useState<
-    Omit<ResultDialogProps, 'onOpenChange'>
-  >({
-    open: false,
-    variant: 'idle',
-    title: '',
-    description: '',
-    closeText: '',
-  });
+  const resultDialog = useDialog<ResultDialogOptions>();
 
   const form = useForm<PasswordUpdateSchemaValues>({
     resolver: zodResolver(passwordUpdateSchema),
     defaultValues: {
-      currentPassword: '',
-      password: '',
-      confirmPassword: '',
+      currentPassword: "",
+      password: "",
+      confirmPassword: "",
     },
   });
 
@@ -63,30 +52,47 @@ export default function AccountPasswordForm() {
   } = form;
 
   async function onSubmit(values: PasswordUpdateSchemaValues) {
+    resultDialog.setDialog(null);
+
+    resultDialog.show({
+      variant: "loading",
+      title: "Changing password",
+      description: "Please wait while we update your password.",
+    });
+
     const passwordChangeResult = await changePassword.mutateAsync({
       currentPassword: values.currentPassword,
       newPassword: values.password,
     });
 
     if (!passwordChangeResult?.data && passwordChangeResult.error) {
-      setResultDialog({
-        open: true,
-        variant: 'error',
-        title: "Something wen't wrong",
-        description: `Details: ${passwordChangeResult.error.message}`,
-        closeText: 'Close',
-      });
+      resultDialog.setDialog((prev) =>
+        prev
+          ? {
+              ...prev,
+              variant: "error",
+              title: "Password change failed",
+              description:
+                "We couldn't change your password at this time. Please try again.",
+            }
+          : prev,
+      );
+
       return;
     }
 
-    reset();
+    resultDialog.setDialog((prev) =>
+      prev
+        ? {
+            ...prev,
+            variant: "success",
+            title: "Password changed",
+            description: "Your password has been updated successfully.",
+          }
+        : prev,
+    );
 
-    setResultDialog({
-      open: true,
-      variant: 'success',
-      title: 'Password Changed',
-      description: 'Your password has been changed successfully.',
-    });
+    reset();
   }
 
   return (
@@ -168,17 +174,22 @@ export default function AccountPasswordForm() {
             <Button
               type="submit"
               form="password-change-form"
-              disabled={isSubmitting}>
+              disabled={isSubmitting}
+            >
               {isSubmitting && <Spinner />}
               Update Password
             </Button>
           </Field>
         </CardFooter>
       </Card>
-      <ResultDialog
-        onOpenChange={(open) => setResultDialog({ ...resultDialog, open })}
-        {...resultDialog}
-      />
+      {resultDialog.dialog && (
+        <ResultDialog
+          {...resultDialog.dialog}
+          onOpenChange={(open) => {
+            resultDialog.setDialog((prev) => (prev ? { ...prev, open } : prev));
+          }}
+        />
+      )}
     </>
   );
 }

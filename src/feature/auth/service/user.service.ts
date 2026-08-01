@@ -1,12 +1,19 @@
-import { DatabaseError, NotFoundError } from '@/lib/errors/app-error';
-import { auth } from '@/utils/auth';
-import { db } from '@/utils/db';
-import { toDate } from 'date-fns';
-import { headers } from 'next/headers';
-import { UserRepository } from '../repository/user.repository';
-import { ProfileSchemaValues } from '../schema/profile.schema';
-import { ChangeEmailSchemaValues } from '../schema/account.schema';
-import { ChangePasswordApiSchemaValues } from '../schema/auth.schema';
+import { headers } from "next/headers";
+import { ALLOWED_IMAGE_TYPES } from "@/data/profile";
+import { toDate } from "@/lib/date";
+import {
+  BadRequestError,
+  DatabaseError,
+  NotFoundError,
+} from "@/lib/errors/app-error";
+import { processProfileImage } from "@/lib/image/process";
+import { getPublicUrl, uploadObject } from "@/lib/storage/storage";
+import { auth } from "@/utils/auth";
+import { db } from "@/utils/db";
+import type { UserRepository } from "../repository/user.repository";
+import type { ChangeEmailSchemaValues } from "../schema/account.schema";
+import type { ChangePasswordApiSchemaValues } from "../schema/auth.schema";
+import type { ProfileSchemaValues } from "../schema/profile.schema";
 
 export type UserFilters = {
   id?: string;
@@ -25,26 +32,26 @@ export class UserService {
 
   async getUser(filters: UserFilters) {
     const filterMap = {
-      id: 'user.id',
-      email: 'user.email',
-      username: 'user.username',
+      id: "user.id",
+      email: "user.email",
+      username: "user.username",
     } as const;
 
-    let query = db.selectFrom('user').selectAll();
+    let query = db.selectFrom("user").selectAll();
 
     for (const [key, column] of Object.entries(filterMap)) {
       const value = filters[key as keyof UserFilters];
 
       if (value) {
-        query = query.where(column, '=', value);
+        query = query.where(column, "=", value);
       }
     }
 
     const user = await query.executeTakeFirst();
 
     if (!user) {
-      throw new NotFoundError('User not found', {
-        errorCode: 'USER_NOT_FOUND',
+      throw new NotFoundError("User not found", {
+        errorCode: "USER_NOT_FOUND",
       });
     }
 
@@ -58,7 +65,7 @@ export class UserService {
     const user = await this.repository.findUserProfile(userId);
 
     if (!user) {
-      throw new DatabaseError('Could not find user');
+      throw new DatabaseError("Could not find user");
     }
 
     const authUpdates: {
@@ -66,8 +73,22 @@ export class UserService {
       name?: string;
     } = {};
 
-    if (image && image !== user.image) {
-      authUpdates.image = image;
+    if (image) {
+      if (!ALLOWED_IMAGE_TYPES.includes(image.type)) {
+        throw new BadRequestError("Image file type is not supported.");
+      }
+
+      const key = `user-profile/${userId}/avatar.webp`;
+      const buffer = Buffer.from(await image.arrayBuffer());
+      const proccessedImage = await processProfileImage(buffer);
+
+      await uploadObject({
+        key,
+        body: proccessedImage,
+        contentType: "image/webp",
+      });
+
+      authUpdates.image = getPublicUrl(key);
     }
 
     const fullName = `${profile.firstName} ${profile.lastName}`;

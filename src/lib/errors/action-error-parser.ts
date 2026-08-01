@@ -35,8 +35,6 @@ export function actionErrorParser(error: unknown): ActionErrorResponse {
     };
   }
 
-  console.log(error)
-
   if (error instanceof NoResultError) {
     return {
       errorCode: error.name,

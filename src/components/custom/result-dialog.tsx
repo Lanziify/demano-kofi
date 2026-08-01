@@ -1,26 +1,31 @@
-"use client";
+'use client';
 
-import { CheckCircle2, Info, Loader2, XCircle } from "lucide-react";
+import { CheckCircle2, XCircle } from 'lucide-react';
 
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
+import { Spinner } from '../ui/spinner';
 
-type ResultDialogVariant = "idle" | "loading" | "success" | "error";
+type ResultDialogVariant = 'loading' | 'success' | 'error';
 
-export type ResultDialogProps = {
+export type ResultDialogOptions = {
+  title?: string;
+  description?: React.ReactNode;
+  variant: ResultDialogVariant;
+  closeText?: string;
+};
+
+export type ResultDialogProps = ResultDialogOptions & {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  variant: ResultDialogVariant;
-  title: string;
-  description?: React.ReactNode;
-  closeText?: string;
 };
 
 export function ResultDialog({
@@ -29,13 +34,12 @@ export function ResultDialog({
   variant,
   title,
   description,
-  closeText = "Close",
+  closeText = 'Close',
 }: ResultDialogProps) {
-  const isLoading = variant === "loading";
+  const isLoading = variant === 'loading';
 
   const icon = {
-    idle: <Info className="size-8 animate-spin" />,
-    loading: <Loader2 className="size-8 animate-spin" />,
+    loading: <Spinner className="size-8" />,
     success: <CheckCircle2 className="size-8" />,
     error: <XCircle className="size-8" />,
   }[variant];
@@ -51,7 +55,7 @@ export function ResultDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent>
+      <DialogContent showCloseButton={!isLoading}>
         <DialogHeader className="items-center space-y-4 text-center">
           {icon}
 
@@ -61,7 +65,9 @@ export function ResultDialog({
         </DialogHeader>
 
         {!isLoading && (
-          <Button onClick={() => onOpenChange(false)}>{closeText}</Button>
+          <DialogFooter>
+            <Button onClick={() => onOpenChange(false)}>{closeText}</Button>
+          </DialogFooter>
         )}
       </DialogContent>
     </Dialog>

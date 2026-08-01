@@ -7,8 +7,9 @@ import {
   MessageSquareWarning,
   Settings,
 } from "lucide-react";
-
+import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,27 +19,24 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ThemeDropdown } from "../theme-dropdown";
-import SignoutButton from "../signout-button";
-import { LanguageDropdown } from "../language-dropdown";
-import { useAuthStore } from "@/store/auth-store";
 import { getInitials } from "@/lib/strings";
-import Link from "next/link";
+import { useAuthStore } from "@/store/auth-store";
+import { LanguageDropdown } from "../language-dropdown";
+import SignoutButton from "../signout-button";
+import { ThemeDropdown } from "../theme-dropdown";
 
 export function DashboardNavUser() {
   const user = useAuthStore((state) => state.user);
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button className="flex items-center gap-2 rounded-full outline-none">
-          <Avatar className="size-8">
-            <AvatarImage src={user?.image ?? undefined} alt="Profile" />
-            <AvatarFallback className="text-sm font-semibold">
-              {getInitials(user?.name)}
-            </AvatarFallback>
-          </Avatar>
-        </button>
+      <DropdownMenuTrigger className="outline-none">
+        <Avatar className="size-8">
+          <AvatarImage src={user?.image ?? undefined} alt="Profile" />
+          <AvatarFallback className="text-sm font-semibold">
+            {getInitials(user?.name)}
+          </AvatarFallback>
+        </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-xs">
         <DropdownMenuLabel className="overflow-hidden font-normal">

@@ -1,39 +1,30 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import React from "react";
 import { Controller, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import { DobPicker } from "@/components/custom/dob-picker";
+import { UploadProfileAvatar } from "@/components/custom/upload-profile";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
   CardDescription,
   CardFooter,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import {
   Field,
-  FieldLabel,
   FieldDescription,
   FieldError,
   FieldGroup,
-  FieldSet,
+  FieldLabel,
   FieldLegend,
+  FieldSet,
 } from "@/components/ui/field";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { UploadProfileAvatar } from "@/components/custom/upload-profile";
-import { useAuthStore } from "@/store/auth-store";
-import { getInitials } from "@/lib/strings";
-import { DobPicker } from "@/components/custom/dob-picker";
-import { profileSchema, ProfileSchemaValues } from "../schema/profile.schema";
-import { useUserQueries } from "../hooks/use-user-queries";
-import { Spinner } from "@/components/ui/spinner";
-import { formatDate, toDate } from "@/lib/date";
-import { useUpdateUserProfile } from "../mutations/user.mutation";
-import { usePsgcQueries } from "../hooks/use-psgc-quries";
 import {
   Select,
   SelectContent,
@@ -42,6 +33,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Spinner } from "@/components/ui/spinner";
+import { Textarea } from "@/components/ui/textarea";
+import { formatDate, toDate } from "@/lib/date";
+import { getInitials } from "@/lib/strings";
+import { useAuthStore } from "@/store/auth-store";
+import { usePsgcQueries } from "../hooks/use-psgc-quries";
+import { useUserQueries } from "../hooks/use-user-queries";
+import { useUpdateUserProfile } from "../mutations/user.mutation";
+import {
+  type ProfileSchemaValues,
+  profileSchema,
+} from "../schema/profile.schema";
 
 export default function ProfileForm() {
   const { user } = useAuthStore();
@@ -50,7 +53,7 @@ export default function ProfileForm() {
   const initialized = React.useRef(false);
 
   const defaultFormValues = {
-    image: "",
+    image: undefined,
     firstName: "",
     lastName: "",
     bio: "",
@@ -83,15 +86,19 @@ export default function ProfileForm() {
   });
 
   async function onSubmit(values: ProfileSchemaValues) {
-    await updateProfile.mutateAsync({ ...values, userId: user?.id! });
+    const { error } = await updateProfile.mutateAsync({
+      ...values,
+      userId: user?.id as string,
+    });
 
-    if (updateProfile.isError) {
-      toast.error(updateProfile.error.message);
+    if (error) {
+      toast.error(error.message);
     }
 
     toast.success("Profile updated!");
   }
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: defaultFormValues changes on every re-render
   React.useEffect(() => {
     if (!userProfile.data || initialized.current) return;
 
@@ -99,7 +106,7 @@ export default function ProfileForm() {
 
     const values = {
       ...defaultFormValues,
-      image: userProfile.data.image ?? "",
+      // image: userProfile.data.image ?? "",
       firstName: profile?.firstName ?? "",
       lastName: profile?.lastName ?? "",
       bio: profile?.bio ?? "",
@@ -143,15 +150,18 @@ export default function ProfileForm() {
             <Controller
               name="image"
               control={control}
-              render={({ field }) => (
+              render={({ field, fieldState }) => (
                 <Field>
                   <UploadProfileAvatar
+                    imageUrl={userProfile.data?.image}
                     value={field.value}
                     fallback={getInitials(user?.name)}
                     onChange={(file) => field.onChange(file)}
                   />
 
-                  {/* {fieldState.invalid && <FieldError errors={[fieldState.error]} />} */}
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
                 </Field>
               )}
             />
@@ -312,15 +322,11 @@ export default function ProfileForm() {
                         </SelectTrigger>
                         <SelectContent alignItemWithTrigger={false}>
                           <SelectGroup>
-                            {regions.data &&
-                              regions.data.map((region) => (
-                                <SelectItem
-                                  key={region.code}
-                                  value={region.name}
-                                >
-                                  {region.name}
-                                </SelectItem>
-                              ))}
+                            {regions?.data?.map((region) => (
+                              <SelectItem key={region.code} value={region.name}>
+                                {region.name}
+                              </SelectItem>
+                            ))}
                           </SelectGroup>
                         </SelectContent>
                       </Select>
@@ -349,15 +355,14 @@ export default function ProfileForm() {
                         </SelectTrigger>
                         <SelectContent alignItemWithTrigger={false}>
                           <SelectGroup>
-                            {provinces.data &&
-                              provinces.data.map((province) => (
-                                <SelectItem
-                                  key={province.code}
-                                  value={province.name}
-                                >
-                                  {province.name}
-                                </SelectItem>
-                              ))}
+                            {provinces?.data?.map((province) => (
+                              <SelectItem
+                                key={province.code}
+                                value={province.name}
+                              >
+                                {province.name}
+                              </SelectItem>
+                            ))}
                           </SelectGroup>
                         </SelectContent>
                       </Select>
@@ -392,15 +397,14 @@ export default function ProfileForm() {
                         </SelectTrigger>
                         <SelectContent alignItemWithTrigger={false}>
                           <SelectGroup>
-                            {municipalities.data &&
-                              municipalities.data.map((municipality) => (
-                                <SelectItem
-                                  key={municipality.code}
-                                  value={municipality.name}
-                                >
-                                  {municipality.name}
-                                </SelectItem>
-                              ))}
+                            {municipalities?.data?.map((municipality) => (
+                              <SelectItem
+                                key={municipality.code}
+                                value={municipality.name}
+                              >
+                                {municipality.name}
+                              </SelectItem>
+                            ))}
                           </SelectGroup>
                         </SelectContent>
                       </Select>
@@ -435,15 +439,14 @@ export default function ProfileForm() {
                         </SelectTrigger>
                         <SelectContent alignItemWithTrigger={false}>
                           <SelectGroup>
-                            {barangays.data &&
-                              barangays.data.map((barangay) => (
-                                <SelectItem
-                                  key={barangay.code}
-                                  value={barangay.name}
-                                >
-                                  {barangay.name}
-                                </SelectItem>
-                              ))}
+                            {barangays?.data?.map((barangay) => (
+                              <SelectItem
+                                key={barangay.code}
+                                value={barangay.name}
+                              >
+                                {barangay.name}
+                              </SelectItem>
+                            ))}
                           </SelectGroup>
                         </SelectContent>
                       </Select>
