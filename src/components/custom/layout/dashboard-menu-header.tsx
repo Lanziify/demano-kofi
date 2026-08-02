@@ -1,5 +1,5 @@
-import { SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
-import { Coffee } from "lucide-react";
+import { Coffee } from 'lucide-react';
+import { SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 
 export default function DashboardMenuHeader() {
   return (

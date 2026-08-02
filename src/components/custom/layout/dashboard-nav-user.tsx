@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   BadgeCheck,
@@ -6,10 +6,9 @@ import {
   CircleQuestionMark,
   MessageSquareWarning,
   Settings,
-} from "lucide-react";
-import Link from "next/link";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+} from 'lucide-react';
+import Link from 'next/link';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,12 +17,12 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { getInitials } from "@/lib/strings";
-import { useAuthStore } from "@/store/auth-store";
-import { LanguageDropdown } from "../language-dropdown";
-import SignoutButton from "../signout-button";
-import { ThemeDropdown } from "../theme-dropdown";
+} from '@/components/ui/dropdown-menu';
+import { getInitials } from '@/lib/strings';
+import { useAuthStore } from '@/store/auth-store';
+import { LanguageDropdown } from '../language-dropdown';
+import SignoutButton from '../signout-button';
+import { ThemeDropdown } from '../theme-dropdown';
 
 export function DashboardNavUser() {
   const user = useAuthStore((state) => state.user);

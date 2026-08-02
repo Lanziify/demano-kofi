@@ -1,13 +1,13 @@
-import { auth } from "@/utils/auth";
-import { NextRequest, NextResponse } from "next/server";
-import { apiErrorParser } from "./errors/api-error-parser";
-import { BadRequestError } from "./errors/app-error";
+import type { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/utils/auth';
+import { apiErrorParser } from './errors/api-error-parser';
+import { BadRequestError } from './errors/app-error';
 
 type Context = { params: Promise<Record<string, string | string[]>> };
 
 type ApiRouteHandler = (
   req: NextRequest,
-  context: Context,
+  context: Context
 ) => Promise<NextResponse>;
 
 type ApiGuard = (req: NextRequest, context: Context) => Promise<void>;
@@ -18,7 +18,7 @@ interface ApiHandlerOptions {
 
 export const apiErrorHandler = (
   handler: ApiRouteHandler,
-  options?: ApiHandlerOptions,
+  options?: ApiHandlerOptions
 ): ApiRouteHandler => {
   return async (req: NextRequest, context: Context) => {
     try {
@@ -40,6 +40,6 @@ export const requiredSession: ApiGuard = async (req) => {
   });
 
   if (!session) {
-    throw new BadRequestError("Cannot perform request without active session.");
+    throw new BadRequestError('Cannot perform request without active session.');
   }
 };

@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import React from "react";
-import { Controller, useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { DobPicker } from "@/components/custom/dob-picker";
-import { UploadProfileAvatar } from "@/components/custom/upload-profile";
-import { Button } from "@/components/ui/button";
+import { zodResolver } from '@hookform/resolvers/zod';
+import React from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { DobPicker } from '@/components/custom/dob-picker';
+import { UploadProfileAvatar } from '@/components/custom/upload-profile';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -14,7 +14,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 import {
   Field,
   FieldDescription,
@@ -23,8 +23,8 @@ import {
   FieldLabel,
   FieldLegend,
   FieldSet,
-} from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -32,19 +32,19 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Spinner } from "@/components/ui/spinner";
-import { Textarea } from "@/components/ui/textarea";
-import { formatDate, toDate } from "@/lib/date";
-import { getInitials } from "@/lib/strings";
-import { useAuthStore } from "@/store/auth-store";
-import { usePsgcQueries } from "../hooks/use-psgc-quries";
-import { useUserQueries } from "../hooks/use-user-queries";
-import { useUpdateUserProfile } from "../mutations/user.mutation";
+} from '@/components/ui/select';
+import { Spinner } from '@/components/ui/spinner';
+import { Textarea } from '@/components/ui/textarea';
+import { formatDate, toDate } from '@/lib/date';
+import { getInitials } from '@/lib/strings';
+import { useAuthStore } from '@/store/auth-store';
+import { usePsgcQueries } from '../hooks/use-psgc-quries';
+import { useUserQueries } from '../hooks/use-user-queries';
+import { useUpdateUserProfile } from '../mutations/user.mutation';
 import {
   type ProfileSchemaValues,
   profileSchema,
-} from "../schema/profile.schema";
+} from '../schema/profile.schema';
 
 export default function ProfileForm() {
   const { user } = useAuthStore();
@@ -54,17 +54,17 @@ export default function ProfileForm() {
 
   const defaultFormValues = {
     image: undefined,
-    firstName: "",
-    lastName: "",
-    bio: "",
-    phone: "",
-    dateOfBirth: "",
-    building: "",
-    street: "",
-    region: "",
-    province: "",
-    municipality: "",
-    barangay: "",
+    firstName: '',
+    lastName: '',
+    bio: '',
+    phone: '',
+    dateOfBirth: '',
+    building: '',
+    street: '',
+    region: '',
+    province: '',
+    municipality: '',
+    barangay: '',
   };
 
   const {
@@ -80,9 +80,9 @@ export default function ProfileForm() {
   });
 
   const { regions, provinces, municipalities, barangays } = usePsgcQueries({
-    region: watch("region") ?? "",
-    province: watch("province") ?? "",
-    municipality: watch("municipality") ?? "",
+    region: watch('region') ?? '',
+    province: watch('province') ?? '',
+    municipality: watch('municipality') ?? '',
   });
 
   async function onSubmit(values: ProfileSchemaValues) {
@@ -95,7 +95,7 @@ export default function ProfileForm() {
       toast.error(error.message);
     }
 
-    toast.success("Profile updated!");
+    toast.success('Profile updated!');
   }
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: defaultFormValues changes on every re-render
@@ -107,19 +107,19 @@ export default function ProfileForm() {
     const values = {
       ...defaultFormValues,
       // image: userProfile.data.image ?? "",
-      firstName: profile?.firstName ?? "",
-      lastName: profile?.lastName ?? "",
-      bio: profile?.bio ?? "",
-      phone: profile?.phone ?? "",
+      firstName: profile?.firstName ?? '',
+      lastName: profile?.lastName ?? '',
+      bio: profile?.bio ?? '',
+      phone: profile?.phone ?? '',
       dateOfBirth: profile?.dateOfBirth
         ? formatDate(toDate(profile.dateOfBirth))
-        : "",
-      building: profile?.building ?? "",
-      street: profile?.street ?? "",
-      region: profile?.region ?? "",
-      province: profile?.province ?? "",
-      municipality: profile?.municipality ?? "",
-      barangay: profile?.barangay ?? "",
+        : '',
+      building: profile?.building ?? '',
+      street: profile?.street ?? '',
+      region: profile?.region ?? '',
+      province: profile?.province ?? '',
+      municipality: profile?.municipality ?? '',
+      barangay: profile?.barangay ?? '',
     };
 
     reset(values);
@@ -348,7 +348,7 @@ export default function ProfileForm() {
                       <Select
                         value={field.value}
                         onValueChange={field.onChange}
-                        disabled={!getValues("region")}
+                        disabled={!getValues('region')}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select a province" />
@@ -367,7 +367,7 @@ export default function ProfileForm() {
                         </SelectContent>
                       </Select>
 
-                      {!getValues("region") && (
+                      {!getValues('region') && (
                         <FieldDescription>
                           Select a region first to use this field
                         </FieldDescription>
@@ -390,7 +390,7 @@ export default function ProfileForm() {
                       <Select
                         value={field.value}
                         onValueChange={field.onChange}
-                        disabled={!getValues("province")}
+                        disabled={!getValues('province')}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select a municipality" />
@@ -409,7 +409,7 @@ export default function ProfileForm() {
                         </SelectContent>
                       </Select>
 
-                      {!getValues("province") && (
+                      {!getValues('province') && (
                         <FieldDescription>
                           Select a province first to use this field
                         </FieldDescription>
@@ -432,7 +432,7 @@ export default function ProfileForm() {
                       <Select
                         value={field.value}
                         onValueChange={field.onChange}
-                        disabled={!getValues("municipality")}
+                        disabled={!getValues('municipality')}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select a barangay" />
@@ -451,7 +451,7 @@ export default function ProfileForm() {
                         </SelectContent>
                       </Select>
 
-                      {!getValues("municipality") && (
+                      {!getValues('municipality') && (
                         <FieldDescription>
                           Select a municipality first to use this field
                         </FieldDescription>

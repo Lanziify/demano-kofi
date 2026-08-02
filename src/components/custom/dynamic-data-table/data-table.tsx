@@ -1,7 +1,6 @@
-"use client";
+'use client';
 
-import React from "react";
-import { Table as TanStackTable, flexRender } from "@tanstack/react-table";
+import { flexRender, type Table as TanStackTable } from '@tanstack/react-table';
 import {
   Table,
   TableBody,
@@ -9,7 +8,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 
 interface DataTableProps<T> {
   table: TanStackTable<T>;
@@ -35,7 +34,7 @@ export const DataTable = <T,>({ table }: DataTableProps<T>) => {
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
-                          header.getContext(),
+                          header.getContext()
                         )}
                   </TableHead>
                 ))}
@@ -56,7 +55,7 @@ export const DataTable = <T,>({ table }: DataTableProps<T>) => {
                     >
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext(),
+                        cell.getContext()
                       )}
                     </TableCell>
                   ))}

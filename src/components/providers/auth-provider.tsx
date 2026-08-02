@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import React from "react";
-import { useAuthStore } from "@/store/auth-store";
-import { AuthType } from "@/utils/auth";
+import React from 'react';
+import { useAuthStore } from '@/store/auth-store';
+import type { AuthType } from '@/utils/auth';
 
 type AuthProviderProps = {
-  sessionData: AuthType["Session"];
+  sessionData: AuthType['Session'];
   children: React.ReactNode;
 };
 

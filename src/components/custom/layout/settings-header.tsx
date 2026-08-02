@@ -1,6 +1,8 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
+import { ArrowLeft, Coffee, Menu } from 'lucide-react';
+import Link from 'next/link';
+import React from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,12 +10,9 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { settingsMenuItems } from "@/data/settings-menu";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { ArrowLeft, Coffee, Menu } from "lucide-react";
-import Link from "next/link";
-import React from "react";
+} from '@/components/ui/dropdown-menu';
+import { settingsMenuItems } from '@/data/settings-menu';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 type SettingsLayoutHeaderProps = {
   breadcrumbs: React.ReactNode;

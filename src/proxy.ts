@@ -1,21 +1,21 @@
-import { NextRequest, NextResponse } from "next/server";
-import { headers } from "next/headers";
-import { auth } from "@/utils/auth";
+import { headers } from 'next/headers';
+import { type NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/utils/auth';
 // import { isPlatformInitialized, refreshPlatformState } from './utils/platform';
 
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   // Define routes before fetching session
-  const guestOnlyRoutes = ["/signin", "/signup"];
-  const protectedRoutes = ["/dashboard", "/settings"];
+  const guestOnlyRoutes = ['/signin', '/signup'];
+  const protectedRoutes = ['/dashboard', '/settings'];
   // const bootstrapRoutes = ['/setup', '/setup/verification-success'];
 
   const isGuestOnlyRoute = guestOnlyRoutes.some((route) =>
-    pathname.startsWith(route),
+    pathname.startsWith(route)
   );
   const isProtectedRoute = protectedRoutes.some((route) =>
-    pathname.startsWith(route),
+    pathname.startsWith(route)
   );
   // const isBootstrapRoute = bootstrapRoutes.some((route) =>
   //   pathname.startsWith(route)
@@ -47,14 +47,14 @@ export async function proxy(request: NextRequest) {
   const isAuthenticated = !!session?.user;
 
   if (isGuestOnlyRoute && isAuthenticated) {
-    const url = new URL("/dashboard", request.url);
+    const url = new URL('/dashboard', request.url);
     return NextResponse.redirect(url);
   }
 
   if (isProtectedRoute) {
     if (!isAuthenticated) {
-      const url = new URL("/signin", request.url);
-      url.searchParams.set("callbackURL", pathname);
+      const url = new URL('/signin', request.url);
+      url.searchParams.set('callbackURL', pathname);
       return NextResponse.redirect(url);
     }
   }
@@ -72,6 +72,6 @@ export const config = {
      * - favicon.ico, sitemap.xml, robots.txt (metadata files)
      * - public folder files (images, etc)
      */
-    "/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js)$).*)",
+    '/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js)$).*)',
   ],
 };

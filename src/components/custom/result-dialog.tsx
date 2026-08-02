@@ -1,7 +1,7 @@
 'use client';
 
 import { CheckCircle2, XCircle } from 'lucide-react';
-
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -10,8 +10,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-
-import { Button } from '@/components/ui/button';
 import { Spinner } from '../ui/spinner';
 
 type ResultDialogVariant = 'loading' | 'success' | 'error';

@@ -1,5 +1,10 @@
 'use client';
 
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter, useSearchParams } from 'next/navigation';
+import React from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -17,19 +22,14 @@ import {
 } from '@/components/ui/input-otp';
 import { Spinner } from '@/components/ui/spinner';
 import { cn } from '@/lib/utils';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useRouter, useSearchParams } from 'next/navigation';
-import React from 'react';
-import { Controller, useForm } from 'react-hook-form';
-import { toast } from 'sonner';
 import {
   sendVerificationOTPAction,
   verifyEmailOTPAction,
 } from '../actions/auth.actions';
 import { useAuthQueries } from '../hooks/use-auth-queries';
 import {
+  type VerifyEmailOTPSchemaValues,
   verifyEmailOTPSchema,
-  VerifyEmailOTPSchemaValues,
 } from '../schema/auth.schema';
 
 type OTPVerificationFormProps = {
@@ -145,7 +145,8 @@ export function OTPVerificationForm({ email }: OTPVerificationFormProps) {
                         '*:data-[slot=input-otp-slot]:ring-red-500':
                           fieldState.invalid,
                       }
-                    )}>
+                    )}
+                  >
                     <InputOTPSlot index={0} />
                     <InputOTPSlot index={1} />
                     <InputOTPSlot index={2} />
@@ -164,7 +165,8 @@ export function OTPVerificationForm({ email }: OTPVerificationFormProps) {
           <Button
             type="submit"
             form="otp-verification-form"
-            disabled={isSubmitting}>
+            disabled={isSubmitting}
+          >
             Verify
           </Button>
           <div className="text-muted-foreground text-center text-sm">
@@ -174,7 +176,8 @@ export function OTPVerificationForm({ email }: OTPVerificationFormProps) {
               variant="link"
               className="p-0"
               onClick={onResendSubmit}
-              disabled={timeLeft > 0}>
+              disabled={timeLeft > 0}
+            >
               {timeLeft > 0 ? `Resend in ${timeLeft}s` : 'Resend'}
             </Button>
           </div>

@@ -1,15 +1,13 @@
 'use client';
 
 import { create } from 'zustand';
-
-import { SignInSchemaValues } from '@/feature/auth/schema/auth.schema';
-
 import {
   signInUserAction,
   signOutUserAction,
 } from '@/feature/auth/actions/auth.actions';
+import type { SignInSchemaValues } from '@/feature/auth/schema/auth.schema';
 
-import { AuthType } from '@/utils/auth';
+import type { AuthType } from '@/utils/auth';
 import { authClient } from '@/utils/auth-client';
 
 type AuthUser = AuthType['Session']['user'];

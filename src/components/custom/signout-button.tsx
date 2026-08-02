@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { LogOut } from "lucide-react";
-import { Button } from "../ui/button";
-import { useAuthStore } from "@/store/auth-store";
-import { useRouter } from "next/navigation";
+import { LogOut } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/store/auth-store';
+import { Button } from '../ui/button';
 
 export default function SignoutButton() {
   const router = useRouter();
@@ -11,8 +11,8 @@ export default function SignoutButton() {
 
   const handleSignOut = async () => {
     await signOut();
-    router.refresh()
-    router.replace("/signin");
+    router.refresh();
+    router.replace('/signin');
   };
 
   return (

@@ -1,8 +1,13 @@
 'use client';
 
+import { zodResolver } from '@hookform/resolvers/zod';
+import Link from 'next/link';
+import { useTheme } from 'next-themes';
+import React from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import {
   ResultDialog,
-  ResultDialogProps,
+  type ResultDialogProps,
 } from '@/components/custom/result-dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -15,15 +20,10 @@ import {
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useTheme } from 'next-themes';
-import Link from 'next/link';
-import React from 'react';
-import { Controller, useForm } from 'react-hook-form';
 
 import { resetPasswordAction } from '../actions/auth.actions';
 import {
-  PasswordWithConfirmationSchemaValues,
+  type PasswordWithConfirmationSchemaValues,
   passwordWithConfirmationSchema,
 } from '../schema/shared.schema';
 
@@ -96,7 +96,8 @@ export function ResetPasswordForm({
   return (
     <div
       className={cn('flex flex-col items-center gap-6', className)}
-      {...props}>
+      {...props}
+    >
       <Card className="w-full max-w-md">
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)}>

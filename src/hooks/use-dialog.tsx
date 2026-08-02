@@ -3,10 +3,10 @@
 import * as React from 'react';
 
 type DialogBaseOptions = {
-  title: string,
-  description?: string,
+  title: string;
+  description?: string;
   onConfirm?: () => void | Promise<void>;
-} ;
+};
 
 type DialogBaseState<T> = {
   open: boolean;

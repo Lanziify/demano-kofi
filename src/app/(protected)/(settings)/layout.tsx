@@ -1,9 +1,6 @@
-import SettingsLayoutHeader from "@/components/custom/layout/settings-header";
-import SettingsLayoutSidebar from "@/components/custom/layout/settings-sidebar";
-import { settingsMenuItems } from "@/data/settings-menu";
-import { ArrowLeft, ChevronRight, Coffee } from "lucide-react";
-import Link from "next/link";
-import React from "react";
+import type React from 'react';
+import SettingsLayoutHeader from '@/components/custom/layout/settings-header';
+import SettingsLayoutSidebar from '@/components/custom/layout/settings-sidebar';
 
 type SettingsPageLayoutProps = {
   breadcrumbs: React.ReactNode;

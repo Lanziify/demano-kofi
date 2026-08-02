@@ -1,23 +1,23 @@
 'use server';
 
+import { headers } from 'next/headers';
 import { actionErrorParser } from '@/lib/errors/action-error-parser';
 import { safeCatch } from '@/lib/errors/safe-catch';
 import { auth } from '@/utils/auth';
-import { headers } from 'next/headers';
 import { AuthRepository } from '../repository/auth.repository';
 import { UserRepository } from '../repository/user.repository';
 import {
+  type RequestPasswordResetSchemaValues,
+  type ResetPasswordSchemaValues,
   requestPasswordResetSchema,
-  RequestPasswordResetSchemaValues,
   resetPasswordSchema,
-  ResetPasswordSchemaValues,
+  type SendVerificationOTPSchemaValues,
+  type SignInSchemaValues,
+  type SignUpSchemaValues,
   sendVerificationOTPSchema,
-  SendVerificationOTPSchemaValues,
-  SignInSchemaValues,
   signUpEmailSchema,
-  SignUpSchemaValues,
+  type VerifyEmailOTPSchemaValues,
   verifyEmailOTPSchema,
-  VerifyEmailOTPSchemaValues,
 } from '../schema/auth.schema';
 import { AuthService } from '../service/auth.service';
 

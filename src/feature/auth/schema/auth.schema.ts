@@ -1,6 +1,6 @@
-import { ApiBody } from '@/types/api';
-import { auth } from '@/utils/auth';
 import { z } from 'zod';
+import type { ApiBody } from '@/types/api';
+import type { auth } from '@/utils/auth';
 import {
   nameSchema,
   passwordSchema,

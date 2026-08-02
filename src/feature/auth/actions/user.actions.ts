@@ -3,9 +3,9 @@
 import { actionErrorParser } from '@/lib/errors/action-error-parser';
 import { safeCatch } from '@/lib/errors/safe-catch';
 import { UserRepository } from '../repository/user.repository';
-import { ChangeEmailSchemaValues } from '../schema/account.schema';
+import type { ChangeEmailSchemaValues } from '../schema/account.schema';
 import {
-  ChangePasswordApiSchemaValues,
+  type ChangePasswordApiSchemaValues,
   changePasswordApiSchema,
 } from '../schema/auth.schema';
 import { UserService } from '../service/user.service';

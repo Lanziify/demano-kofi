@@ -1,5 +1,13 @@
 'use client';
 
+import { zodResolver } from '@hookform/resolvers/zod';
+import { MailIcon } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useTheme } from 'next-themes';
+import React from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Empty, EmptyDescription, EmptyHeader } from '@/components/ui/empty';
@@ -14,19 +22,15 @@ import {
 import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
 import { cn } from '@/lib/utils';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { MailIcon } from 'lucide-react';
-import { useTheme } from 'next-themes';
-import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import React from 'react';
-import { Controller, useForm } from 'react-hook-form';
-import { toast } from 'sonner';
 import { signUpUserAction } from '../actions/auth.actions';
-import { signUpSchema, SignUpSchemaValues } from '../schema/auth.schema';
+import { type SignUpSchemaValues, signUpSchema } from '../schema/auth.schema';
 
 type VerificationStatus =
-  'idle' | 'creating' | 'redirecting' | 'completed' | 'error';
+  | 'idle'
+  | 'creating'
+  | 'redirecting'
+  | 'completed'
+  | 'error';
 
 export function SignUpForm({
   className,
@@ -113,7 +117,8 @@ export function SignUpForm({
   return (
     <div
       className={cn('flex flex-col items-center gap-6', className)}
-      {...props}>
+      {...props}
+    >
       <Card className="w-full max-w-md">
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)}>

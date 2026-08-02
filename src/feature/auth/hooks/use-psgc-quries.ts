@@ -1,6 +1,5 @@
-import * as React from "react";
-import { useQuery } from "@tanstack/react-query";
-import { psgcQueries } from "../queries/psgc.queries";
+import { useQuery } from '@tanstack/react-query';
+import { psgcQueries } from '../queries/psgc.queries';
 
 interface UsePsgcQueriesProps {
   region: string;

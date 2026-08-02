@@ -1,10 +1,10 @@
-import { queryOptions } from "@tanstack/react-query";
-import { getUserProfile } from "../api/user.api";
+import { queryOptions } from '@tanstack/react-query';
+import { getUserProfile } from '../api/user.api';
 
 export const userQueries = {
   profile: () => {
     return queryOptions({
-      queryKey: ["me"],
+      queryKey: ['me'],
       queryFn: () => getUserProfile(),
     });
   },

@@ -19,7 +19,7 @@ export type PolicyPath<
 > =
   | PolicyKey
   | {
-      [K in PolicyKey]: `${K}.${Extract<keyof T[K]["actions"], string>}`;
+      [K in PolicyKey]: `${K}.${Extract<keyof T[K]['actions'], string>}`;
     }[PolicyKey];
 
 export const getPolicyStatement = <T extends Policy>(policies: T) => {
@@ -29,15 +29,15 @@ export const getPolicyStatement = <T extends Policy>(policies: T) => {
 
       return acc;
     },
-    {} as Record<keyof T, string[]>,
+    {} as Record<keyof T, string[]>
   );
 };
 
 export const getPolicyDescription = <T extends Policy, P extends PolicyPath<T>>(
   policies: T,
-  path: P,
+  path: P
 ) => {
-  const [policyKey, actionKey] = path.split(".");
+  const [policyKey, actionKey] = path.split('.');
 
   const policy = policies[policyKey];
 

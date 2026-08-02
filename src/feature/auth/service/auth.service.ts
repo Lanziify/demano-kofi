@@ -1,9 +1,9 @@
+import { headers } from 'next/headers';
 import { BadRequestError, NotFoundError } from '@/lib/errors/app-error';
 import { auth } from '@/utils/auth';
-import { headers } from 'next/headers';
-import { AuthRepository } from '../repository/auth.repository';
-import { UserRepository } from '../repository/user.repository';
-import {
+import type { AuthRepository } from '../repository/auth.repository';
+import type { UserRepository } from '../repository/user.repository';
+import type {
   RequestPasswordResetSchemaValues,
   ResetPasswordSchemaValues,
 } from '../schema/auth.schema';

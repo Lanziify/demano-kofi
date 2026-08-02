@@ -1,17 +1,17 @@
-import "dotenv/config";
-import { sql } from "kysely";
+import 'dotenv/config';
+import { sql } from 'kysely';
 
 async function run() {
-  if (process.env.NODE_ENV === "production") {
+  if (process.env.NODE_ENV === 'production') {
     console.error(
-      "❌ CRITICAL ERROR: Cannot wipe database in production mode!",
+      '❌ CRITICAL ERROR: Cannot wipe database in production mode!'
     );
     process.exit(1);
   }
 
-  const { db } = await import("../src/utils/db");
+  const { db } = await import('../src/utils/db');
 
-  console.log("⏳ Wiping all data from database tables...");
+  console.log('⏳ Wiping all data from database tables...');
 
   try {
     await sql`
@@ -32,9 +32,9 @@ async function run() {
     //   })
     //   .execute();
 
-    console.log("✅ Database data cleared successfully.");
+    console.log('✅ Database data cleared successfully.');
   } catch (error) {
-    console.error("❌ Failed to clear database:", error);
+    console.error('❌ Failed to clear database:', error);
   } finally {
     // Always destroy the pool connection so the terminal script exits immediately
     await db.destroy();

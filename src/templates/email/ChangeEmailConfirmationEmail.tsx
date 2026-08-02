@@ -1,4 +1,4 @@
-import { User } from "better-auth";
+import type { User } from 'better-auth';
 import {
   Body,
   Button,
@@ -11,7 +11,7 @@ import {
   Section,
   Tailwind,
   Text,
-} from "react-email";
+} from 'react-email';
 
 type ChangeEmailConfirmationEmailProps = {
   user: User | null;
@@ -64,7 +64,7 @@ export function ChangeEmailConfirmationEmail({
 
               <Section className="my-8 text-center">
                 <Button
-                  href={url ?? ""}
+                  href={url ?? ''}
                   className="rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white no-underline"
                 >
                   Confirm New Email

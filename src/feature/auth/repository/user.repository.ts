@@ -1,7 +1,7 @@
-import { DB, UserProfile } from "@/types/db";
-import { db } from "@/utils/db";
-import { Updateable, type Kysely, type Transaction } from "kysely";
-import { jsonObjectFrom } from "kysely/helpers/postgres";
+import type { Kysely, Transaction, Updateable } from 'kysely';
+import { jsonObjectFrom } from 'kysely/helpers/postgres';
+import type { DB, UserProfile } from '@/types/db';
+import { db } from '@/utils/db';
 
 type Database = Kysely<DB> | Transaction<DB>;
 
@@ -14,36 +14,36 @@ export class UserRepository {
 
   async setUserRole(userId: string, role: string) {
     return this.database
-      .updateTable("user")
+      .updateTable('user')
       .set({
         role: role,
       })
-      .where("id", "=", userId)
+      .where('id', '=', userId)
       .execute();
   }
 
   async findUserById(userId: string) {
     return this.database
-      .selectFrom("user")
+      .selectFrom('user')
       .selectAll()
-      .where("id", "=", userId)
+      .where('id', '=', userId)
       .executeTakeFirst();
   }
 
   async findUserByEmail(email: string) {
     return this.database
-      .selectFrom("user")
+      .selectFrom('user')
       .selectAll()
-      .where("email", "=", email)
+      .where('email', '=', email)
       .executeTakeFirst();
   }
 
   async createUserProfile(
     userId: string,
-    values: Omit<Updateable<UserProfile>, "username" | "image">,
+    values: Omit<Updateable<UserProfile>, 'username' | 'image'>
   ) {
     return this.database
-      .insertInto("userProfile")
+      .insertInto('userProfile')
       .values({
         userId,
         ...values,
@@ -53,40 +53,40 @@ export class UserRepository {
 
   async findUserProfile(userId: string) {
     return this.database
-      .selectFrom("user")
+      .selectFrom('user')
       .selectAll()
       .select((eb) => [
         jsonObjectFrom(
           eb
-            .selectFrom("userProfile")
+            .selectFrom('userProfile')
             .select([
-              "firstName",
-              "lastName",
-              "bio",
-              "phone",
-              "dateOfBirth",
-              "building",
-              "street",
-              "region",
-              "province",
-              "municipality",
-              "barangay",
+              'firstName',
+              'lastName',
+              'bio',
+              'phone',
+              'dateOfBirth',
+              'building',
+              'street',
+              'region',
+              'province',
+              'municipality',
+              'barangay',
             ])
-            .whereRef("userProfile.userId", "=", "user.id"),
-        ).as("profile"),
+            .whereRef('userProfile.userId', '=', 'user.id')
+        ).as('profile'),
       ])
-      .where("user.id", "=", userId)
+      .where('user.id', '=', userId)
       .executeTakeFirst();
   }
 
   async updateUserProfile(
     userId: string,
-    values: Omit<Updateable<UserProfile>, "userId" | "createdAt" | "updatedAt">,
+    values: Omit<Updateable<UserProfile>, 'userId' | 'createdAt' | 'updatedAt'>
   ) {
     return this.database
-      .updateTable("userProfile")
+      .updateTable('userProfile')
       .set(values)
-      .where("userId", "=", userId)
+      .where('userId', '=', userId)
       .executeTakeFirst();
   }
 }

@@ -1,16 +1,16 @@
-import { NextResponse } from "next/server";
-import { UserRepository } from "@/feature/auth/repository/user.repository";
-import { profileSchemaWithUserId } from "@/feature/auth/schema/profile.schema";
-import { UserService } from "@/feature/auth/service/user.service";
-import { apiErrorHandler, requiredSession } from "@/lib/api-handler";
-import { formDataToObject } from "@/utils/api-helpers";
-import { auth } from "@/utils/auth";
+import { NextResponse } from 'next/server';
+import { UserRepository } from '@/feature/auth/repository/user.repository';
+import { profileSchemaWithUserId } from '@/feature/auth/schema/profile.schema';
+import { UserService } from '@/feature/auth/service/user.service';
+import { apiErrorHandler, requiredSession } from '@/lib/api-handler';
+import { formDataToObject } from '@/utils/api-helpers';
+import { auth } from '@/utils/auth';
 
 const repository = new UserRepository();
 const service = new UserService(repository);
 
 export type UserProfileApiResponse = Awaited<
-  ReturnType<UserService["getUserProfile"]>
+  ReturnType<UserService['getUserProfile']>
 >;
 
 export const GET = apiErrorHandler(
@@ -25,11 +25,11 @@ export const GET = apiErrorHandler(
   },
   {
     guards: [requiredSession],
-  },
+  }
 );
 
 export type UpdateUserProfileApiResponse = Awaited<
-  ReturnType<UserService["updateUserProfile"]>
+  ReturnType<UserService['updateUserProfile']>
 >;
 
 export const PATCH = apiErrorHandler(
@@ -43,5 +43,5 @@ export const PATCH = apiErrorHandler(
 
     return NextResponse.json(result, { status: 200 });
   },
-  { guards: [requiredSession] },
+  { guards: [requiredSession] }
 );

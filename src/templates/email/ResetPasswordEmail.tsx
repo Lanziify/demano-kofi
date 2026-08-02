@@ -1,4 +1,4 @@
-import { User } from 'better-auth';
+import type { User } from 'better-auth';
 import {
   Body,
   Button,
@@ -47,7 +47,8 @@ export function ResetPasswordEmail({ user, url }: ResetPasswordEmailProps) {
               <Section className="my-8 text-center">
                 <Button
                   href={url}
-                  className="rounded-lg bg-slate-900 px-6 py-3 text-base font-semibold text-white no-underline">
+                  className="rounded-lg bg-slate-900 px-6 py-3 text-base font-semibold text-white no-underline"
+                >
                   Reset Password
                 </Button>
               </Section>

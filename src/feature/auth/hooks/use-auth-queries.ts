@@ -1,5 +1,5 @@
-import { useQueries, useQuery } from "@tanstack/react-query";
-import { authQueries } from "../queries/auth.queries";
+import { useQuery } from '@tanstack/react-query';
+import { authQueries } from '../queries/auth.queries';
 
 type AuthQueriesHookProps = {
   email: string;

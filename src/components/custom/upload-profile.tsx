@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { Camera } from "lucide-react";
-import * as React from "react";
+import { Camera } from 'lucide-react';
+import * as React from 'react';
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 type UploadProfileAvatarProps = {
   imageUrl?: string | null;
@@ -15,7 +15,7 @@ type UploadProfileAvatarProps = {
 export function UploadProfileAvatar({
   imageUrl,
   value,
-  fallback = "JD",
+  fallback = 'JD',
   onChange,
 }: UploadProfileAvatarProps) {
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -48,7 +48,7 @@ export function UploadProfileAvatar({
 
   React.useEffect(() => {
     return () => {
-      if (preview?.startsWith("blob:")) {
+      if (preview?.startsWith('blob:')) {
         URL.revokeObjectURL(preview);
       }
     };

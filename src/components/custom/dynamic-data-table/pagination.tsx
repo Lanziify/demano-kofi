@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
+import type { Table } from '@tanstack/react-table';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
   Select,
-  SelectTrigger,
   SelectContent,
   SelectItem,
+  SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Table } from "@tanstack/react-table";
+} from '@/components/ui/select';
 
 export default function DataTablePagination<T>({ table }: { table: Table<T> }) {
   return (
@@ -17,11 +17,11 @@ export default function DataTablePagination<T>({ table }: { table: Table<T> }) {
       <div
         className={`text-muted-foreground flex-1 ${
           table.getFilteredSelectedRowModel().rows.length === 0
-            ? "invisible"
-            : "visible"
+            ? 'invisible'
+            : 'visible'
         }`}
       >
-        {table.getFilteredSelectedRowModel().rows.length} of{" "}
+        {table.getFilteredSelectedRowModel().rows.length} of{' '}
         {table.getFilteredRowModel().rows.length} row(s) selected
       </div>
       <div className="mt-2 flex flex-col-reverse items-center gap-4 sm:flex-row sm:gap-6 lg:gap-8">
@@ -46,7 +46,7 @@ export default function DataTablePagination<T>({ table }: { table: Table<T> }) {
           </Select>
         </div>
         <div className="flex items-center justify-center font-medium">
-          Page {table.getState().pagination.pageIndex + 1} of{" "}
+          Page {table.getState().pagination.pageIndex + 1} of{' '}
           {table.getPageCount()}
         </div>
         <div className="item-center flex gap-2">

@@ -1,8 +1,8 @@
-import nodemailer from "nodemailer";
-import nodemailerSendgrid from "nodemailer-sendgrid";
+import nodemailer from 'nodemailer';
+import nodemailerSendgrid from 'nodemailer-sendgrid';
 
 export const transporter =
-  process.env.NODE_ENV === "development"
+  process.env.NODE_ENV === 'development'
     ? nodemailer.createTransport({
         host: process.env.SMTP_HOST,
         port: Number(process.env.SMTP_PORT),
@@ -15,5 +15,5 @@ export const transporter =
     : nodemailer.createTransport(
         nodemailerSendgrid({
           apiKey: process.env.SENDGRID_API_KEY!,
-        }),
+        })
       );

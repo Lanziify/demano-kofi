@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import React from "react";
-import { Controller, useForm } from "react-hook-form";
-import { ReauthenticateDialog } from "@/components/custom/reauthenticate-dialog";
+import { zodResolver } from '@hookform/resolvers/zod';
+import React from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { ReauthenticateDialog } from '@/components/custom/reauthenticate-dialog';
 import {
   ResultDialog,
   type ResultDialogOptions,
-} from "@/components/custom/result-dialog";
-import { Button } from "@/components/ui/button";
+} from '@/components/custom/result-dialog';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -16,22 +16,22 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 import {
   Field,
   FieldError,
   FieldGroup,
   FieldLabel,
-} from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { Spinner } from "@/components/ui/spinner";
-import { useVerifyUserPassword } from "@/feature/auth/mutations/auth.mutation";
-import { useUpdateEmailAddress } from "@/feature/auth/mutations/user.mutation";
+} from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import { Spinner } from '@/components/ui/spinner';
+import { useVerifyUserPassword } from '@/feature/auth/mutations/auth.mutation';
+import { useUpdateEmailAddress } from '@/feature/auth/mutations/user.mutation';
 import {
   type EmailChangeFormSchemaValues,
   emailChangeFormSchema,
-} from "@/feature/auth/schema/account.schema";
-import { useDialog } from "@/hooks/use-dialog";
+} from '@/feature/auth/schema/account.schema';
+import { useDialog } from '@/hooks/use-dialog';
 
 export default function AccountEmailForm() {
   const [isReauthDialogOpen, setIsReauthDialogOpen] = React.useState(false);
@@ -43,8 +43,8 @@ export default function AccountEmailForm() {
   const form = useForm<EmailChangeFormSchemaValues>({
     resolver: zodResolver(emailChangeFormSchema),
     defaultValues: {
-      email: "",
-      confirmEmail: "",
+      email: '',
+      confirmEmail: '',
     },
   });
 
@@ -64,9 +64,9 @@ export default function AccountEmailForm() {
     resultDialog.setDialog(null);
 
     resultDialog.show({
-      variant: "loading",
-      title: "Upading email",
-      description: "Please wait while we update your email address.",
+      variant: 'loading',
+      title: 'Upading email',
+      description: 'Please wait while we update your email address.',
     });
 
     const passwordCheckResult = await verifyUserPassword.mutateAsync(password);
@@ -76,19 +76,19 @@ export default function AccountEmailForm() {
         prev
           ? {
               ...prev,
-              variant: "error",
-              title: "Verification failed",
+              variant: 'error',
+              title: 'Verification failed',
               description: "We couldn't verify your account. Please try again.",
             }
-          : prev,
+          : prev
       );
 
       return;
     }
 
     const emailUpdateResult = await updateEmailAddress.mutateAsync({
-      newEmail: getValues("email"),
-      callbackURL: "/verification/email-change-confirmation",
+      newEmail: getValues('email'),
+      callbackURL: '/verification/email-change-confirmation',
     });
 
     if (!emailUpdateResult.data && emailUpdateResult.error) {
@@ -96,11 +96,11 @@ export default function AccountEmailForm() {
         prev
           ? {
               ...prev,
-              variant: "error",
-              title: "Email update failed",
+              variant: 'error',
+              title: 'Email update failed',
               description: `We couldn't update your email address. ${emailUpdateResult.error.message}.`,
             }
-          : prev,
+          : prev
       );
 
       return;
@@ -110,12 +110,12 @@ export default function AccountEmailForm() {
       prev
         ? {
             ...prev,
-            variant: "success",
-            title: "Check your new email",
+            variant: 'success',
+            title: 'Check your new email',
             description:
               "We've sent a verification email to your new address. Verify it to complete the email change.",
           }
-        : prev,
+        : prev
     );
   }
 

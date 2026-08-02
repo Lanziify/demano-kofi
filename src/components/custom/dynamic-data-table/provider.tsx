@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import React from "react";
-import {
+import type {
   ColumnDef,
   ColumnFiltersState,
   Table,
   VisibilityState,
-} from "@tanstack/react-table";
-import useDynamicTable from "@/hooks/use-dynamic-table";
+} from '@tanstack/react-table';
+import React from 'react';
+import useDynamicTable from '@/hooks/use-dynamic-table';
 
 interface DynamicTableContextType<T> {
   table: Table<T>;
@@ -32,7 +32,7 @@ export function useDynamicTableContext<T>() {
   const ctx = React.useContext(DynamicTableContext);
 
   if (!ctx) {
-    throw new Error("Cannot use this context outside its wrapper");
+    throw new Error('Cannot use this context outside its wrapper');
   }
 
   return ctx as DynamicTableContextType<T>;

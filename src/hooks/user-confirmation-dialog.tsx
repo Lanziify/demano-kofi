@@ -1,10 +1,10 @@
 'use client';
 
-import {
+import React from 'react';
+import type {
   ConfirmationDialogOptions,
   ConfirmationDialogProps,
 } from '@/components/custom/confirmation-dialog';
-import React from 'react';
 
 type ConfirmationDialogState = Omit<ConfirmationDialogProps, 'onOpenChange'>;
 

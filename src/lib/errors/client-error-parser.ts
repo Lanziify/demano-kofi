@@ -1,7 +1,7 @@
-import axios from "axios";
-import type { ApiErrorResponse } from "./api-error-parser";
-import { AppError } from "./app-error";
-import type { ErrorCode } from "./error-codes";
+import axios from 'axios';
+import type { ApiErrorResponse } from './api-error-parser';
+import { AppError } from './app-error';
+import type { ErrorCode } from './error-codes';
 
 export interface ClientErrorOptions extends ErrorOptions {
   errorCode: ErrorCode;
@@ -33,7 +33,7 @@ export class ClientRequestError extends Error {
 }
 
 export function withClientErrorHandling<TArgs extends unknown[], TResult>(
-  fn: (...args: TArgs) => Promise<TResult>,
+  fn: (...args: TArgs) => Promise<TResult>
 ) {
   return async (...args: TArgs): Promise<TResult> => {
     try {
@@ -47,11 +47,11 @@ export function withClientErrorHandling<TArgs extends unknown[], TResult>(
         throw new ClientRequestError(
           error.response?.data?.message ?? error.message,
           {
-            errorCode: error.response?.data?.errorCode ?? "UNEXPECTED_ERROR",
+            errorCode: error.response?.data?.errorCode ?? 'UNEXPECTED_ERROR',
             statusCode: error.response?.status ?? 500,
             details: error.response?.data?.details,
             cause: error,
-          },
+          }
         );
       }
 

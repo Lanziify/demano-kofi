@@ -1,5 +1,6 @@
-"use client";
+'use client';
 
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -7,11 +8,10 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import AccountEmailForm from "./_components/email-change-form";
-import AccountUsernameForm from "./_components/username-change-form";
-import AccountPasswordForm from "./_components/password-change-form";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/card';
+import AccountEmailForm from './_components/email-change-form';
+import AccountPasswordForm from './_components/password-change-form';
+import AccountUsernameForm from './_components/username-change-form';
 
 export default function AccountPage() {
   return (

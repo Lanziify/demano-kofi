@@ -23,7 +23,7 @@ export const appDbErrorCodes = {
   NOT_NULL_VIOLATION: '23502',
   CHECK_VIOLATION: '23514',
   INVALID_TEXT_REPRESENTATION: '22P02',
-  DATABASE_ERROR: 'fallback'
+  DATABASE_ERROR: 'fallback',
 } as const;
 
 export type AppDbErrorCodes = keyof typeof appDbErrorCodes;

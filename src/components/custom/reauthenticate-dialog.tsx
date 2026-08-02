@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Controller, useForm } from 'react-hook-form';
 
 import {
   Dialog,
@@ -10,15 +10,15 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   type ReauthenticateSchemaValues,
   reauthenticateSchema,
-} from "@/feature/auth/schema/auth.schema";
-import { Button } from "../ui/button";
-import { Field, FieldError, FieldGroup, FieldLabel } from "../ui/field";
-import { Input } from "../ui/input";
-import { Spinner } from "../ui/spinner";
+} from '@/feature/auth/schema/auth.schema';
+import { Button } from '../ui/button';
+import { Field, FieldError, FieldGroup, FieldLabel } from '../ui/field';
+import { Input } from '../ui/input';
+import { Spinner } from '../ui/spinner';
 
 interface CreateCampusDialogProps {
   open: boolean;
@@ -39,7 +39,7 @@ export function ReauthenticateDialog({
   } = useForm<ReauthenticateSchemaValues>({
     resolver: zodResolver(reauthenticateSchema),
     defaultValues: {
-      password: "",
+      password: '',
     },
   });
 

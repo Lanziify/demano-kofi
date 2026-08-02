@@ -1,7 +1,7 @@
+import { NextResponse } from 'next/server';
 import { UserRepository } from '@/feature/auth/repository/user.repository';
 import { UserService } from '@/feature/auth/service/user.service';
 import { apiErrorHandler } from '@/lib/api-handler';
-import { NextResponse } from 'next/server';
 
 const repository = new UserRepository();
 const service = new UserService(repository);

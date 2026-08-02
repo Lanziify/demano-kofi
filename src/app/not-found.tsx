@@ -1,5 +1,4 @@
-import Link from "next/link";
-import { Coffee, ArrowLeft, Search } from "lucide-react";
+import { Coffee, Search } from 'lucide-react';
 
 export default function NotFound() {
   return (

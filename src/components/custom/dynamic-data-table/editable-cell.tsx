@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import React from "react";
-import { Input } from "@/components/ui/input";
-import { CellContext } from "@tanstack/react-table";
+import type { CellContext } from '@tanstack/react-table';
+import React from 'react';
+import { Input } from '@/components/ui/input';
 
 export default function EditableCell<TData, TValue>({
   getValue,

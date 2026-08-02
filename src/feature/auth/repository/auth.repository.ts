@@ -1,6 +1,6 @@
-import { DB } from "@/types/db";
-import { db } from "@/utils/db";
-import { type Kysely, type Transaction } from "kysely";
+import type { Kysely, Transaction } from 'kysely';
+import type { DB } from '@/types/db';
+import { db } from '@/utils/db';
 
 type Database = Kysely<DB> | Transaction<DB>;
 
@@ -13,10 +13,10 @@ export class AuthRepository {
 
   findPendingVerification(identifier: string) {
     return this.database
-      .selectFrom("verification")
+      .selectFrom('verification')
       .selectAll()
-      .where("verification.identifier", "=", identifier)
-      .orderBy("createdAt", "desc")
+      .where('verification.identifier', '=', identifier)
+      .orderBy('createdAt', 'desc')
       .executeTakeFirst();
   }
 }

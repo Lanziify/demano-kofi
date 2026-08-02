@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { zodResolver } from "@hookform/resolvers/zod";
+import { zodResolver } from '@hookform/resolvers/zod';
 
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm } from 'react-hook-form';
 import {
   ResultDialog,
   type ResultDialogOptions,
-} from "@/components/custom/result-dialog";
-import { Button } from "@/components/ui/button";
+} from '@/components/custom/result-dialog';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -15,21 +15,21 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 import {
   Field,
   FieldError,
   FieldGroup,
   FieldLabel,
-} from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { Spinner } from "@/components/ui/spinner";
-import { useChangePassword } from "@/feature/auth/mutations/user.mutation";
+} from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import { Spinner } from '@/components/ui/spinner';
+import { useChangePassword } from '@/feature/auth/mutations/user.mutation';
 import {
   type PasswordUpdateSchemaValues,
   passwordUpdateSchema,
-} from "@/feature/auth/schema/account.schema";
-import { useDialog } from "@/hooks/use-dialog";
+} from '@/feature/auth/schema/account.schema';
+import { useDialog } from '@/hooks/use-dialog';
 
 export default function AccountPasswordForm() {
   const changePassword = useChangePassword();
@@ -38,9 +38,9 @@ export default function AccountPasswordForm() {
   const form = useForm<PasswordUpdateSchemaValues>({
     resolver: zodResolver(passwordUpdateSchema),
     defaultValues: {
-      currentPassword: "",
-      password: "",
-      confirmPassword: "",
+      currentPassword: '',
+      password: '',
+      confirmPassword: '',
     },
   });
 
@@ -55,9 +55,9 @@ export default function AccountPasswordForm() {
     resultDialog.setDialog(null);
 
     resultDialog.show({
-      variant: "loading",
-      title: "Changing password",
-      description: "Please wait while we update your password.",
+      variant: 'loading',
+      title: 'Changing password',
+      description: 'Please wait while we update your password.',
     });
 
     const passwordChangeResult = await changePassword.mutateAsync({
@@ -70,12 +70,12 @@ export default function AccountPasswordForm() {
         prev
           ? {
               ...prev,
-              variant: "error",
-              title: "Password change failed",
+              variant: 'error',
+              title: 'Password change failed',
               description:
                 "We couldn't change your password at this time. Please try again.",
             }
-          : prev,
+          : prev
       );
 
       return;
@@ -85,11 +85,11 @@ export default function AccountPasswordForm() {
       prev
         ? {
             ...prev,
-            variant: "success",
-            title: "Password changed",
-            description: "Your password has been updated successfully.",
+            variant: 'success',
+            title: 'Password changed',
+            description: 'Your password has been updated successfully.',
           }
-        : prev,
+        : prev
     );
 
     reset();

@@ -1,4 +1,4 @@
-import { appDbErrorCodes } from './error-codes';
+import type { appDbErrorCodes } from './error-codes';
 
 type PostgresError = {
   code?: (typeof appDbErrorCodes)[keyof typeof appDbErrorCodes];

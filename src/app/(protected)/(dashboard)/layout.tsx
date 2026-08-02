@@ -1,12 +1,12 @@
-import React from "react";
+import type React from 'react';
+import { DashboardNavUser } from '@/components/custom/layout/dashboard-nav-user';
+import { DashboardSidebar } from '@/components/custom/layout/dashboard-sidebar';
+import { Separator } from '@/components/ui/separator';
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
-} from "@/components/ui/sidebar";
-import { DashboardSidebar } from "@/components/custom/layout/dashboard-sidebar";
-import { Separator } from "@/components/ui/separator";
-import { DashboardNavUser } from "@/components/custom/layout/dashboard-nav-user";
+} from '@/components/ui/sidebar';
 
 type DashboardLayoutProps = {
   breadcrumbs: React.ReactNode;
@@ -21,7 +21,7 @@ export default async function DashboardLayout({
     <SidebarProvider
       style={
         {
-          "--sidebar-width": "250px",
+          '--sidebar-width': '250px',
         } as React.CSSProperties
       }
     >

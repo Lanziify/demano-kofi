@@ -2,9 +2,9 @@ import {
   DeleteObjectCommand,
   GetObjectCommand,
   PutObjectCommand,
-} from "@aws-sdk/client-s3";
-import { env } from "@/env";
-import { s3Client } from "./s3";
+} from '@aws-sdk/client-s3';
+import { env } from '@/env';
+import { s3Client } from './s3';
 
 const bucket = env.STORAGE_BUCKET;
 
@@ -23,7 +23,7 @@ export async function uploadObject({
       Key: key,
       Body: body,
       ContentType: contentType,
-    }),
+    })
   );
 }
 
@@ -32,7 +32,7 @@ export async function deleteObject(key: string) {
     new DeleteObjectCommand({
       Bucket: bucket,
       Key: key,
-    }),
+    })
   );
 }
 
@@ -41,7 +41,7 @@ export async function getObject(key: string) {
     new GetObjectCommand({
       Bucket: bucket,
       Key: key,
-    }),
+    })
   );
 }
 

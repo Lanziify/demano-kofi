@@ -1,3 +1,7 @@
+import { betterAuth } from 'better-auth';
+import { nextCookies } from 'better-auth/next-js';
+import { admin, emailOTP, organization, username } from 'better-auth/plugins';
+import { render } from 'react-email';
 import { appRoles, platformAccessControl } from '@/lib/auth/permissions';
 import {
   ChangeEmailConfirmationEmail,
@@ -5,10 +9,6 @@ import {
   ResetPasswordEmail,
   VerificationEmail,
 } from '@/templates/email';
-import { betterAuth } from 'better-auth';
-import { nextCookies } from 'better-auth/next-js';
-import { admin, emailOTP, organization, username } from 'better-auth/plugins';
-import { render } from 'react-email';
 import { db } from './db';
 import { transporter } from './email';
 

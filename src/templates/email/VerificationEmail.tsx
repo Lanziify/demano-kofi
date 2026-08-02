@@ -1,8 +1,5 @@
-import { User } from "better-auth";
-import { UserWithRole } from "better-auth/plugins";
 import {
   Body,
-  Button,
   Container,
   Head,
   Heading,
@@ -12,7 +9,7 @@ import {
   Section,
   Tailwind,
   Text,
-} from "react-email";
+} from 'react-email';
 
 type VerificationEmailProps = {
   otp: string;

@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import { CheckCircle2 } from "lucide-react";
-import { useEffect } from "react";
+import { CheckCircle2 } from 'lucide-react';
+import { useEffect } from 'react';
 
-import { Empty, EmptyDescription, EmptyHeader } from "@/components/ui/empty";
+import { Empty, EmptyDescription, EmptyHeader } from '@/components/ui/empty';
 
 export default function VerifiedPage() {
   useEffect(() => {
-    const channel = new BroadcastChannel("email-change-confirmation");
+    const channel = new BroadcastChannel('email-change-confirmation');
 
-    channel.postMessage("email-change-confirmation");
+    channel.postMessage('email-change-confirmation');
     channel.close();
 
     const timer = setTimeout(() => {
