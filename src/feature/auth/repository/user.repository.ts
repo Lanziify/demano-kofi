@@ -1,6 +1,6 @@
 import type { Kysely, Transaction, Updateable } from 'kysely';
 import { jsonObjectFrom } from 'kysely/helpers/postgres';
-import type { DB, UserProfile } from '@/types/db';
+import type { DB, UserProfiles } from '@/types/db';
 import { db } from '@/utils/db';
 
 type Database = Kysely<DB> | Transaction<DB>;
@@ -40,10 +40,10 @@ export class UserRepository {
 
   async createUserProfile(
     userId: string,
-    values: Omit<Updateable<UserProfile>, 'username' | 'image'>
+    values: Omit<Updateable<UserProfiles>, 'username' | 'image'>
   ) {
     return this.database
-      .insertInto('userProfile')
+      .insertInto('userProfiles')
       .values({
         userId,
         ...values,
@@ -58,7 +58,7 @@ export class UserRepository {
       .select((eb) => [
         jsonObjectFrom(
           eb
-            .selectFrom('userProfile')
+            .selectFrom('userProfiles')
             .select([
               'firstName',
               'lastName',
@@ -72,7 +72,7 @@ export class UserRepository {
               'municipality',
               'barangay',
             ])
-            .whereRef('userProfile.userId', '=', 'user.id')
+            .whereRef('userProfiles.userId', '=', 'user.id')
         ).as('profile'),
       ])
       .where('user.id', '=', userId)
@@ -81,10 +81,10 @@ export class UserRepository {
 
   async updateUserProfile(
     userId: string,
-    values: Omit<Updateable<UserProfile>, 'userId' | 'createdAt' | 'updatedAt'>
+    values: Omit<Updateable<UserProfiles>, 'userId' | 'createdAt' | 'updatedAt'>
   ) {
     return this.database
-      .updateTable('userProfile')
+      .updateTable('userProfiles')
       .set(values)
       .where('userId', '=', userId)
       .executeTakeFirst();

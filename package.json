@@ -10,7 +10,7 @@
     "format": "biome format --write",
     "migrate:better-auth": "bunx --bun @better-auth/cli migrate",
     "migrate:kysely": "bunx --bun kysely migrate:latest",
-    "generate:types": "kysely-codegen --out-file ./src/types/db.d.ts",
+    "generate:types": "kysely-codegen --camel-case --out-file ./src/types/db.d.ts",
     "db:clean": "tsx --env-file=.env ./scripts/clean-db.ts",
     "db:fresh": "tsx --env-file=.env ./scripts/fresh-db.ts"
   },

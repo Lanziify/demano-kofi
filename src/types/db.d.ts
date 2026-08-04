@@ -3,7 +3,7 @@
  * Please do not edit it manually.
  */
 
-import type { ColumnType } from 'kysely';
+import type { ColumnType } from "kysely";
 
 export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
@@ -84,7 +84,7 @@ export interface User {
   username: string | null;
 }
 
-export interface UserProfile {
+export interface UserProfiles {
   barangay: string | null;
   bio: string | null;
   building: string | null;
@@ -106,7 +106,7 @@ export interface Verification {
   expiresAt: Timestamp;
   id: string;
   identifier: string;
-  resendAvailableAt: Timestamp;
+  resendAvailableAt: Generated<Timestamp>;
   updatedAt: Generated<Timestamp>;
   value: string;
 }
@@ -118,6 +118,6 @@ export interface DB {
   organization: Organization;
   session: Session;
   user: User;
-  userProfile: UserProfile;
+  userProfiles: UserProfiles;
   verification: Verification;
 }

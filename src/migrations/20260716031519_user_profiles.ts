@@ -1,17 +1,18 @@
 import { type Kysely, sql } from 'kysely';
 
-// `any` is required here since migrations should be frozen in time. alternatively, keep a "snapshot" db interface.
+// `any` is required here since migrations should be frozen in time.
+// Alternatively, keep a "snapshot" DB interface.
 export async function up(db: Kysely<any>): Promise<void> {
   await db.schema
-    .createTable('userProfile')
-    .addColumn('userId', 'text', (col) =>
+    .createTable('user_profiles')
+    .addColumn('user_id', 'text', (col) =>
       col.primaryKey().references('user.id').onDelete('cascade')
     )
-    .addColumn('firstName', 'text')
-    .addColumn('lastName', 'text')
+    .addColumn('first_name', 'text')
+    .addColumn('last_name', 'text')
     .addColumn('bio', 'text')
     .addColumn('phone', 'text')
-    .addColumn('dateOfBirth', 'date')
+    .addColumn('date_of_birth', 'date')
 
     // Address
     .addColumn('building', 'text')
@@ -21,16 +22,17 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn('municipality', 'text')
     .addColumn('barangay', 'text')
 
-    .addColumn('createdAt', 'timestamptz', (col) =>
+    .addColumn('created_at', 'timestamptz', (col) =>
       col.defaultTo(sql`now()`).notNull()
     )
-    .addColumn('updatedAt', 'timestamptz', (col) =>
+    .addColumn('updated_at', 'timestamptz', (col) =>
       col.defaultTo(sql`now()`).notNull()
     )
     .execute();
 }
 
-// `any` is required here since migrations should be frozen in time. alternatively, keep a "snapshot" db interface.
+// `any` is required here since migrations should be frozen in time.
+// Alternatively, keep a "snapshot" DB interface.
 export async function down(db: Kysely<any>): Promise<void> {
-  await db.schema.dropTable('userProfile').execute();
+  await db.schema.dropTable('user_profiles').execute();
 }
