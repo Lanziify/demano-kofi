@@ -13,6 +13,8 @@ export const appApiErrorCodes = {
   // User
   USERNAME_TAKEN: 'USERNAME_TAKEN',
   USER_NOT_FOUND: 'USER_NOT_FOUND',
+  // Product
+  CATEGORY_NOT_FOUND: 'CATEGORY_NOT_FOUND',
 } as const;
 
 export type AppApiErrorCodes = keyof typeof appApiErrorCodes;

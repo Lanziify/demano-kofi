@@ -5,22 +5,25 @@ import { BadRequestError } from './errors/app-error';
 
 type Context = { params: Promise<Record<string, string | string[]>> };
 
-type ApiRouteHandler = (
+type ApiRouteHandler<TContext = Context> = (
   req: NextRequest,
-  context: Context
+  context: TContext
 ) => Promise<NextResponse>;
 
-type ApiGuard = (req: NextRequest, context: Context) => Promise<void>;
+type ApiGuard<TContext = Context> = (
+  req: NextRequest,
+  context: TContext
+) => Promise<void>;
 
-interface ApiHandlerOptions {
-  guards?: ApiGuard[];
+interface ApiHandlerOptions<TContext = Context> {
+  guards?: ApiGuard<TContext>[];
 }
 
-export const apiErrorHandler = (
-  handler: ApiRouteHandler,
-  options?: ApiHandlerOptions
-): ApiRouteHandler => {
-  return async (req: NextRequest, context: Context) => {
+export const apiErrorHandler = <TContext = Context>(
+  handler: ApiRouteHandler<TContext>,
+  options?: ApiHandlerOptions<TContext>
+): ApiRouteHandler<TContext> => {
+  return async (req: NextRequest, context: TContext) => {
     try {
       if (options?.guards) {
         for (const guard of options.guards) {
@@ -34,7 +37,7 @@ export const apiErrorHandler = (
   };
 };
 
-export const requiredSession: ApiGuard = async (req) => {
+export const requiredSession = async (req: NextRequest) => {
   const session = await auth.api.getSession({
     headers: req.headers,
   });

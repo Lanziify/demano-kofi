@@ -46,6 +46,15 @@ export interface Member {
   userId: string;
 }
 
+export interface ModifierGroups {
+  createdAt: Generated<Timestamp>;
+  id: Generated<string>;
+  isRequired: Generated<boolean>;
+  name: string;
+  selectionType: string;
+  updatedAt: Generated<Timestamp>;
+}
+
 export interface Organization {
   createdAt: Timestamp;
   id: string;
@@ -53,6 +62,54 @@ export interface Organization {
   metadata: string | null;
   name: string;
   slug: string;
+}
+
+export interface ProductCategories {
+  createdAt: Generated<Timestamp>;
+  description: string | null;
+  id: Generated<string>;
+  name: string;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface ProductImages {
+  id: Generated<string>;
+  imageUrl: string;
+  productId: string;
+}
+
+export interface ProductModifierGroups {
+  id: Generated<string>;
+  modifierGroupId: string;
+  productId: string;
+}
+
+export interface ProductModifiers {
+  id: Generated<string>;
+  modifierGroupId: string;
+  name: string;
+  priceAdjustment: Generated<number>;
+}
+
+export interface Products {
+  categoryId: string | null;
+  createdAt: Generated<Timestamp>;
+  description: string | null;
+  id: Generated<string>;
+  isAvailable: Generated<boolean>;
+  isFeatured: Generated<boolean>;
+  name: string;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface ProductVariants {
+  createdAt: Generated<Timestamp>;
+  id: Generated<string>;
+  name: string;
+  price: number;
+  productId: string;
+  sku: string;
+  updatedAt: Generated<Timestamp>;
 }
 
 export interface Session {
@@ -115,7 +172,14 @@ export interface DB {
   account: Account;
   invitation: Invitation;
   member: Member;
+  modifierGroups: ModifierGroups;
   organization: Organization;
+  productCategories: ProductCategories;
+  productImages: ProductImages;
+  productModifierGroups: ProductModifierGroups;
+  productModifiers: ProductModifiers;
+  products: Products;
+  productVariants: ProductVariants;
   session: Session;
   user: User;
   userProfiles: UserProfiles;
