@@ -38,21 +38,34 @@ export interface Invitation {
   status: string;
 }
 
+export interface Media {
+  createdAt: Generated<Timestamp>;
+  fileSize: number;
+  height: number | null;
+  id: Generated<string>;
+  mimeType: string;
+  storageKey: string;
+  updatedAt: Generated<Timestamp>;
+  width: number | null;
+}
+
+export interface MediaVariants {
+  createdAt: Generated<Timestamp>;
+  fileSize: number | null;
+  height: number | null;
+  id: Generated<string>;
+  mediaId: string;
+  storageKey: string;
+  type: string;
+  width: number | null;
+}
+
 export interface Member {
   createdAt: Timestamp;
   id: string;
   organizationId: string;
   role: string;
   userId: string;
-}
-
-export interface ModifierGroups {
-  createdAt: Generated<Timestamp>;
-  id: Generated<string>;
-  isRequired: Generated<boolean>;
-  name: string;
-  selectionType: string;
-  updatedAt: Generated<Timestamp>;
 }
 
 export interface Organization {
@@ -72,23 +85,34 @@ export interface ProductCategories {
   updatedAt: Generated<Timestamp>;
 }
 
+export interface ProductCategoryModifierGroups {
+  modifierGroupId: string;
+  productCategoryId: string;
+}
+
 export interface ProductImages {
-  id: Generated<string>;
-  imageUrl: string;
+  isPrimary: Generated<boolean>;
+  mediaId: string;
   productId: string;
+  sortOrder: Generated<number>;
 }
 
 export interface ProductModifierGroups {
+  createdAt: Generated<Timestamp>;
   id: Generated<string>;
-  modifierGroupId: string;
-  productId: string;
+  isRequired: Generated<boolean>;
+  name: string;
+  selectionType: string;
+  updatedAt: Generated<Timestamp>;
 }
 
 export interface ProductModifiers {
+  createdAt: Generated<Timestamp>;
   id: Generated<string>;
   modifierGroupId: string;
   name: string;
   priceAdjustment: Generated<number>;
+  updatedAt: Generated<Timestamp>;
 }
 
 export interface Products {
@@ -171,10 +195,12 @@ export interface Verification {
 export interface DB {
   account: Account;
   invitation: Invitation;
+  media: Media;
+  mediaVariants: MediaVariants;
   member: Member;
-  modifierGroups: ModifierGroups;
   organization: Organization;
   productCategories: ProductCategories;
+  productCategoryModifierGroups: ProductCategoryModifierGroups;
   productImages: ProductImages;
   productModifierGroups: ProductModifierGroups;
   productModifiers: ProductModifiers;

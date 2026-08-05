@@ -49,13 +49,15 @@ export async function up(db: Kysely<any>): Promise<void> {
   // Product Images
   await db.schema
     .createTable('product_images')
-    .addColumn('id', 'uuid', (col) =>
-      col.primaryKey().defaultTo(sql`gen_random_uuid()`)
-    )
     .addColumn('product_id', 'uuid', (col) =>
       col.references('products.id').onDelete('cascade').notNull()
     )
-    .addColumn('image_url', 'text', (col) => col.notNull())
+    .addColumn('media_id', 'uuid', (col) =>
+      col.references('media.id').onDelete('cascade').notNull()
+    )
+    .addColumn('is_primary', 'boolean', (col) => col.defaultTo(false).notNull())
+    .addColumn('sort_order', 'integer', (col) => col.defaultTo(0).notNull())
+    .addPrimaryKeyConstraint('product_images_pk', ['product_id', 'media_id'])
     .execute();
 
   // Product Variants
@@ -81,7 +83,7 @@ export async function up(db: Kysely<any>): Promise<void> {
 
   // Modifier Groups
   await db.schema
-    .createTable('modifier_groups')
+    .createTable('product_modifier_groups')
     .addColumn('id', 'uuid', (col) =>
       col.primaryKey().defaultTo(sql`gen_random_uuid()`)
     )
@@ -98,20 +100,17 @@ export async function up(db: Kysely<any>): Promise<void> {
     )
     .execute();
 
-  // Product Modifier Groups
+  // Product Category Modifier Groups
   await db.schema
-    .createTable('product_modifier_groups')
-    .addColumn('id', 'uuid', (col) =>
-      col.primaryKey().defaultTo(sql`gen_random_uuid()`)
-    )
-    .addColumn('product_id', 'uuid', (col) =>
-      col.references('products.id').onDelete('cascade').notNull()
+    .createTable('product_category_modifier_groups')
+    .addColumn('product_category_id', 'uuid', (col) =>
+      col.references('product_categories.id').onDelete('cascade').notNull()
     )
     .addColumn('modifier_group_id', 'uuid', (col) =>
-      col.references('modifier_groups.id').onDelete('cascade').notNull()
+      col.references('product_modifier_groups.id').onDelete('cascade').notNull()
     )
-    .addUniqueConstraint('product_modifier_groups_unique', [
-      'product_id',
+    .addPrimaryKeyConstraint('product_category_modifier_groups_pk', [
+      'product_category_id',
       'modifier_group_id',
     ])
     .execute();
@@ -123,11 +122,17 @@ export async function up(db: Kysely<any>): Promise<void> {
       col.primaryKey().defaultTo(sql`gen_random_uuid()`)
     )
     .addColumn('modifier_group_id', 'uuid', (col) =>
-      col.references('modifier_groups.id').onDelete('cascade').notNull()
+      col.references('product_modifier_groups.id').onDelete('cascade').notNull()
     )
     .addColumn('name', 'varchar(255)', (col) => col.notNull())
     .addColumn('price_adjustment', 'integer', (col) =>
       col.defaultTo(0).notNull()
+    )
+    .addColumn('created_at', 'timestamptz', (col) =>
+      col.defaultTo(sql`now()`).notNull()
+    )
+    .addColumn('updated_at', 'timestamptz', (col) =>
+      col.defaultTo(sql`now()`).notNull()
     )
     .execute();
 }
@@ -136,8 +141,8 @@ export async function up(db: Kysely<any>): Promise<void> {
 // Alternatively, keep a "snapshot" DB interface.
 export async function down(db: Kysely<any>): Promise<void> {
   await db.schema.dropTable('product_modifiers').execute();
+  await db.schema.dropTable('product_category_modifier_groups').execute();
   await db.schema.dropTable('product_modifier_groups').execute();
-  await db.schema.dropTable('modifier_groups').execute();
   await db.schema.dropTable('product_variants').execute();
   await db.schema.dropTable('product_images').execute();
   await db.schema.dropTable('products').execute();

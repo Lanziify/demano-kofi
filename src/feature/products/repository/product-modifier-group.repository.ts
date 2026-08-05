@@ -1,70 +1,73 @@
 import type { Kysely, Transaction } from 'kysely';
 import type { DB } from '@/types/db';
 import { db } from '@/utils/db';
-import type { ProductCategorySchemaValue } from '../schema/product-category.schema';
+import type { ProductModifierGroupSchemaValue } from '../schema/product-modifier-group.schema';
 
 type Database = Kysely<DB> | Transaction<DB>;
 
-export type FindManyCategoriesOptions = {
+export type FindManyModifierGroupsOptions = {
   page?: number;
   pageSize?: number;
 };
 
-export class ProductCategoryRepository {
+export class ProductModifierGroupRepository {
   constructor(private readonly database: Database = db) {}
 
   withTransaction(trx: Transaction<DB>) {
-    return new ProductCategoryRepository(trx);
+    return new ProductModifierGroupRepository(trx);
   }
 
-  async create(values: ProductCategorySchemaValue, db = this.database) {
+  async create(values: ProductModifierGroupSchemaValue, db = this.database) {
     return db
-      .insertInto('productCategories')
+      .insertInto('productModifierGroups')
       .values(values)
       .returningAll()
       .executeTakeFirst();
   }
 
-  // async update(id: string, values: ProductCategorySchemaValue) {
+  // async update(id: string, values: ProductModifierGroupSchemaValue) {
   //   return this.database
-  //     .updateTable('productCategories')
+  //     .updateTable('productModifierGroups')
   //     .set(values)
-  //     .where('productCategories.id', '=', id)
+  //     .where('productModifierGroups.id', '=', id)
   //     .returningAll()
   //     .executeTakeFirst();
   // }
 
   // async delete(id: string) {
   //   return this.database
-  //     .deleteFrom('productCategories')
-  //     .where('productCategories.id', '=', id)
+  //     .deleteFrom('productModifierGroups')
+  //     .where('productModifierGroups.id', '=', id)
   //     .returningAll()
   //     .executeTakeFirst();
   // }
 
   // async findById(id: string) {
   //   return this.database
-  //     .selectFrom('productCategories')
+  //     .selectFrom('productModifierGroups')
   //     .selectAll()
-  //     .where('productCategories.id', '=', id)
+  //     .where('productModifierGroups.id', '=', id)
   //     .executeTakeFirst();
   // }
 
   // async findAll() {
-  //   return this.database.selectFrom('productCategories').selectAll().execute();
+  //   return this.database
+  //     .selectFrom('productModifierGroups')
+  //     .selectAll()
+  //     .execute();
   // }
 
-  // async findMany({ page = 1, pageSize = 10 }: FindManyCategoriesOptions) {
+  // async findMany({ page = 1, pageSize = 10 }: FindManyModifierGroupsOptions) {
   //   const [data, totalRow] = await Promise.all([
   //     this.database
-  //       .selectFrom('productCategories')
+  //       .selectFrom('productModifierGroups')
   //       .selectAll()
   //       .limit(pageSize)
   //       .offset((page - 1) * pageSize)
-  //       .orderBy('productCategories.createdAt', 'desc')
+  //       .orderBy('productModifierGroups.createdAt', 'desc')
   //       .execute(),
   //     this.database
-  //       .selectFrom('productCategories')
+  //       .selectFrom('productModifierGroups')
   //       .select(sql<string>`count(*)`.as('total'))
   //       .executeTakeFirstOrThrow(),
   //   ]);
