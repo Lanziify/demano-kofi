@@ -6,7 +6,7 @@ import {
 import { env } from '@/env';
 import { s3Client } from './s3';
 
-const bucket = env.STORAGE_BUCKET;
+export const bucket = env.STORAGE_BUCKET;
 
 export async function uploadObject({
   key,

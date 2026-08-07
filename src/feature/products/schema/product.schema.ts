@@ -10,14 +10,12 @@ type ColumnTimestampProperties = 'createdAt' | 'updatedAt';
 type Product = Selectable<Products>;
 
 export const productSchema = z.object({
-  categoryId: z.uuid().nullable().optional(),
+  categoryId: z.uuid().nullable(),
   name: z.string().trim().min(1, 'Please enter a product name.').max(255),
-  description: z.string().trim().nullable().optional(),
+  description: z.string().trim(),
   isAvailable: z.boolean(),
   isFeatured: z.boolean(),
-}) satisfies z.ZodType<
-  Partial<Omit<Product, 'id' | ColumnTimestampProperties>>
->;
+}) satisfies z.ZodType<Omit<Product, 'id' | ColumnTimestampProperties>>;
 
 export type ProductSchemaValue = z.infer<typeof productSchema>;
 

@@ -1,42 +1,33 @@
 import { NextResponse } from 'next/server';
-import z from 'zod';
-import { ProductRepository } from '@/feature/products/repository/product.repository';
-import { productSchema } from '@/feature/products/schema/schema';
+import { createProductSchema } from '@/feature/products/schema/product.schema';
 import { ProductService } from '@/feature/products/service/product.service';
 import { apiErrorHandler, requiredSession } from '@/lib/api-handler';
 
-const repository = new ProductRepository();
-const service = new ProductService(repository);
-
-const listProductsQuerySchema = z.object({
-  page: z.coerce.number().int().positive().optional(),
-  pageSize: z.coerce.number().int().positive().max(100).optional(),
-});
-
-export type ProductsApiResponse = Awaited<
-  ReturnType<ProductService['getProducts']>
->;
-
-export const GET = apiErrorHandler(async (req) => {
-  const { searchParams } = new URL(req.url);
-
-  const { page, pageSize } = listProductsQuerySchema.parse(
-    Object.fromEntries(searchParams)
-  );
-
-  const result = await service.getProducts({ page, pageSize });
-
-  return NextResponse.json(result, { status: 200 });
-});
+const service = new ProductService();
 
 export type CreateProductApiResponse = Awaited<
   ReturnType<ProductService['createProduct']>
 >;
 
+// multipart/form-data: a "data" field carries the JSON payload (name, variants,
+// optional inline category, and each image's sortOrder/altText without the file),
+// and repeated "images" fields carry the actual File objects in the same order as
+// payload.images, so they can be zipped back together before validation.
 export const POST = apiErrorHandler(
   async (req) => {
-    const body = await req.json();
-    const values = productSchema.parse(body);
+    const formData = await req.formData();
+
+    const payload = JSON.parse(String(formData.get('data') ?? '{}'));
+    const files = formData.getAll('images');
+
+    const images = (payload.images ?? []).map(
+      (image: Record<string, unknown>, index: number) => ({
+        ...image,
+        file: files[index],
+      })
+    );
+
+    const values = createProductSchema.parse({ ...payload, images });
 
     const result = await service.createProduct(values);
 

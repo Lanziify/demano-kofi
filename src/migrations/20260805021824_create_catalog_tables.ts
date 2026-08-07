@@ -55,7 +55,7 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn('media_id', 'uuid', (col) =>
       col.references('media.id').onDelete('cascade').notNull()
     )
-    .addColumn('is_primary', 'boolean', (col) => col.defaultTo(false).notNull())
+    // .addColumn('is_primary', 'boolean', (col) => col.defaultTo(false).notNull())
     .addColumn('sort_order', 'integer', (col) => col.defaultTo(0).notNull())
     .addPrimaryKeyConstraint('product_images_pk', ['product_id', 'media_id'])
     .execute();

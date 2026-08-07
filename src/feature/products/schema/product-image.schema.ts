@@ -1,9 +1,23 @@
+import type { Selectable } from 'kysely';
 import z from 'zod';
+import type { ProductImages } from '@/types/db';
+
+type ColumnTimestampProperties = 'createdAt' | 'updatedAt';
+
+type Image = Selectable<ProductImages>;
+
+export const productImageSchema = z.object({
+  mediaId: z.uuid(),
+  productId: z.uuid(),
+  sortOrder: z.number().nonnegative(),
+}) satisfies z.ZodType<Partial<Omit<Image, 'id' | ColumnTimestampProperties>>>;
+
+export type ProductImageSchemaValue = z.infer<typeof productImageSchema>
 
 export const addProductImageSchema = z.object({
   file: z
     .file()
-    .optional()
+    // .optional()
     .refine((file) => !file || file.size <= 5_000_000, {
       message: 'Image must be less than 5 MB',
     })
@@ -15,8 +29,8 @@ export const addProductImageSchema = z.object({
       }
     ),
   altText: z.string().trim().max(255).optional(),
-  sortOrder: z.number().int().nonnegative().optional(),
-  isPrimary: z.boolean().optional(),
+  sortOrder: z.number().int().nonnegative(),
+  // isPrimary: z.boolean().optional(),
 });
 
 export type AddProductImageSchemaValue = z.infer<typeof addProductImageSchema>;

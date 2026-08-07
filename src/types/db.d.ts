@@ -40,23 +40,12 @@ export interface Invitation {
 
 export interface Media {
   createdAt: Generated<Timestamp>;
-  fileSize: number;
-  height: number | null;
-  id: Generated<string>;
-  mimeType: string;
-  storageKey: string;
-  updatedAt: Generated<Timestamp>;
-  width: number | null;
-}
-
-export interface MediaVariants {
-  createdAt: Generated<Timestamp>;
   fileSize: number | null;
   height: number | null;
   id: Generated<string>;
-  mediaId: string;
   storageKey: string;
   type: string;
+  updatedAt: Generated<Timestamp>;
   width: number | null;
 }
 
@@ -91,7 +80,6 @@ export interface ProductCategoryModifierGroups {
 }
 
 export interface ProductImages {
-  isPrimary: Generated<boolean>;
   mediaId: string;
   productId: string;
   sortOrder: Generated<number>;
@@ -196,7 +184,6 @@ export interface DB {
   account: Account;
   invitation: Invitation;
   media: Media;
-  mediaVariants: MediaVariants;
   member: Member;
   organization: Organization;
   productCategories: ProductCategories;

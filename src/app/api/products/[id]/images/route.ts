@@ -1,37 +1,36 @@
 import { NextResponse } from 'next/server';
-import { ProductImageRepository } from '@/feature/products/repository/product-image.repository';
-import { productImageSchema } from '@/feature/products/schema/schema';
+import z from 'zod';
+import { addProductImageSchema } from '@/feature/products/schema/product-image.schema';
 import { ProductImageService } from '@/feature/products/service/product-image.service';
 import { apiErrorHandler, requiredSession } from '@/lib/api-handler';
 
-const repository = new ProductImageRepository();
-const service = new ProductImageService(repository);
+const service = new ProductImageService();
 
 type Context = RouteContext<'/api/products/[id]/images'>;
 
-export type ProductImagesApiResponse = Awaited<
-  ReturnType<ProductImageService['getImages']>
+export type AddProductImagesApiResponse = Awaited<
+  ReturnType<ProductImageService['addImages']>
 >;
 
-export const GET = apiErrorHandler<Context>(async (_req, context) => {
-  const { id } = await context.params;
-
-  const result = await service.getImages(id);
-
-  return NextResponse.json(result, { status: 200 });
-});
-
-export type CreateProductImageApiResponse = Awaited<
-  ReturnType<ProductImageService['addImage']>
->;
-
+// multipart/form-data: a "data" field carries a JSON array of {sortOrder, altText}
+// (no file), and repeated "images" fields carry the actual File objects in the
+// same order, so they can be zipped back together before validation.
 export const POST = apiErrorHandler<Context>(
   async (req, context) => {
     const { id } = await context.params;
-    const body = await req.json();
-    const values = productImageSchema.parse({ ...body, productId: id });
+    const formData = await req.formData();
 
-    const result = await service.addImage(values);
+    const metadata = JSON.parse(String(formData.get('data') ?? '[]'));
+    const files = formData.getAll('images');
+
+    const images = z.array(addProductImageSchema).parse(
+      metadata.map((image: Record<string, unknown>, index: number) => ({
+        ...image,
+        file: files[index],
+      }))
+    );
+
+    const result = await service.addImages(id, images);
 
     return NextResponse.json(result, { status: 201 });
   },

@@ -1,6 +1,7 @@
 import type { Kysely, Transaction } from 'kysely';
 import type { DB } from '@/types/db';
 import { db } from '@/utils/db';
+import type { ProductImageSchemaValue } from '../schema/product-image.schema';
 
 type Database = Kysely<DB> | Transaction<DB>;
 
@@ -9,6 +10,14 @@ export class ProductImageRepository {
 
   withTransaction(trx: Transaction<DB>) {
     return new ProductImageRepository(trx);
+  }
+
+  createMany(values: ProductImageSchemaValue[]) {
+    return this.database
+      .insertInto('productImages')
+      .values(values)
+      .returningAll()
+      .execute();
   }
 
   // async create(values: ProductImageSchemaValues) {

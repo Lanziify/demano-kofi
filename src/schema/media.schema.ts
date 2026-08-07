@@ -1,32 +1,30 @@
+import type { Selectable } from 'kysely';
 import { z } from 'zod';
+import type { Media as MediaType } from '@/types/db';
+
+type ColumnTimestampProperties = 'createdAt' | 'updatedAt';
+
+export type Media = Selectable<MediaType>;
+
+export const mediaTypeSchema = z.enum([
+  'thumbnail',
+  'medium',
+  'large',
+  'original',
+]);
 
 export const mediaSchema = z.object({
-  id: z.uuid(),
+  type: mediaTypeSchema,
   storageKey: z.string(),
-  mimeType: z.string(),
+  width: z.number().int().positive().nullable(),
+  height: z.number().int().positive().nullable(),
   fileSize: z.number().int().nonnegative(),
-  width: z.number().int().positive().nullable(),
-  height: z.number().int().positive().nullable(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-});
+}) satisfies z.ZodType<Partial<Omit<Media, 'id' | ColumnTimestampProperties>>>;
 
-export const mediaVariantSchema = z.object({
+export type MediaSchemaValue = z.infer<typeof mediaSchema>;
+
+export const createMediaSchema = mediaSchema.extend({
   id: z.uuid(),
-  mediaId: z.uuid(),
-  type: z.enum(['thumbnail', 'medium', 'large']),
-  storageKey: z.string(),
-  width: z.number().int().positive().nullable(),
-  height: z.number().int().positive().nullable(),
-  fileSize: z.number().int().nonnegative().nullable(),
-  createdAt: z.date(),
 });
 
-export const mediaResponseSchema = mediaSchema.extend({
-  url: z.url(),
-  variants: z.object({
-    thumbnail: z.url().optional(),
-    medium: z.url().optional(),
-    large: z.url().optional(),
-  }),
-});
+export type CreateMediaSchemaValue = z.infer<typeof createMediaSchema>;
