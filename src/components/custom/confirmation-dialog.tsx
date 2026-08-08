@@ -19,13 +19,13 @@ export type ConfirmationDialogOptions = {
   confirmLabel?: string;
   cancelLabel?: string;
   confirmVariant?: 'default' | 'destructive';
+  onConfirm?: () => void | Promise<void>;
 };
 
 export type ConfirmationDialogProps = ConfirmationDialogOptions & {
   open: boolean;
   loading?: boolean;
   onOpenChange: (open: boolean) => void;
-  onConfirm: () => void | Promise<void>;
 };
 
 export function ConfirmationDialog({
@@ -55,11 +55,7 @@ export function ConfirmationDialog({
 
           <AlertDialogAction
             disabled={loading}
-            onClick={async (e) => {
-              e.preventDefault();
-
-              await onConfirm();
-            }}
+            onClick={onConfirm}
             className={
               confirmVariant === 'destructive'
                 ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90'

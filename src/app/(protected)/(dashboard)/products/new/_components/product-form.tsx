@@ -3,12 +3,14 @@
 import { DndContext, type DragEndEvent } from '@dnd-kit/core';
 import { restrictToParentElement } from '@dnd-kit/modifiers';
 import {
+  rectSortingStrategy,
   SortableContext,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { DollarSign, Option, Plus, Star, Trash } from 'lucide-react';
+import { DollarSign, Image, Plus, Shapes, Star, Trash } from 'lucide-react';
 import React from 'react';
+import { useDropzone } from 'react-dropzone';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import {
@@ -47,6 +49,9 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { createProductSchema } from '@/feature/products/schema/product.schema';
+import { MAX_PRODUCT_IMAGES } from '@/lib/image/constants';
+import { cn } from '@/lib/utils';
+import ProductImage from './product-image';
 import SortableVariant from './sortable-variants';
 
 export default function ProductForm() {
@@ -60,37 +65,108 @@ export default function ProductForm() {
     },
   });
 
-  const variantsField = useFieldArray({
+  const {
+    fields: variantFields,
+    append: appendVariant,
+    remove: removeVariant,
+    move: moveVariant,
+  } = useFieldArray({
     control: form.control,
     name: 'variants',
   });
 
-  const { move: moveVariants } = variantsField;
+  const {
+    fields: imageFields,
+    append: appendImage,
+    remove: removeImage,
+    move: moveImage,
+  } = useFieldArray({
+    control: form.control,
+    name: 'images',
+  });
 
-  const variants = form.watch('variants');
+  const onDrop = React.useCallback(
+    async (acceptedFiles: File[]) => {
+      const remainingSlots = MAX_PRODUCT_IMAGES - imageFields.length;
 
-  const handleVariantDragEnd = (event: DragEndEvent) => {
-    if (event.active.id === event.over?.id) return;
+      if (remainingSlots <= 0) {
+        return;
+      }
 
-    const initialIndex = variantsField.fields.findIndex(
-      (item) => item.id === event.active.id
-    );
-    const dropIndex = variantsField.fields.findIndex(
-      (item) => item.id === event.over?.id
-    );
+      const filesToAdd = acceptedFiles.slice(0, remainingSlots);
 
-    moveVariants(initialIndex, dropIndex);
-  };
+      appendImage(
+        filesToAdd.map((file, index) => ({
+          file,
+          sortOrder: index,
+          altText: file.name,
+        }))
+      );
 
-  React.useEffect(() => {
-    console.log('Variants:', variants);
-  }, [variants]);
+      form.trigger('images');
+    },
+    [appendImage, form, imageFields.length]
+  );
+
+  const { getRootProps, getInputProps, isDragActive, isDragReject } =
+    useDropzone({
+      onDrop,
+      maxFiles: 10,
+      maxSize: 5_000_000,
+      accept: {
+        'image/jpeg': [],
+        'image/png': [],
+        'image/webp': [],
+      },
+    });
+
+  const handleImageDragEnd = React.useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+
+      if (!over || active.id === over.id) return;
+
+      const initialIndex = imageFields.findIndex(
+        (item) => item.id === active.id
+      );
+
+      const dropIndex = imageFields.findIndex((item) => item.id === over.id);
+
+      if (initialIndex === -1 || dropIndex === -1) return;
+
+      moveImage(initialIndex, dropIndex);
+
+      imageFields.forEach((_, index) => {
+        form.setValue(`images.${index}.sortOrder`, index);
+      });
+    },
+    [imageFields, moveImage, form.setValue]
+  );
+
+  const handleVariantDragEnd = React.useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+
+      if (!over || active.id === over.id) return;
+
+      const initialIndex = variantFields.findIndex(
+        (item) => item.id === active.id
+      );
+
+      const dropIndex = variantFields.findIndex((item) => item.id === over.id);
+
+      if (initialIndex === -1 || dropIndex === -1) return;
+
+      moveVariant(initialIndex, dropIndex);
+    },
+    [moveVariant, variantFields]
+  );
 
   return (
     <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[1fr_280px]">
       <div className="space-y-6">
         {/* Product Info */}
-        <Card>
+        <Card className="shadow-none">
           <CardHeader>
             <CardTitle>Basic Information</CardTitle>
             <CardDescription>
@@ -134,16 +210,58 @@ export default function ProductForm() {
           </CardContent>
         </Card>
         {/* Product Images */}
-        <Card>
+        <Card className="shadow-none">
           <CardHeader>
             <CardTitle>Product Images</CardTitle>
             <CardDescription>
               Add image URLs to display for this product.
             </CardDescription>
           </CardHeader>
+          <CardContent>
+            <Empty
+              {...getRootProps()}
+              className={cn('cursor-pointer border border-dashed', {
+                'border-green-500 bg-green-500/10':
+                  isDragActive && !isDragReject,
+                'border-border bg-card': !isDragActive,
+              })}
+            >
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <Image />
+                </EmptyMedia>
+                <EmptyTitle>Upload product images</EmptyTitle>
+                <EmptyDescription>
+                  Drag 'n' drop some files here, or click to select files
+                </EmptyDescription>
+              </EmptyHeader>
+              <input {...getInputProps()} id="images" />
+            </Empty>
+
+            <DndContext
+              onDragEnd={handleImageDragEnd}
+              modifiers={[restrictToParentElement]}
+            >
+              <div className="mt-4 grid grid-cols-5 gap-4">
+                <SortableContext
+                  items={imageFields}
+                  strategy={rectSortingStrategy}
+                >
+                  {imageFields.map((field, index) => (
+                    <ProductImage
+                      key={field.id}
+                      id={field.id}
+                      value={field}
+                      onRemove={() => removeImage(index)}
+                    />
+                  ))}
+                </SortableContext>
+              </div>
+            </DndContext>
+          </CardContent>
         </Card>
         {/* Product Variants */}
-        <Card>
+        <Card className="shadow-none">
           <CardHeader>
             <CardTitle>Variants</CardTitle>
             <CardDescription>
@@ -152,17 +270,17 @@ export default function ProductForm() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {variantsField.fields.length > 0 && (
+            {variantFields.length > 0 && (
               <DndContext
                 onDragEnd={handleVariantDragEnd}
                 modifiers={[restrictToParentElement]}
               >
                 <SortableContext
-                  items={variantsField.fields}
+                  items={variantFields}
                   strategy={verticalListSortingStrategy}
                 >
                   <ul className="space-y-2">
-                    {variantsField.fields.map((field, index) => (
+                    {variantFields.map((field, index) => (
                       <SortableVariant
                         key={field.id}
                         id={field.id}
@@ -225,7 +343,7 @@ export default function ProductForm() {
                           type="button"
                           variant="destructive"
                           size="icon"
-                          onClick={() => variantsField.remove(index)}
+                          onClick={() => removeVariant(index)}
                         >
                           <Trash />
                         </Button>
@@ -241,7 +359,7 @@ export default function ProductForm() {
                 <EmptyHeader className="w-full max-w-none flex-row justify-between">
                   <div className="flex items-center gap-4">
                     <EmptyMedia variant="icon" className="m-0">
-                      <Option />
+                      <Shapes />
                     </EmptyMedia>
                     <div className="text-start">
                       <EmptyTitle>No product variants</EmptyTitle>
@@ -253,7 +371,7 @@ export default function ProductForm() {
                   <Button
                     type="button"
                     onClick={() =>
-                      variantsField.append({ name: '', price: 0, sku: '' })
+                      appendVariant({ name: '', price: 0, sku: '' })
                     }
                   >
                     <Plus />
@@ -265,9 +383,7 @@ export default function ProductForm() {
               <Button
                 type="button"
                 variant="ghost"
-                onClick={() =>
-                  variantsField.append({ name: '', price: 0, sku: '' })
-                }
+                onClick={() => appendVariant({ name: '', price: 0, sku: '' })}
               >
                 <Plus />
                 Add Variant
@@ -276,7 +392,7 @@ export default function ProductForm() {
           </CardContent>
         </Card>
         {/* Product Modifiers */}
-        <Card>
+        <Card className="shadow-none">
           <CardHeader>
             <CardTitle>Modifier Groups</CardTitle>
             <CardDescription>
@@ -286,8 +402,8 @@ export default function ProductForm() {
           </CardHeader>
         </Card>
       </div>
-      <div className="space-y-5 lg:sticky lg:top-6">
-        <Card>
+      <div className="space-y-5 lg:sticky lg:top-22.25">
+        <Card className="shadow-none">
           <CardHeader>
             <CardTitle>Status</CardTitle>
           </CardHeader>
@@ -327,7 +443,7 @@ export default function ProductForm() {
             </FieldGroup>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="shadow-none">
           <CardHeader>
             <CardTitle>Product Category</CardTitle>
           </CardHeader>

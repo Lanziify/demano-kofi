@@ -8,8 +8,8 @@ type ColumnTimestampProperties = 'createdAt' | 'updatedAt';
 type Category = Selectable<ProductCategories>;
 
 export const productCategorySchema = z.object({
-  name: z.string().trim().min(1).max(255),
-  description: z.string().trim().nullable().optional(),
+  name: z.string().trim().min(1, "Please enter category name").max(255),
+  description: z.string(),
 }) satisfies z.ZodType<
   Partial<Omit<Category, 'id' | ColumnTimestampProperties>>
 >;

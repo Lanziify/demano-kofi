@@ -10,7 +10,7 @@ type ModifierGroup = Selectable<ProductModifierGroups>;
 export const modifierSelectionTypeSchema = z.enum(['single', 'multiple']);
 
 export const productModifierGroupSchema = z.object({
-  name: z.string().trim().min(1).max(255),
+  name: z.string().trim().min(1, "Please enter modifier group name").max(255),
   selectionType: modifierSelectionTypeSchema,
   isRequired: z.boolean().default(false),
 }) satisfies z.ZodType<Omit<ModifierGroup, 'id' | ColumnTimestampProperties>>;
@@ -27,3 +27,5 @@ export const createProductModifierGroupSchema =
 export type CreateProductModifierGroupSchemaValue = z.infer<
   typeof createProductModifierGroupSchema
 >;
+
+export type ModifierGroupFieldValue = z.input<typeof createProductModifierGroupSchema>;

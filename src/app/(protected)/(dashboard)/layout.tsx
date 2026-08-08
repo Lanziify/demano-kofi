@@ -27,7 +27,7 @@ export default async function DashboardLayout({
     >
       <DashboardSidebar />
       <SidebarInset>
-        <header className="bg-background sticky top-0 flex shrink-0 items-center justify-between gap-2 border-b p-4">
+        <header className="sticky top-0 z-10 flex shrink-0 items-center justify-between gap-2 border-b bg-background p-4">
           <div className="flex items-center">
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="my-auto mr-2 h-4" />
