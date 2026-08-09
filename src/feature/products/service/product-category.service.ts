@@ -1,6 +1,11 @@
 import type { Transaction } from 'kysely';
 import { DatabaseError } from '@/lib/errors/app-error';
-import type { DB } from '@/types/db';
+import type {
+  DB,
+  ProductCategories,
+  ProductModifierGroups,
+  ProductModifiers,
+} from '@/types/db';
 import { db } from '@/utils/db';
 import { ProductCategoryRepository } from '../repository/product-category.repository';
 import { ProductCategoryModifierGroupRepository } from '../repository/product-category-modifier-group.repository';
@@ -24,9 +29,11 @@ export class ProductCategoryService {
       const { modifierGroupIds, modifierGroups, ...categoryData } = values;
 
       const categoryRepo = this.productCategoryRepository.withTransaction(trx);
-      const groupRepo = this.productModifierGroupRepository.withTransaction(trx);
+      const groupRepo =
+        this.productModifierGroupRepository.withTransaction(trx);
       const modifierRepo = this.productModifierRepository.withTransaction(trx);
-      const linkRepo = this.productCategoryModifierGroupRepository.withTransaction(trx);
+      const linkRepo =
+        this.productCategoryModifierGroupRepository.withTransaction(trx);
 
       const category = await categoryRepo.create(categoryData);
 
@@ -77,47 +84,37 @@ export class ProductCategoryService {
     return trx ? run(trx) : db.transaction().execute(run);
   }
 
-  // async updateCategory(id: string, values: ProductCategorySchemaValues) {
-  //   const category = await this.repository.update(id, values);
+  async getCategories() {
+    return await this.productCategoryRepository.findAll();
+  }
 
-  //   if (!category) {
-  //     throw new NotFoundError('Category not found', {
-  //       errorCode: 'CATEGORY_NOT_FOUND',
-  //     });
-  //   }
+  async getCategoryById(id: string) {
+    return await this.productCategoryRepository.findById(id);
+  }
 
-  //   return category;
-  // }
+  async getCategoriesWithGroups(id?: string) {
+    return await this.productCategoryRepository.findWithGroups(id);
+  }
 
-  // async deleteCategory(id: string) {
-  //   const category = await this.repository.delete(id);
-
-  //   if (!category) {
-  //     throw new NotFoundError('Category not found', {
-  //       errorCode: 'CATEGORY_NOT_FOUND',
-  //     });
-  //   }
-
-  //   return category;
-  // }
-
-  // async getCategory(id: string) {
-  //   const category = await this.repository.findById(id);
-
-  //   if (!category) {
-  //     throw new NotFoundError('Category not found', {
-  //       errorCode: 'CATEGORY_NOT_FOUND',
-  //     });
-  //   }
-
-  //   return category;
-  // }
-
-  // async getAllCategories() {
-  //   return await this.repository.findAll();
-  // }
-
-  // async getCategories(options: FindManyCategoriesOptions) {
-  //   return await this.repository.findMany(options);
-  // }
+  async getCategoriesWithGroupsModifiers(id?: string) {
+    return await this.productCategoryRepository.findWithGroupsModifiers(id);
+  }
 }
+
+export type ProductCategory = ProductCategories;
+
+export type ProductCategoryWithGroups = (
+  ProductCategory & {
+    modifierGroups: ProductModifierGroups[];
+  }
+)[];
+
+export type ProductCategoryWithGroupsModifiers = (
+  ProductCategory & {
+    modifierGroups: (
+      ProductModifierGroups & {
+        modifiers: ProductModifiers[];
+      }
+    )[];
+  }
+)[];

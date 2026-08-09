@@ -1,10 +1,10 @@
 import { APIError, isAPIError } from 'better-auth/api';
-import { NoResultError } from 'kysely';
 import z, { ZodError } from 'zod';
 import { AppError } from './app-error';
+import { type ErrorCode, isErrorCode } from './error-codes';
 
 export type ActionErrorResponse = {
-  errorCode?: string;
+  errorCode?: ErrorCode;
   message?: string;
   details?: Record<string, unknown> | unknown;
 };
@@ -20,7 +20,10 @@ export function actionErrorParser(error: unknown): ActionErrorResponse {
 
   if (error instanceof APIError || isAPIError(error)) {
     return {
-      errorCode: error.body?.code ?? 'UNEXPECTED_ERROR',
+      errorCode:
+        error.body?.code && isErrorCode(error.body?.code)
+          ? error.body?.code
+          : 'UNEXPECTED_ERROR',
       message: error.body?.message ?? 'Authentication failed',
       details: error.cause,
     };
@@ -33,17 +36,9 @@ export function actionErrorParser(error: unknown): ActionErrorResponse {
       details: error.details,
     };
   }
-
-  if (error instanceof NoResultError) {
-    return {
-      errorCode: error.name,
-      message: error.message,
-      details: error.stack,
-    };
-  }
-
+  
   return {
-    errorCode: 'INTERNAL_SERVER_ERROR',
+    errorCode: 'UNEXPECTED_ERROR',
     message: 'Something went wrong',
   };
 }

@@ -1,18 +1,54 @@
 import axios from 'axios';
-import type { CreateProductCategoryApiResponse } from '@/app/api/products/categories/route';
+import type {
+  CreateProductCategoryApiResponse,
+  GetProductCategoriesApiResponseMap,
+} from '@/app/api/products/categories/route';
 import { withClientErrorHandling } from '@/lib/errors/client-error-parser';
-import { safeCatch } from '@/lib/errors/safe-catch';
 import type { CreateProductCategorySchemaValue } from '../schema/product-category.schema';
 
-export const createCategory = withClientErrorHandling(
-  async (values: CreateProductCategorySchemaValue) => {
-    return safeCatch(async () => {
-      const { data } = await axios.post<CreateProductCategoryApiResponse>(
-        '/api/products/categories',
-        values
-      );
+export const getCategories = withClientErrorHandling(async () => {
+  const { data } = await axios.get<
+    GetProductCategoriesApiResponseMap['category']
+  >('/api/products/categories');
 
-      return data;
+  return data;
+});
+
+export const getCategoriesWithGroups = withClientErrorHandling(async () => {
+  const { data } = await axios.get<
+    GetProductCategoriesApiResponseMap['groups']
+  >('/api/products/categories', {
+    params: {
+      include: 'groups',
+    },
+  });
+
+  return data;
+});
+
+export const getCategoriesWithGroupsModifiers = withClientErrorHandling(
+  async () => {
+    const { data } = await axios.get<
+      GetProductCategoriesApiResponseMap['groupsModifiers']
+    >('/api/products/categories', {
+      params: {
+        include: 'groupsModifiers',
+      },
     });
+
+    return data;
   }
 );
+
+//#region Category Mutations
+export const createCategory = withClientErrorHandling(
+  async (values: CreateProductCategorySchemaValue) => {
+    const { data } = await axios.post<CreateProductCategoryApiResponse>(
+      '/api/products/categories',
+      values
+    );
+
+    return data;
+  }
+);
+//#endregion

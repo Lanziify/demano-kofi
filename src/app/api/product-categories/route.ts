@@ -1,27 +1,19 @@
 import { NextResponse } from 'next/server';
-import {
-  createProductCategorySchema,
-  productCategoryQuerySchema,
-} from '@/feature/products/schema/product-category.schema';
-import {
-  type ProductCategory,
-  ProductCategoryService,
-  type ProductCategoryWithGroups,
-  type ProductCategoryWithGroupsModifiers,
-} from '@/feature/products/service/product-category.service';
-import { apiErrorHandler, requiredSession } from '@/lib/api-handler';
+import { productCategoryQuerySchema } from '@/feature/products/schema/product-category.schema';
+import { ProductCategoryService } from '@/feature/products/service/product-category.service';
+import { apiErrorHandler } from '@/lib/api-handler';
 
 const service = new ProductCategoryService();
 
-export type CreateProductCategoryApiResponse = Awaited<
-  ReturnType<ProductCategoryService['createCategory']>
->;
-
-export type GetProductCategoriesApiResponseMap = {
-  category: ProductCategory[];
-  groups: ProductCategoryWithGroups;
-  groupsModifiers: ProductCategoryWithGroupsModifiers;
-};
+// export type CategoriesApiResponse = Awaited<
+//   ReturnType<ProductCategoryService['getCategories']>
+// >;
+// export type CategoriesWithGroupsApiResponse = Awaited<
+//   ReturnType<ProductCategoryService['getCategoriesWithGroups']>
+// >;
+// export type CategoriesWithGroupsModifiersApiResponse = Awaited<
+//   ReturnType<ProductCategoryService['getCategoriesWithGroupsModifiers']>
+// >;
 
 export const GET = apiErrorHandler(
   async (req) => {
@@ -56,16 +48,4 @@ export const GET = apiErrorHandler(
     return NextResponse.json(result, { status: 200 });
   },
   { guards: [] }
-);
-
-export const POST = apiErrorHandler(
-  async (req) => {
-    const body = await req.json();
-    const values = createProductCategorySchema.parse(body);
-
-    const result = await service.createCategory(values);
-
-    return NextResponse.json(result, { status: 201 });
-  },
-  { guards: [requiredSession] }
 );

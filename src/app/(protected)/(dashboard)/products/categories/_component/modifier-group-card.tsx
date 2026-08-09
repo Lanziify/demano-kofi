@@ -41,7 +41,7 @@ import { cn } from '@/lib/utils';
 // Form field values are typed against the schema's input shape, since
 // zod-defaulted fields (e.g. isRequired) are optional pre-submit and only
 // become required after resolver validation produces the output shape.
-export type ModifierGroupCardProps<
+export type ProductModifierGroupCardProps<
   TFieldValues extends FieldValues,
   TName extends FieldPathByValue<
     TFieldValues,
@@ -53,13 +53,17 @@ export type ModifierGroupCardProps<
   onClose?: () => void;
 };
 
-export default function ModifierGroupCard<
+export default function ProductModifierGroupCard<
   TFieldValues extends FieldValues,
   TName extends FieldPathByValue<
     TFieldValues,
     ModifierGroupFieldValue | undefined
   >,
->({ name, control, onClose }: ModifierGroupCardProps<TFieldValues, TName>) {
+>({
+  name,
+  control,
+  onClose,
+}: ProductModifierGroupCardProps<TFieldValues, TName>) {
   const nameField = `${name}.name` as FieldPath<TFieldValues>;
   const selectionTypeField = `${name}.selectionType` as FieldPath<TFieldValues>;
   const isRequiredField = `${name}.isRequired` as FieldPath<TFieldValues>;

@@ -3,7 +3,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createCategory } from '../api/product-category.api';
 
-export const useCreateCategory = () => {
+export const useCreateProductCategory = () => {
   const queryClient = useQueryClient();
 
   return useMutation({

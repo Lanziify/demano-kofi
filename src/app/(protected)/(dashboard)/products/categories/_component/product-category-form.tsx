@@ -35,16 +35,16 @@ import {
   FieldSet,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { useCreateCategory } from '@/feature/products/mutations/product-category.mutation';
+import { useCreateProductCategory } from '@/feature/products/mutations/product-category.mutation';
 import {
   type CreateProductCategorySchemaValue,
   createProductCategorySchema,
 } from '@/feature/products/schema/product-category.schema';
 import { useDialog } from '@/hooks/use-dialog';
-import ModifierGroupCard from './modifier-group-card';
+import ProductModifierGroupCard from './modifier-group-card';
 
-export default function CategoryForm() {
-  const createCategory = useCreateCategory();
+export default function ProductCategoryForm() {
+  const createCategory = useCreateProductCategory();
   const confirmationDialog = useDialog<ConfirmationDialogOptions>();
 
   const form = useForm({
@@ -62,13 +62,13 @@ export default function CategoryForm() {
   });
 
   const onSubmit = async (values: CreateProductCategorySchemaValue) => {
-    const { error } = await createCategory.mutateAsync(values);
+    await createCategory.mutateAsync(values);
 
-    if (error) {
-      toast.error(error.message);
+    if (createCategory.isError) {
+      toast.error(createCategory.error.message);
     }
 
-    form.reset()
+    form.reset();
   };
 
   const hasFormValues = () => {
@@ -155,7 +155,7 @@ export default function CategoryForm() {
                 </FieldDescription>
                 <FieldGroup className="gap-4">
                   {modifierGroups.fields.map((field, index) => (
-                    <ModifierGroupCard
+                    <ProductModifierGroupCard
                       key={field.id}
                       control={form.control}
                       name={`modifierGroups.${index}`}

@@ -38,11 +38,11 @@ export const apiErrorHandler = <TContext = Context>(
 };
 
 export const requiredSession = async (req: NextRequest) => {
-  // const session = await auth.api.getSession({
-  //   headers: req.headers,
-  // });
+  const session = await auth.api.getSession({
+    headers: req.headers,
+  });
 
-  // if (!session) {
-  //   throw new BadRequestError('Cannot perform request without active session.');
-  // }
+  if (!session) {
+    throw new BadRequestError('Cannot perform request without active session.');
+  }
 };

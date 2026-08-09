@@ -1,4 +1,5 @@
 import type { Kysely, Transaction } from 'kysely';
+import { jsonArrayFrom } from 'kysely/helpers/postgres';
 import type { DB } from '@/types/db';
 import { db } from '@/utils/db';
 import type { ProductCategorySchemaValue } from '../schema/product-category.schema';
@@ -42,38 +43,85 @@ export class ProductCategoryRepository {
   //     .executeTakeFirst();
   // }
 
-  // async findById(id: string) {
-  //   return this.database
-  //     .selectFrom('productCategories')
-  //     .selectAll()
-  //     .where('productCategories.id', '=', id)
-  //     .executeTakeFirst();
-  // }
+  async findAll() {
+    return this.database.selectFrom('productCategories').selectAll().execute();
+  }
 
-  // async findAll() {
-  //   return this.database.selectFrom('productCategories').selectAll().execute();
-  // }
+  async findById(id: string) {
+    return this.database
+      .selectFrom('productCategories')
+      .selectAll()
+      .where('productCategories.id', '=', id)
+      .executeTakeFirst();
+  }
 
-  // async findMany({ page = 1, pageSize = 10 }: FindManyCategoriesOptions) {
-  //   const [data, totalRow] = await Promise.all([
-  //     this.database
-  //       .selectFrom('productCategories')
-  //       .selectAll()
-  //       .limit(pageSize)
-  //       .offset((page - 1) * pageSize)
-  //       .orderBy('productCategories.createdAt', 'desc')
-  //       .execute(),
-  //     this.database
-  //       .selectFrom('productCategories')
-  //       .select(sql<string>`count(*)`.as('total'))
-  //       .executeTakeFirstOrThrow(),
-  //   ]);
+  async findWithGroups(id?: string) {
+    const query = this.database
+      .selectFrom('productCategories as pc')
+      .selectAll('pc')
+      .select((cmgeb) => [
+        jsonArrayFrom(
+          cmgeb
+            .selectFrom('productCategoryModifierGroups as pcmg')
+            .innerJoin(
+              'productModifierGroups as pmg',
+              'pmg.id',
+              'pcmg.modifierGroupId'
+            )
+            .select([
+              'pmg.id',
+              'pmg.name',
+              'pmg.isRequired',
+              'pmg.selectionType',
+              'pmg.createdAt',
+              'pmg.updatedAt',
+            ])
+            .whereRef('pcmg.productCategoryId', '=', 'pc.id')
+        ).as('modifierGroups'),
+      ]);
 
-  //   return {
-  //     data,
-  //     page,
-  //     pageSize,
-  //     total: Number(totalRow.total),
-  //   };
-  // }
+    if (id) {
+      return query.where('pc.id', '=', id).executeTakeFirst();
+    }
+
+    return query.execute();
+  }
+
+  async findWithGroupsModifiers(id?: string) {
+    const query = this.database
+      .selectFrom('productCategories as pc')
+      .selectAll('pc')
+      .select((cmgeb) => [
+        jsonArrayFrom(
+          cmgeb
+            .selectFrom('productCategoryModifierGroups as pcmg')
+            .innerJoin(
+              'productModifierGroups as pmg',
+              'pmg.id',
+              'pcmg.modifierGroupId'
+            )
+            .select((mgeb) => [
+              'pmg.id',
+              'pmg.name',
+              'pmg.isRequired',
+              'pmg.selectionType',
+              jsonArrayFrom(
+                mgeb
+                  .selectFrom('productModifiers as pm')
+                  .select(['pm.id', 'pm.name', 'pm.priceAdjustment'])
+                  .whereRef('pm.modifierGroupId', '=', 'pmg.id')
+              ).as('modifiers'),
+              'pmg.createdAt',
+              'pmg.updatedAt',
+            ])
+            .whereRef('pcmg.productCategoryId', '=', 'pc.id')
+        ).as('modifierGroups'),
+      ]);
+
+    if (id) {
+      return query.where('pc.id', '=', id).executeTakeFirst();
+    }
+
+    return query.execute();
+  }
 }
