@@ -25,7 +25,7 @@ export class ModifierGroupService {
         );
       }
 
-      if (modifiers.length > 0) {
+      if (modifiers && modifiers.length > 0) {
         await modifierRepo.createMany(
           modifiers.map((modifier) => ({
             ...modifier,

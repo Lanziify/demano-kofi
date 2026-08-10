@@ -35,14 +35,22 @@ export class ProductCategoryModifierGroupRepository {
       .execute();
   }
 
-  // async delete(productCategoryId: string, modifierGroupId: string) {
-  //   return this.database
-  //     .deleteFrom('productCategoryModifierGroups')
-  //     .where('productCategoryModifierGroups.productCategoryId', '=', productCategoryId)
-  //     .where('productCategoryModifierGroups.modifierGroupId', '=', modifierGroupId)
-  //     .returningAll()
-  //     .executeTakeFirst();
-  // }
+  async delete(productCategoryId: string, modifierGroupId: string) {
+    return this.database
+      .deleteFrom('productCategoryModifierGroups')
+      .where(
+        'productCategoryModifierGroups.productCategoryId',
+        '=',
+        productCategoryId
+      )
+      .where(
+        'productCategoryModifierGroups.modifierGroupId',
+        '=',
+        modifierGroupId
+      )
+      .returningAll()
+      .executeTakeFirst();
+  }
 
   // Returns the linked modifier groups themselves, not the join rows.
   // async findByCategory(productCategoryId: string) {

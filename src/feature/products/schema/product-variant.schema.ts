@@ -2,8 +2,6 @@ import type { Selectable } from 'kysely';
 import z from 'zod';
 import type { ProductVariants } from '@/types/db';
 
-type ColumnTimestampProperties = 'createdAt' | 'updatedAt';
-
 type Variant = Selectable<ProductVariants>;
 
 export const productVariantSchema = z.object({

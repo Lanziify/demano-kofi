@@ -2,8 +2,6 @@ import type { Selectable } from 'kysely';
 import z from 'zod';
 import type { ProductImages } from '@/types/db';
 
-type ColumnTimestampProperties = 'createdAt' | 'updatedAt';
-
 type Image = Selectable<ProductImages>;
 
 export const productImageSchema = z.object({

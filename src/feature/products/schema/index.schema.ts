@@ -1,0 +1,1 @@
+type ColumnTimestampProperties = 'createdAt' | 'updatedAt';

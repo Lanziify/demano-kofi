@@ -5,8 +5,6 @@ import { createProductCategorySchema } from './product-category.schema';
 import { addProductImageSchema } from './product-image.schema';
 import { createProductVariantSchema } from './product-variant.schema';
 
-type ColumnTimestampProperties = 'createdAt' | 'updatedAt';
-
 type Product = Selectable<Products>;
 
 export const productSchema = z.object({

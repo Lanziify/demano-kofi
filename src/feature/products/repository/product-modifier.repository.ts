@@ -1,13 +1,12 @@
 import type { Kysely, Transaction } from 'kysely';
 import type { DB } from '@/types/db';
 import { db } from '@/utils/db';
-import type { CreateModifierSchemaValue } from '../schema/product-modifier.schema';
+import type {
+  CreateModifierSchemaValue,
+  UpdateProductModifierSchemaValue,
+} from '../schema/product-modifier.schema';
 
 type Database = Kysely<DB> | Transaction<DB>;
-
-type ProductModifierInsert = CreateModifierSchemaValue & {
-  modifierGroupId: string;
-};
 
 export class ProductModifierRepository {
   constructor(private readonly database: Database = db) {}
@@ -16,20 +15,32 @@ export class ProductModifierRepository {
     return new ProductModifierRepository(trx);
   }
 
-  async create(values: ProductModifierInsert, db = this.database) {
-    return db
+  async create(values: CreateModifierSchemaValue) {
+    return this.database
       .insertInto('productModifiers')
       .values(values)
       .returningAll()
       .executeTakeFirst();
   }
 
-  async createMany(values: ProductModifierInsert[], db = this.database) {
-    return db
+  async createMany(values: CreateModifierSchemaValue[]) {
+    return this.database
       .insertInto('productModifiers')
       .values(values)
       .returningAll()
       .execute();
+  }
+
+  async update({
+    id,
+    ...values
+  }: Omit<UpdateProductModifierSchemaValue, 'id'> & { id: string }) {
+    return this.database
+      .updateTable('productModifiers')
+      .set(values)
+      .where('productModifiers.id', '=', id)
+      .returningAll()
+      .executeTakeFirst();
   }
 
   // async update(
@@ -46,14 +57,14 @@ export class ProductModifierRepository {
   //     .executeTakeFirst();
   // }
 
-  // async delete(modifierGroupId: string, id: string) {
-  //   return this.database
-  //     .deleteFrom('productModifiers')
-  //     .where('productModifiers.id', '=', id)
-  //     .where('productModifiers.modifierGroupId', '=', modifierGroupId)
-  //     .returningAll()
-  //     .executeTakeFirst();
-  // }
+  async delete(modifierGroupId: string, id: string) {
+    return this.database
+      .deleteFrom('productModifiers')
+      .where('productModifiers.id', '=', id)
+      .where('productModifiers.modifierGroupId', '=', modifierGroupId)
+      .returningAll()
+      .executeTakeFirst();
+  }
 
   // async findById(modifierGroupId: string, id: string) {
   //   return this.database

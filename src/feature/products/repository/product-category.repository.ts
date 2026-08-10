@@ -2,7 +2,10 @@ import type { Kysely, Transaction } from 'kysely';
 import { jsonArrayFrom } from 'kysely/helpers/postgres';
 import type { DB } from '@/types/db';
 import { db } from '@/utils/db';
-import type { ProductCategorySchemaValue } from '../schema/product-category.schema';
+import type {
+  CreateProductCategorySchemaValue,
+  UpdateProductCategorySchemaValue,
+} from '../schema/product-category.schema';
 
 type Database = Kysely<DB> | Transaction<DB>;
 
@@ -18,22 +21,25 @@ export class ProductCategoryRepository {
     return new ProductCategoryRepository(trx);
   }
 
-  async create(values: ProductCategorySchemaValue, db = this.database) {
-    return db
+  async create(values: CreateProductCategorySchemaValue) {
+    return this.database
       .insertInto('productCategories')
       .values(values)
       .returningAll()
       .executeTakeFirst();
   }
 
-  // async update(id: string, values: ProductCategorySchemaValue) {
-  //   return this.database
-  //     .updateTable('productCategories')
-  //     .set(values)
-  //     .where('productCategories.id', '=', id)
-  //     .returningAll()
-  //     .executeTakeFirst();
-  // }
+  async update({
+    id,
+    ...values
+  }: Omit<UpdateProductCategorySchemaValue, 'modifierGroups'>) {
+    return this.database
+      .updateTable('productCategories')
+      .set(values)
+      .where('productCategories.id', '=', id)
+      .returningAll()
+      .executeTakeFirst();
+  }
 
   // async delete(id: string) {
   //   return this.database
@@ -78,13 +84,50 @@ export class ProductCategoryRepository {
             ])
             .whereRef('pcmg.productCategoryId', '=', 'pc.id')
         ).as('modifierGroups'),
-      ]);
+      ])
+      .orderBy('pc.createdAt', 'desc');
 
     if (id) {
       return query.where('pc.id', '=', id).executeTakeFirst();
     }
 
     return query.execute();
+  }
+
+  // Dedicated single-result variant so callers get a non-array return type
+  // without relying on findWithGroupsModifiers' overloaded-by-argument shape.
+  async findOneWithGroupsModifiers(id: string) {
+    return this.database
+      .selectFrom('productCategories as pc')
+      .selectAll('pc')
+      .select((cmgeb) => [
+        jsonArrayFrom(
+          cmgeb
+            .selectFrom('productCategoryModifierGroups as pcmg')
+            .innerJoin(
+              'productModifierGroups as pmg',
+              'pmg.id',
+              'pcmg.modifierGroupId'
+            )
+            .select((mgeb) => [
+              'pmg.id',
+              'pmg.name',
+              'pmg.isRequired',
+              'pmg.selectionType',
+              jsonArrayFrom(
+                mgeb
+                  .selectFrom('productModifiers as pm')
+                  .select(['pm.id', 'pm.name', 'pm.priceAdjustment'])
+                  .whereRef('pm.modifierGroupId', '=', 'pmg.id')
+              ).as('modifiers'),
+              'pmg.createdAt',
+              'pmg.updatedAt',
+            ])
+            .whereRef('pcmg.productCategoryId', '=', 'pc.id')
+        ).as('modifierGroups'),
+      ])
+      .where('pc.id', '=', id)
+      .executeTakeFirst();
   }
 
   async findWithGroupsModifiers(id?: string) {
@@ -116,7 +159,8 @@ export class ProductCategoryRepository {
             ])
             .whereRef('pcmg.productCategoryId', '=', 'pc.id')
         ).as('modifierGroups'),
-      ]);
+      ])
+      .orderBy('pc.createdAt', 'desc');
 
     if (id) {
       return query.where('pc.id', '=', id).executeTakeFirst();

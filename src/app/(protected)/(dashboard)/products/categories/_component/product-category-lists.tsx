@@ -12,19 +12,34 @@ import {
 } from '@/components/ui/item';
 import { Spinner } from '@/components/ui/spinner';
 import { useProducts } from '@/feature/products/hooks/use-products';
+import { useDialog } from '@/hooks/use-dialog';
+import {
+  ProductCategoryDialog,
+  type ProductCategoryDialogOptions,
+} from './product-category-dialog';
 
 export default function ProductCategoryList() {
   const { categoriesWithGroupsModifiers } = useProducts();
+  const categoryDialog = useDialog<ProductCategoryDialogOptions>();
+
+  const handleCategoryEdit = (
+    item: NonNullable<typeof categoriesWithGroupsModifiers.data>[number]
+  ) => {
+    categoryDialog.show({
+      title: 'Edit Category',
+      description: 'Create new product category for you product listings.',
+      confirmLabel: 'Save',
+      data: item,
+    });
+  };
 
   if (categoriesWithGroupsModifiers.isPending) {
     return <Spinner />;
   }
 
-  console.log(categoriesWithGroupsModifiers.data);
-
   return (
     <div className="space-y-3">
-      {categoriesWithGroupsModifiers.data?.map((item, index) => (
+      {categoriesWithGroupsModifiers.data?.map((item) => (
         <Item key={String(item.id)} variant="muted" className="bg">
           <ItemMedia variant="icon">
             <Tag />
@@ -40,12 +55,27 @@ export default function ProductCategoryList() {
               <Folder size={10} />
               Products {item.modifierGroups.length}
             </span>
-            <Button variant="ghost" size="icon-sm">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => handleCategoryEdit(item)}
+            >
               <Pencil />
             </Button>
           </ItemActions>
         </Item>
       ))}
+
+      {categoryDialog.dialog?.open && (
+        <ProductCategoryDialog
+          onOpenChange={(open) => {
+            categoryDialog.setDialog((prev) =>
+              prev ? { ...prev, open } : prev
+            );
+          }}
+          {...categoryDialog.dialog}
+        />
+      )}
     </div>
   );
 }

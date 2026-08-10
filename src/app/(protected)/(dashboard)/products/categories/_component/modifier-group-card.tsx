@@ -1,4 +1,4 @@
-import { DollarSign, Plus, X } from 'lucide-react';
+import { DollarSign, Plus, Trash, X } from 'lucide-react';
 import {
   type Control,
   Controller,
@@ -77,7 +77,7 @@ export default function ProductModifierGroupCard<
   return (
     <Card>
       <CardContent className="space-y-6">
-        <FieldGroup className="grid grid-cols-1 gap-6 sm:grid-cols-[1fr_200px_auto_auto]">
+        <FieldGroup className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_200px_auto_auto]">
           <Controller
             control={control}
             name={nameField}
@@ -135,7 +135,7 @@ export default function ProductModifierGroupCard<
           </Button>
         </FieldGroup>
         <FieldGroup
-          className={cn('gap-3 pl-4', {
+          className={cn('gap-2 pl-4', {
             'border-orange-400 border-l-2': modifierFields.fields.length > 0,
           })}
         >
@@ -144,7 +144,7 @@ export default function ProductModifierGroupCard<
               <Field
                 key={field.id}
                 orientation="horizontal"
-                className="grid grid-cols-[1fr_auto_auto] items-start gap-2"
+                className="grid grid-cols-[1fr_auto_auto] items-start gap-4"
               >
                 <Controller
                   control={control}
@@ -177,10 +177,7 @@ export default function ProductModifierGroupCard<
                           type="number"
                           onChange={(event) => {
                             const value = event.target.value;
-
-                            field.onChange(
-                              value === '' ? undefined : Number(value)
-                            );
+                            field.onChange(value === '' ? '' : Number(value));
                           }}
                         />
                         <InputGroupAddon>
@@ -196,11 +193,11 @@ export default function ProductModifierGroupCard<
                 />
                 <Button
                   type="button"
-                  variant="ghost"
+                  variant="destructive"
                   size="icon"
                   onClick={() => modifierFields.remove(index)}
                 >
-                  <X />
+                  <Trash />
                 </Button>
               </Field>
             ))}

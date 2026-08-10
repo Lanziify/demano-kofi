@@ -1,7 +1,10 @@
 import type { Kysely, Transaction } from 'kysely';
 import type { DB } from '@/types/db';
 import { db } from '@/utils/db';
-import type { ProductModifierGroupSchemaValue } from '../schema/product-modifier-group.schema';
+import type {
+  CreateProductModifierGroupSchemaValue,
+  UpdateProductModifierGroupSchemaValue,
+} from '../schema/product-modifier-group.schema';
 
 type Database = Kysely<DB> | Transaction<DB>;
 
@@ -17,10 +20,26 @@ export class ProductModifierGroupRepository {
     return new ProductModifierGroupRepository(trx);
   }
 
-  async create(values: ProductModifierGroupSchemaValue, db = this.database) {
-    return db
+  async create(
+    values: Omit<CreateProductModifierGroupSchemaValue, 'modifiers'>
+  ) {
+    return this.database
       .insertInto('productModifierGroups')
       .values(values)
+      .returningAll()
+      .executeTakeFirst();
+  }
+
+  async update({
+    id,
+    ...values
+  }: Omit<UpdateProductModifierGroupSchemaValue, 'modifiers' | 'id'> & {
+    id: string;
+  }) {
+    return this.database
+      .updateTable('productModifierGroups')
+      .set(values)
+      .where('productModifierGroups.id', '=', id)
       .returningAll()
       .executeTakeFirst();
   }
