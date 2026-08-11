@@ -35,7 +35,7 @@ export type CreateProductModifierGroupSchemaValue = z.infer<
 // can be created rather than matched to an existing row.
 export const updateProductModifierGroupSchema =
   productModifierGroupSchema.extend({
-    id: z.uuid().optional(),
+    id: z.uuid(),
     modifiers: z.array(updateProductModifierSchema).optional(),
   });
 

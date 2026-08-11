@@ -7,7 +7,7 @@ type Modifier = Selectable<ProductModifiers>;
 export const productModifierSchema = z.object({
   id: z.uuid(),
   name: z.string().trim().min(1, 'Please enter product modifier name').max(255),
-  priceAdjustment: z.number('Please enter a valid number').int(),
+  priceAdjustment: z.number('Please enter a valid number').int().nonnegative(),
 }) satisfies z.ZodType<Partial<Omit<Modifier, ColumnTimestampProperties>>>;
 
 export type ProductModifierSchemaValue = z.infer<typeof productModifierSchema>;

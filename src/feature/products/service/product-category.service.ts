@@ -1,4 +1,4 @@
-import type { Transaction } from 'kysely';
+import type { Selectable, Transaction } from 'kysely';
 import { DatabaseError, NotFoundError } from '@/lib/errors/app-error';
 import type {
   DB,
@@ -197,14 +197,14 @@ export class ProductCategoryService {
   }
 }
 
-export type ProductCategory = ProductCategories;
+export type ProductCategory = Selectable<ProductCategories>;
 
 export type ProductCategoryWithGroups = (ProductCategory & {
-  modifierGroups: ProductModifierGroups[];
+  modifierGroups: Selectable<ProductModifierGroups>[];
 })[];
 
 export type ProductCategoryWithGroupsModifiers = (ProductCategory & {
-  modifierGroups: (ProductModifierGroups & {
+  modifierGroups: (Selectable<ProductModifierGroups> & {
     modifiers: ProductModifiers[];
   })[];
 })[];
