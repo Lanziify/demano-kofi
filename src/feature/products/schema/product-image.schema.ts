@@ -2,35 +2,30 @@ import type { Selectable } from 'kysely';
 import z from 'zod';
 import type { ProductImages } from '@/types/db';
 
-type Image = Selectable<ProductImages>;
-
 export const productImageSchema = z.object({
   mediaId: z.uuid(),
   productId: z.uuid(),
   sortOrder: z.number().nonnegative(),
-}) satisfies z.ZodType<Partial<Omit<Image, 'id' | ColumnTimestampProperties>>>;
+  altText: z.string().trim().max(255),
+}) satisfies z.ZodType<Selectable<ProductImages>>;
 
-export type ProductImageSchemaValue = z.infer<typeof productImageSchema>;
+export type ProductImageValues = z.infer<typeof productImageSchema>;
 
 export const productFileSchema = z
   .file()
-  // .optional()
   .refine((file) => !file || file.size <= 5_000_000, {
     message: 'Image must be less than 5 MB',
   })
-  .refine(
-    (file) =>
-      !file || ['image/jpeg', 'image/png', 'image/webp'].includes(file.type),
-    {
-      message: 'Only JPG, PNG, and WebP images are allowed',
-    }
-  );
+  .refine((file) => !file || ['image/jpeg', 'image/png', 'image/webp'].includes(file.type), {
+    message: 'Only JPG, PNG, and WebP images are allowed',
+  });
 
-export const addProductImageSchema = z.object({
-  file: productFileSchema,
-  altText: z.string().trim().max(255).optional(),
+export const productImageFormSchema = productImageSchema.omit({ mediaId: true, productId: true }).extend({
+  mediaId: z.uuid().optional(),
+  productId: z.uuid().optional(),
+  file: productFileSchema.optional(),
+  imageUrl: z.string().optional(),
   sortOrder: z.number().int().nonnegative(),
-  // isPrimary: z.boolean().optional(),
 });
 
-export type AddProductImageSchemaValue = z.infer<typeof addProductImageSchema>;
+export type ProductImageFormValues = z.infer<typeof productImageFormSchema>;

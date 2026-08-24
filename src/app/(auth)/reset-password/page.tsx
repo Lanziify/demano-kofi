@@ -25,7 +25,9 @@ export default async function ResetPasswordPage({
             Could not proceed with invalid or expired token. Please request a
             new one.
           </EmptyDescription>
-          <Button render={<Link href={'/signin'} />}>Go back to Sign In</Button>
+          <Button render={<Link href={'/signin'} />} nativeButton={false}>
+            Go back to Sign In
+          </Button>
         </EmptyHeader>
       </Empty>
     );

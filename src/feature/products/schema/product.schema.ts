@@ -1,12 +1,13 @@
 import type { Selectable } from 'kysely';
 import z from 'zod';
-import type { Products } from '@/types/db';
-import { addProductImageSchema } from './product-image.schema';
-import { updateProductModifierGroupSchema } from './product-modifier-group.schema';
-import { createProductVariantSchema } from './product-variant.schema';
+import type { ProductModifierGroups, ProductModifierOptions, Products } from '@/types/db';
+import { modifierGroupFormWithOptionsSchema, modifierGroupOptionSchema } from './modifier.schema';
+import { productImageFormSchema } from './product-image.schema';
+import { variantFormSchema } from './variants.schema';
 
-type Product = Selectable<Products>;
-
+/**
+ * Product schema
+ */
 export const productSchema = z.object({
   id: z.uuid(),
   categoryId: z.uuid('Please select category.'),
@@ -14,19 +15,67 @@ export const productSchema = z.object({
   description: z.string().trim(),
   isAvailable: z.boolean().default(true),
   isFeatured: z.boolean().default(false),
-}) satisfies z.ZodType<Omit<Product, ColumnTimestampProperties>>;
+  createdAt: z.date(),
+  updatedAt: z.date(),
+}) satisfies z.ZodType<Selectable<Products>>;
 
-export type ProductSchemaValue = z.infer<typeof productSchema>;
+export type ProductValues = z.infer<typeof productSchema>;
 
-export const createProductSchema = productSchema.omit({ id: true }).extend({
-  // Images
-  images: z.array(addProductImageSchema).max(10).optional(),
-  // Variants
-  variants: z
-    .array(createProductVariantSchema)
-    // .min(1, 'Please add at least one variant.')
-    .optional(),
-  modifierGroups: z.array(updateProductModifierGroupSchema).optional(),
+/**
+ * Product modifier group option schema
+ */
+export const productModifierOptionSchema = z.object({
+  productId: z.uuid(),
+  modifierGroupId: z.uuid(),
+  modifierOptionId: z.uuid(),
+  priceAdjustment: z.number('Please enter a valid number').int().nonnegative(),
+  sortOrder: z.number().nonnegative(),
+}) satisfies z.ZodType<Selectable<ProductModifierOptions>>;
+
+export type ProductModifierOptionValues = z.infer<typeof productModifierOptionSchema>;
+
+/**
+ * Product modifier group relation schema
+ */
+export const productModifierGroupSchema = z.object({
+  productId: z.uuid(),
+  categoryModifierGroupId: z.uuid(),
+  modifierGroupId: z.uuid(),
+  isRequired: z.boolean(),
+  sortOrder: z.number().nonnegative(),
+}) satisfies z.ZodType<Selectable<ProductModifierGroups>>;
+
+export type ProductModifierGroupValues = z.infer<typeof productModifierGroupSchema>;
+
+/**
+ * Product form schema
+ */
+export const productModifierOptionFormSchema = modifierGroupOptionSchema
+  .omit({
+    id: true,
+    createdAt: true,
+    updatedAt: true,
+  })
+  .extend({
+    id: z.uuid().optional(),
+    modifierGroupId: z.uuid().optional(),
+  });
+
+export const productModifierGroupFormWithOptionsSchema = modifierGroupFormWithOptionsSchema
+  .omit({ id: true, options: true })
+  .extend({
+    id: z.uuid().optional(),
+    presetId: z.uuid().optional(),
+    isRequired: z.boolean(),
+    sortOrder: z.number().nonnegative(),
+    options: z.array(productModifierOptionFormSchema).optional(),
+  });
+
+export const productFormSchema = productSchema.omit({ id: true, createdAt: true, updatedAt: true }).extend({
+  id: z.uuid().optional(),
+  images: z.array(productImageFormSchema).max(10).optional(),
+  variants: z.array(variantFormSchema).optional(),
+  modifierGroups: z.array(productModifierGroupFormWithOptionsSchema).optional(),
 });
 
-export type CreateProductSchemaValue = z.infer<typeof createProductSchema>;
+export type ProductFormValues = z.infer<typeof productFormSchema>;

@@ -11,16 +11,16 @@ import {
 } from '@tanstack/react-table';
 import React from 'react';
 
-export default function useDynamicTable<T>() {
-  const [data, setData] = React.useState<T[]>([]);
-  const [defaultColumn, setDefaultColumn] = React.useState<ColumnDef<T>>();
-  const [columns, setColumns] = React.useState<ColumnDef<T>[]>([]);
+interface UseDynamicTableOptions<T> {
+  data: T[];
+  columns: ColumnDef<T>[];
+  defaultColumn?: ColumnDef<T>;
+}
+
+export default function useDynamicTable<T>({ data, columns, defaultColumn }: UseDynamicTableOptions<T>) {
   const [globalFilter, setGlobalFilter] = React.useState('');
-  const [columnFilters, setColumnFilter] = React.useState<ColumnFiltersState>(
-    []
-  );
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({});
+  const [columnFilters, setColumnFilter] = React.useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
 
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
@@ -58,9 +58,7 @@ export default function useDynamicTable<T>() {
     table,
     pagination,
     globalFilter,
-
-    setData,
-    setColumns,
-    setDefaultColumn,
+    columnFilters,
+    columnVisibility,
   };
 }

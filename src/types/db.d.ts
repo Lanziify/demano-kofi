@@ -27,6 +27,21 @@ export interface Account {
   userId: string;
 }
 
+export interface Categories {
+  createdAt: Generated<Timestamp>;
+  description: string | null;
+  id: Generated<string>;
+  name: string;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface CategoryModifierGroups {
+  categoryId: string;
+  id: Generated<string>;
+  modifierGroupId: string;
+  sortOrder: number;
+}
+
 export interface Invitation {
   createdAt: Generated<Timestamp>;
   email: string;
@@ -57,6 +72,24 @@ export interface Member {
   userId: string;
 }
 
+export interface ModifierGroupOptions {
+  createdAt: Generated<Timestamp>;
+  id: Generated<string>;
+  modifierGroupId: string;
+  name: string;
+  priceAdjustment: Generated<number>;
+  sortOrder: number;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface ModifierGroups {
+  createdAt: Generated<Timestamp>;
+  id: Generated<string>;
+  name: string;
+  selectionType: string;
+  updatedAt: Generated<Timestamp>;
+}
+
 export interface Organization {
   createdAt: Timestamp;
   id: string;
@@ -66,41 +99,27 @@ export interface Organization {
   slug: string;
 }
 
-export interface ProductCategories {
-  createdAt: Generated<Timestamp>;
-  description: string | null;
-  id: Generated<string>;
-  name: string;
-  updatedAt: Generated<Timestamp>;
-}
-
-export interface ProductCategoryModifierGroups {
-  modifierGroupId: string;
-  productCategoryId: string;
-}
-
 export interface ProductImages {
+  altText: string | null;
   mediaId: string;
   productId: string;
-  sortOrder: Generated<number>;
+  sortOrder: number;
 }
 
 export interface ProductModifierGroups {
-  createdAt: Generated<Timestamp>;
-  id: Generated<string>;
+  categoryModifierGroupId: string | null;
   isRequired: Generated<boolean>;
-  name: string;
-  selectionType: string;
-  updatedAt: Generated<Timestamp>;
+  modifierGroupId: string;
+  productId: string;
+  sortOrder: number;
 }
 
-export interface ProductModifiers {
-  createdAt: Generated<Timestamp>;
-  id: Generated<string>;
+export interface ProductModifierOptions {
   modifierGroupId: string;
-  name: string;
-  priceAdjustment: Generated<number>;
-  updatedAt: Generated<Timestamp>;
+  modifierOptionId: string;
+  priceAdjustment: number | null;
+  productId: string;
+  sortOrder: number;
 }
 
 export interface Products {
@@ -111,16 +130,6 @@ export interface Products {
   isAvailable: Generated<boolean>;
   isFeatured: Generated<boolean>;
   name: string;
-  updatedAt: Generated<Timestamp>;
-}
-
-export interface ProductVariants {
-  createdAt: Generated<Timestamp>;
-  id: Generated<string>;
-  name: string;
-  price: number;
-  productId: string;
-  sku: string;
   updatedAt: Generated<Timestamp>;
 }
 
@@ -170,6 +179,17 @@ export interface UserProfiles {
   userId: string;
 }
 
+export interface Variants {
+  createdAt: Generated<Timestamp>;
+  id: Generated<string>;
+  name: string;
+  priceAmount: number;
+  productId: string;
+  sku: string;
+  sortOrder: number;
+  updatedAt: Generated<Timestamp>;
+}
+
 export interface Verification {
   createdAt: Generated<Timestamp>;
   expiresAt: Timestamp;
@@ -182,19 +202,21 @@ export interface Verification {
 
 export interface DB {
   account: Account;
+  categories: Categories;
+  categoryModifierGroups: CategoryModifierGroups;
   invitation: Invitation;
   media: Media;
   member: Member;
+  modifierGroupOptions: ModifierGroupOptions;
+  modifierGroups: ModifierGroups;
   organization: Organization;
-  productCategories: ProductCategories;
-  productCategoryModifierGroups: ProductCategoryModifierGroups;
   productImages: ProductImages;
   productModifierGroups: ProductModifierGroups;
-  productModifiers: ProductModifiers;
+  productModifierOptions: ProductModifierOptions;
   products: Products;
-  productVariants: ProductVariants;
   session: Session;
   user: User;
   userProfiles: UserProfiles;
+  variants: Variants;
   verification: Verification;
 }

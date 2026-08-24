@@ -81,6 +81,25 @@ export class UnAuthorizedError extends AppError {
     });
   }
 }
+
+export class ValidationError extends AppError {
+  constructor(
+    message = 'Validation failed.',
+    options?: {
+      errorCode?: ErrorCode;
+      cause?: unknown;
+      details?: Record<string, unknown>;
+    }
+  ) {
+    super(message, {
+      statusCode: 422,
+      errorCode: options?.errorCode ?? 'VALIDATION_ERROR',
+      cause: options?.cause instanceof Error ? options.cause : undefined,
+      details: options?.details,
+    });
+  }
+}
+
 export class ServerError extends AppError {
   constructor(
     message = 'Something went wrong with the server',

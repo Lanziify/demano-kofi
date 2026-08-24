@@ -1,83 +1,82 @@
 import { APIError, isAPIError } from 'better-auth/api';
 import { NextResponse } from 'next/server';
 import z, { ZodError } from 'zod';
+import type { ApiRErrorResponse } from '@/types/api';
 import { AppError } from './app-error';
 import { isPostgresError, parsePostgresError } from './db-error-parser';
-import { type ErrorCode, isErrorCode } from './error-codes';
+import { isErrorCode } from './error-codes';
 
-export type ApiErrorResponse = {
-  errorCode?: ErrorCode;
-  message?: string;
-  details?: Record<string, unknown> | unknown;
-};
+export function apiErrorParser(error: unknown): NextResponse<ApiRErrorResponse> {
+  let errorData: ApiRErrorResponse & { status: number } = {
+    success: false,
+    data: null,
+    error: {},
+    status: 404,
+  };
 
-export function apiErrorParser(error: unknown): NextResponse<ApiErrorResponse> {
   if (error instanceof ZodError) {
-    return NextResponse.json(
-      {
+    errorData = {
+      ...errorData,
+      error: {
         errorCode: 'VALIDATION_ERROR',
         message: 'Invalid request body',
         details: z.flattenError(error),
       },
-      { status: 400 }
-    );
+      status: 400,
+    };
   }
 
   if (error instanceof APIError || isAPIError(error)) {
-    return NextResponse.json(
-      {
-        errorCode:
-          error.body?.code && isErrorCode(error.body?.code)
-            ? error.body?.code
-            : 'UNEXPECTED_ERROR',
+    errorData = {
+      ...errorData,
+      error: {
+        errorCode: error.body?.code && isErrorCode(error.body?.code) ? error.body?.code : 'UNEXPECTED_ERROR',
         message: error.body?.message,
         details: error.cause,
       },
-      { status: error.statusCode }
-    );
+      status: error.statusCode,
+    };
   }
 
   if (isPostgresError(error)) {
     const parsed = parsePostgresError(error);
 
-    return NextResponse.json(
-      {
+    errorData = {
+      ...errorData,
+      error: {
         errorCode: parsed.errorCode,
         message: parsed.message,
         details: parsed.details,
       },
-      { status: parsed.statusCode }
-    );
+      status: parsed.statusCode,
+    };
   }
 
   if (error instanceof AppError) {
-    return NextResponse.json(
-      {
+    errorData = {
+      ...errorData,
+      error: {
         errorCode: error.errorCode,
         message: error.message,
         details: error.details,
       },
-      { status: error.statusCode }
-    );
+      status: error.statusCode,
+    };
   }
 
   if (error instanceof Error) {
-    return NextResponse.json(
-      {
-        status: 500,
+    errorData = {
+      ...errorData,
+      error: {
         errorCode: 'UNEXPECTED_ERROR',
         message: error.message,
         details: error.cause,
       },
-      { status: 500 }
-    );
+      status: 500,
+    };
   }
 
-  return NextResponse.json(
-    {
-      errorCode: 'UNEXPECTED_ERROR',
-      message: 'Something went wrong',
-    },
-    { status: 500 }
-  );
+  const { status, ...result } = errorData;
+
+  return NextResponse.json<ApiRErrorResponse>(result, { status });
 }

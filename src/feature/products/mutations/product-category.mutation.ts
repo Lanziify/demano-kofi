@@ -1,10 +1,6 @@
 'use client';
 
-import {
-  type QueryClient,
-  useMutation,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { type QueryClient, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createCategory, updateCategory } from '../api/product-category.api';
 
 // Each of these is its own top-level query key (see products.queries.ts), so
@@ -12,11 +8,8 @@ import { createCategory, updateCategory } from '../api/product-category.api';
 // as one array key would only match a query key nested under that exact
 // three-level path, which none of them are, and silently invalidate nothing.
 function invalidateCategoryQueries(queryClient: QueryClient) {
-  queryClient.invalidateQueries({ queryKey: ['product-categories'] });
-  queryClient.invalidateQueries({ queryKey: ['product-categories-groups'] });
-  queryClient.invalidateQueries({
-    queryKey: ['product-categories-groups-modifiers'],
-  });
+  queryClient.invalidateQueries({ queryKey: ['categories'] });
+  queryClient.invalidateQueries({ queryKey: ['category-modifier-group-options'] });
 }
 
 export const useCreateProductCategory = () => {

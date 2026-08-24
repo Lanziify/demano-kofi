@@ -1,27 +1,11 @@
 import { NextResponse } from 'next/server';
-import {
-  createProductCategorySchema,
-  productCategoryQuerySchema,
-} from '@/feature/products/schema/product-category.schema';
-import {
-  type ProductCategory,
-  ProductCategoryService,
-  type ProductCategoryWithGroups,
-  type ProductCategoryWithGroupsModifiers,
-} from '@/feature/products/service/product-category.service';
+import { categoryFormWithModifierGroupsSchema, categoryQuerySchema } from '@/feature/products/schema/category.schema';
+import { CategoryService } from '@/feature/products/service/category.service';
+import type { Category, CategoryWithModifierGroupOptions } from '@/feature/products/types/types';
 import { apiErrorHandler, requiredSession } from '@/lib/api-handler';
+import type { ApiSuccessResponse } from '@/types/api';
 
-const service = new ProductCategoryService();
-
-export type CreateProductCategoryApiResponse = Awaited<
-  ReturnType<ProductCategoryService['createCategory']>
->;
-
-export type GetProductCategoriesApiResponseMap = {
-  category: ProductCategory[];
-  groups: ProductCategoryWithGroups;
-  groupsModifiers: ProductCategoryWithGroupsModifiers;
-};
+const service = new CategoryService();
 
 export const GET = apiErrorHandler(
   async (req) => {
@@ -33,27 +17,31 @@ export const GET = apiErrorHandler(
       values[key] = value;
     });
 
-    const { data: parsedValues } = productCategoryQuerySchema.safeParse(values);
+    const { data: queries } = categoryQuerySchema.safeParse(values);
 
-    if (parsedValues?.include) {
-      switch (parsedValues.include) {
-        case 'groups': {
-          const result = await service.getCategoriesWithGroups(
-            parsedValues?.id
-          );
-          return NextResponse.json(result, { status: 200 });
-        }
-        case 'groupsModifiers': {
-          const result = await service.getCategoriesWithGroupsModifiers(
-            parsedValues?.id
-          );
-          return NextResponse.json(result, { status: 200 });
-        }
-      }
+    if (queries?.include === 'groupModifierOptions') {
+      const result = await service.getCategoriesWithModifierGroupOptions();
+
+      return NextResponse.json<ApiSuccessResponse<CategoryWithModifierGroupOptions[]>>(
+        {
+          success: true,
+          data: result,
+          error: null,
+        },
+        { status: 200 }
+      );
     }
 
     const result = await service.getCategories();
-    return NextResponse.json(result, { status: 200 });
+
+    return NextResponse.json<ApiSuccessResponse<Category[]>>(
+      {
+        success: true,
+        data: result,
+        error: null,
+      },
+      { status: 200 }
+    );
   },
   { guards: [] }
 );
@@ -61,7 +49,7 @@ export const GET = apiErrorHandler(
 export const POST = apiErrorHandler(
   async (req) => {
     const body = await req.json();
-    const values = createProductCategorySchema.parse(body);
+    const values = categoryFormWithModifierGroupsSchema.parse(body);
 
     const result = await service.createCategory(values);
 

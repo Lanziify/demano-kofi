@@ -1,69 +1,35 @@
 import axios from 'axios';
-import type { UpdateProductCategoryApiResponse } from '@/app/api/products/categories/[id]/route';
-import type {
-  CreateProductCategoryApiResponse,
-  GetProductCategoriesApiResponseMap,
-} from '@/app/api/products/categories/route';
 import { withClientErrorHandling } from '@/lib/errors/client-error-parser';
-import type {
-  CreateProductCategorySchemaValue,
-  UpdateProductCategorySchemaValue,
-} from '../schema/product-category.schema';
+import type { ApiSuccessResponse } from '@/types/api';
+import type { CategoryFormWithModifierGroupsValue } from '../schema/category.schema';
+import type { Category, CategoryWithModifierGroupOptions } from '../types/types';
 
 export const getCategories = withClientErrorHandling(async () => {
-  const { data } = await axios.get<
-    GetProductCategoriesApiResponseMap['category']
-  >('/api/products/categories');
+  const { data } = await axios.get<ApiSuccessResponse<Category[]>>('/api/products/categories');
 
   return data;
 });
 
-export const getCategoriesWithGroups = withClientErrorHandling(async () => {
-  const { data } = await axios.get<
-    GetProductCategoriesApiResponseMap['groups']
-  >('/api/products/categories', {
+export const getCategoriesWithGroupOptions = withClientErrorHandling(async () => {
+  const { data } = await axios.get<ApiSuccessResponse<CategoryWithModifierGroupOptions[]>>('/api/products/categories', {
     params: {
-      include: 'groups',
+      include: 'groupModifierOptions',
     },
   });
 
   return data;
 });
 
-export const getCategoriesWithGroupsModifiers = withClientErrorHandling(
-  async () => {
-    const { data } = await axios.get<
-      GetProductCategoriesApiResponseMap['groupsModifiers']
-    >('/api/products/categories', {
-      params: {
-        include: 'groupsModifiers',
-      },
-    });
-
-    return data;
-  }
-);
-
 //#region Category Mutations
-export const createCategory = withClientErrorHandling(
-  async (values: CreateProductCategorySchemaValue) => {
-    const { data } = await axios.post<CreateProductCategoryApiResponse>(
-      '/api/products/categories',
-      values
-    );
+export const createCategory = withClientErrorHandling(async (values: CategoryFormWithModifierGroupsValue) => {
+  const { data } = await axios.post<ApiSuccessResponse<Category>>('/api/products/categories', values);
 
-    return data;
-  }
-);
+  return data;
+});
 
-export const updateCategory = withClientErrorHandling(
-  async (values: UpdateProductCategorySchemaValue) => {
-    const { data } = await axios.patch<UpdateProductCategoryApiResponse>(
-      `/api/products/categories/${values.id}`,
-      values
-    );
+export const updateCategory = withClientErrorHandling(async (values: CategoryFormWithModifierGroupsValue) => {
+  const { data } = await axios.patch<ApiSuccessResponse<Category>>(`/api/products/categories/${values.id}`, values);
 
-    return data;
-  }
-);
+  return data;
+});
 //#endregion

@@ -4,17 +4,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import isEqual from 'lodash/isEqual';
 import { Check, Component, Plus, X } from 'lucide-react';
 import React from 'react';
-import {
-  Controller,
-  type Resolver,
-  useFieldArray,
-  useForm,
-} from 'react-hook-form';
+import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import {
-  ConfirmationDialog,
-  type ConfirmationDialogOptions,
-} from '@/components/custom/confirmation-dialog';
+import { ConfirmationDialog, type ConfirmationDialogOptions } from '@/components/custom/confirmation-dialog';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -24,13 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from '@/components/ui/empty';
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 import {
   Field,
   FieldDescription,
@@ -48,35 +34,33 @@ import {
   useUpdateProductCategory,
 } from '@/feature/products/mutations/product-category.mutation';
 import {
-  type CreateProductCategorySchemaValue,
-  createProductCategorySchema,
-  type UpdateProductCategorySchemaValue,
-  updateProductCategorySchema,
-} from '@/feature/products/schema/product-category.schema';
-import type { ProductCategoryWithGroupsModifiers } from '@/feature/products/service/product-category.service';
+  type CategoryFormWithModifierGroupsValue,
+  categoryFormWithModifierGroupsSchema,
+} from '@/feature/products/schema/category.schema';
+import type { CategoryWithModifierGroupOptions } from '@/feature/products/types/types';
 import { useDialog } from '@/hooks/use-dialog';
 import ProductModifierGroupCard from './modifier-group-card';
 
-type ProductCategoryDialogStatus = 'idle' | 'loading' | 'success' | 'error';
+type CategoryDialogFormStatus = 'idle' | 'loading' | 'success' | 'error';
 
-export type ProductCategoryDialogOptions = {
+export type CategoryDialogFormOptions = {
   title?: string;
   description?: string;
   confirmLabel?: string;
   closeText?: string;
   confirmVariant?: 'default' | 'destructive';
-  data?: ProductCategoryWithGroupsModifiers[number] | null;
+  data?: CategoryWithModifierGroupOptions | null;
   onConfirm?: () => void | Promise<void>;
 };
 
-export type ProductCategoryDialogProps = ProductCategoryDialogOptions & {
+export type CategoryDialogFormProps = CategoryDialogFormOptions & {
   open?: boolean;
   loading?: boolean;
-  status?: ProductCategoryDialogStatus;
+  status?: CategoryDialogFormStatus;
   onOpenChange?: (open: boolean) => void;
 };
 
-export function ProductCategoryDialog({
+export function CategoryDialogForm({
   open = false,
   title = '',
   description = '',
@@ -84,9 +68,8 @@ export function ProductCategoryDialog({
   confirmLabel = 'Submit',
   data,
   onOpenChange,
-}: ProductCategoryDialogProps) {
+}: CategoryDialogFormProps) {
   const isLoading = status === 'loading';
-  const isEditing = Boolean(data?.id);
 
   const createCategory = useCreateProductCategory();
   const updateCategory = useUpdateProductCategory();
@@ -98,18 +81,8 @@ export function ProductCategoryDialog({
     modifierGroups: [],
   };
 
-  // Editing an existing category still uses createProductCategorySchema's
-  // shape for the form's type param — updateProductCategorySchema only
-  // differs by requiring `id` on the category/groups/modifiers, which the
-  // resolver below validates at runtime regardless of the declared type.
-  const categorySchema = isEditing
-    ? updateProductCategorySchema
-    : createProductCategorySchema;
-
   const form = useForm({
-    resolver: zodResolver(
-      categorySchema
-    ) as Resolver<CreateProductCategorySchemaValue>,
+    resolver: zodResolver(categoryFormWithModifierGroupsSchema),
     defaultValues: {
       ...initialValues,
     },
@@ -122,13 +95,17 @@ export function ProductCategoryDialog({
     name: 'modifierGroups',
   });
 
-  const onSubmit = async (values: CreateProductCategorySchemaValue) => {
-    if (data?.id) {
-      const editValues = categorySchema.safeParse(data);
-      if (isEqual(values, editValues.data)) return;
+  const onSubmit = async (values: CategoryFormWithModifierGroupsValue) => {
+    const payload = {
+      ...values,
+      modifierGroups: values.modifierGroups?.map((group) => ({
+        ...group,
+        options: group.options?.map((option, index) => ({ ...option, sortOrder: index })),
+      })),
+    } as CategoryFormWithModifierGroupsValue;
 
-      const { modifierGroups: groups, ...categoryData } =
-        values as unknown as UpdateProductCategorySchemaValue;
+    if (data?.id) {
+      const { modifierGroups: groups, ...categoryData } = payload;
 
       confirmationDialog.show({
         title: 'Continue update?',
@@ -138,7 +115,7 @@ export function ProductCategoryDialog({
         onConfirm: async () => {
           await updateCategory.mutateAsync({
             ...categoryData,
-            id: String(data.id),
+            id: String(payload.id),
             modifierGroups: groups,
           });
 
@@ -147,7 +124,7 @@ export function ProductCategoryDialog({
         },
       });
     } else {
-      await createCategory.mutateAsync(values);
+      await createCategory.mutateAsync(payload);
       toast.success('Category created successfully');
       form.reset();
     }
@@ -155,7 +132,7 @@ export function ProductCategoryDialog({
 
   const hasFormValues = () => {
     const values = form.getValues();
-    const editValues = categorySchema.safeParse(data);
+    const editValues = categoryFormWithModifierGroupsSchema.safeParse(data);
 
     return editValues.error
       ? values.name.trim() !== '' ||
@@ -173,8 +150,7 @@ export function ProductCategoryDialog({
 
     confirmationDialog.show({
       title: 'Are you sure?',
-      description:
-        'You will lose all the information entered for this category.',
+      description: 'You will lose all the information entered for this category.',
       confirmLabel: 'Confirm',
       confirmVariant: 'default',
       onConfirm: () => {
@@ -196,13 +172,19 @@ export function ProductCategoryDialog({
   }
 
   React.useEffect(() => {
-    const parsedData = categorySchema.safeParse(data);
+    if (!data) return;
+
+    const parsedData = categoryFormWithModifierGroupsSchema.safeParse(data);
+
+    if (parsedData.error) {
+      toast.error(parsedData.error.message);
+    }
 
     form.reset({
       ...initialValues,
       ...parsedData.data,
-    } as CreateProductCategorySchemaValue);
-  }, [data, form.reset, categorySchema]);
+    });
+  }, [data, form.reset]);
 
   return (
     <div>
@@ -224,9 +206,7 @@ export function ProductCategoryDialog({
                         <FieldLabel htmlFor={field.name}>Name</FieldLabel>
                         <Input {...field} placeholder="Coffee" />
 
-                        {fieldState.invalid && (
-                          <FieldError errors={[fieldState.error]} />
-                        )}
+                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                       </Field>
                     )}
                   />
@@ -236,17 +216,10 @@ export function ProductCategoryDialog({
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor={field.name}>
-                          Description
-                        </FieldLabel>
-                        <Input
-                          {...field}
-                          placeholder="Optional short category description"
-                        />
+                        <FieldLabel htmlFor={field.name}>Description</FieldLabel>
+                        <Input {...field} placeholder="Optional short category description" />
 
-                        {fieldState.invalid && (
-                          <FieldError errors={[fieldState.error]} />
-                        )}
+                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                       </Field>
                     )}
                   />
@@ -255,9 +228,7 @@ export function ProductCategoryDialog({
                   {modifierGroups.fields.length > 0 && (
                     <FieldSet>
                       <FieldLegend>Modifier Groups</FieldLegend>
-                      <FieldDescription>
-                        Create product modifier groups
-                      </FieldDescription>
+                      <FieldDescription>Create product modifier groups</FieldDescription>
                       <FieldGroup className="gap-4">
                         {modifierGroups.fields.map((field, index) => (
                           <ProductModifierGroupCard
@@ -281,8 +252,7 @@ export function ProductCategoryDialog({
                           <div className="text-start">
                             <EmptyTitle>No modifier groups</EmptyTitle>
                             <EmptyDescription>
-                              You haven't created any product modifier group for
-                              this category yet.
+                              You haven't created any product modifier group for this category yet.
                             </EmptyDescription>
                           </div>
                         </div>
@@ -292,8 +262,8 @@ export function ProductCategoryDialog({
                             modifierGroups.append({
                               name: '',
                               selectionType: 'multiple',
-                              isRequired: false,
-                              modifiers: [],
+                              options: [],
+                              sortOrder: modifierGroups.fields.length,
                             })
                           }
                         >
@@ -310,8 +280,8 @@ export function ProductCategoryDialog({
                         modifierGroups.append({
                           name: '',
                           selectionType: 'multiple',
-                          isRequired: false,
-                          modifiers: [],
+                          options: [],
+                          sortOrder: modifierGroups.fields.length,
                         })
                       }
                     >
@@ -322,20 +292,11 @@ export function ProductCategoryDialog({
                 </div>
                 <DialogFooter>
                   <Field orientation="horizontal" className="justify-end">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={handleFormCancel}
-                      disabled={isSubmitting}
-                    >
+                    <Button type="button" variant="outline" onClick={handleFormCancel} disabled={isSubmitting}>
                       <X />
                       Cancel
                     </Button>
-                    <Button
-                      type="submit"
-                      form="category-form"
-                      disabled={isSubmitting}
-                    >
+                    <Button type="submit" form="category-form" disabled={isSubmitting}>
                       <Check />
                       {confirmLabel}
                     </Button>
@@ -348,9 +309,7 @@ export function ProductCategoryDialog({
                   <Spinner />
                 </ItemMedia>
                 <ItemContent>
-                  <ItemTitle className="line-clamp-1">
-                    Please wait for a while...
-                  </ItemTitle>
+                  <ItemTitle className="line-clamp-1">Please wait for a while...</ItemTitle>
                 </ItemContent>
               </Item>
             )}
@@ -361,9 +320,7 @@ export function ProductCategoryDialog({
         <ConfirmationDialog
           {...confirmationDialog.dialog}
           onOpenChange={(open) => {
-            confirmationDialog.setDialog((prev) =>
-              prev ? { ...prev, open } : prev
-            );
+            confirmationDialog.setDialog((prev) => (prev ? { ...prev, open } : prev));
           }}
           onConfirm={confirmationDialog.dialog.onConfirm}
         />
@@ -372,8 +329,8 @@ export function ProductCategoryDialog({
   );
 }
 
-export function ProductCategoryDialogTrigger() {
-  const categoryDialog = useDialog<ProductCategoryDialogOptions>();
+export function CategoryDialogFormTrigger() {
+  const categoryDialog = useDialog<CategoryDialogFormOptions>();
 
   return (
     <div>
@@ -381,8 +338,7 @@ export function ProductCategoryDialogTrigger() {
         onClick={() => {
           categoryDialog.show({
             title: 'New Category',
-            description:
-              'Create new product category for you product listings.',
+            description: 'Create new product category for you product listings.',
           });
         }}
       >
@@ -390,11 +346,9 @@ export function ProductCategoryDialogTrigger() {
         Add Category
       </Button>
       {categoryDialog.dialog?.open && (
-        <ProductCategoryDialog
+        <CategoryDialogForm
           onOpenChange={(open) => {
-            categoryDialog.setDialog((prev) =>
-              prev ? { ...prev, open } : prev
-            );
+            categoryDialog.setDialog((prev) => (prev ? { ...prev, open } : prev));
           }}
           {...categoryDialog.dialog}
         />

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { ApiErrorResponse } from './api-error-parser';
+import type { ApiErrorBody, ApiRErrorResponse } from '@/types/api';
 import { AppError } from './app-error';
 import type { ErrorCode } from './error-codes';
 
@@ -43,23 +43,20 @@ export class ClientRequestError extends AppError {
 //   };
 // }
 
-export function withClientErrorHandling<TArgs extends unknown[], TResult>(
-  fn: (...args: TArgs) => Promise<TResult>
-) {
+export function withClientErrorHandling<TArgs extends unknown[], TResult>(fn: (...args: TArgs) => Promise<TResult>) {
   return async (...args: TArgs): Promise<TResult> => {
     try {
       return await fn(...args);
     } catch (error) {
-      if (axios.isAxiosError<ApiErrorResponse>(error)) {
-        throw new ClientRequestError(
-          error.response?.data?.message ?? error.message,
-          {
-            // errorCode: error.response?.data?.errorCode ?? 'UNEXPECTED_ERROR',
-            // // statusCode: error.response?.status ?? 500,
-            // // details: error.response?.data?.details,
-            // cause: error,
-          }
-        );
+      if (axios.isAxiosError<ApiRErrorResponse<ApiErrorBody>>(error)) {
+        const errorData = error.response?.data.error;
+
+        throw new ClientRequestError(errorData?.message ?? error.message, {
+          // errorCode: errorData?.errorCode ?? 'UNEXPECTED_ERROR',
+          // // statusCode: error.response?.status ?? 500,
+          // // details: error.response?.data?.details,
+          // cause: error,
+        });
       }
 
       throw error;

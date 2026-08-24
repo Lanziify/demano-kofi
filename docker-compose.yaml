@@ -30,8 +30,8 @@ services:
     entrypoint: >
       /bin/sh -c "
       /usr/bin/mc alias set myminio  http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD};
-      /usr/bin/mc mb --ignore-existing myminio/demano-kofi-local;
-      /usr/bin/mc anonymous set download myminio/demano-kofi-local;
+      /usr/bin/mc mb --ignore-existing myminio/demano-kofi-environment;
+      /usr/bin/mc anonymous set download myminio/demano-kofi-environment;
       exit 0;
       "
   mailpit:

@@ -1,32 +1,22 @@
 'use client';
 
-import type {
-  ColumnDef,
-  ColumnFiltersState,
-  Table,
-  VisibilityState,
-} from '@tanstack/react-table';
+import type { ColumnDef, ColumnFiltersState, Table, VisibilityState } from '@tanstack/react-table';
 import React from 'react';
 import useDynamicTable from '@/hooks/use-dynamic-table';
 
 interface DynamicTableContextType<T> {
   table: Table<T>;
+  loading: boolean;
   pagination: {
     pageIndex: number;
     pageSize: number;
   };
-  setData: React.Dispatch<React.SetStateAction<T[]>>;
-  setColumns: React.Dispatch<React.SetStateAction<ColumnDef<T>[]>>;
-  setDefaultColumn: React.Dispatch<
-    React.SetStateAction<ColumnDef<T> | undefined>
-  >;
   globalFilter: string;
   columnFilters: ColumnFiltersState;
   columnVisibility: VisibilityState;
 }
 
-export const DynamicTableContext =
-  React.createContext<DynamicTableContextType<any> | null>(null);
+export const DynamicTableContext = React.createContext<DynamicTableContextType<any> | null>(null);
 
 export function useDynamicTableContext<T>() {
   const ctx = React.useContext(DynamicTableContext);
@@ -40,36 +30,29 @@ export function useDynamicTableContext<T>() {
 
 interface DynamicTableProviderProps<T> {
   children: React.ReactNode;
-
-  initialData: T[];
-
+  loading?: boolean;
+  initialData: T[] | undefined;
   initialColumns: ColumnDef<T>[];
-
   defaultColumn?: ColumnDef<T>;
 }
 
 export function DynamicTableProvider<T>({
   children,
+  loading,
   initialData,
   initialColumns,
   defaultColumn,
 }: DynamicTableProviderProps<T>) {
-  const value = useDynamicTable<T>();
+  const isLoading = loading ?? initialData === undefined;
 
-  React.useEffect(() => {
-    value.setData(initialData);
-  }, [initialData]);
-
-  React.useEffect(() => {
-    value.setColumns(initialColumns);
-  }, [initialColumns]);
-
-  React.useEffect(() => {
-    value.setDefaultColumn(defaultColumn);
-  }, [defaultColumn]);
+  const value = useDynamicTable<T>({
+    data: initialData ?? [],
+    columns: initialColumns,
+    defaultColumn,
+  });
 
   return (
-    <DynamicTableContext.Provider value={value as DynamicTableContextType<any>}>
+    <DynamicTableContext.Provider value={{ ...value, loading: isLoading } as DynamicTableContextType<T>}>
       {children}
     </DynamicTableContext.Provider>
   );

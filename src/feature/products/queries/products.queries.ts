@@ -1,27 +1,26 @@
 import { queryOptions } from '@tanstack/react-query';
-import {
-  getCategories,
-  getCategoriesWithGroups,
-  getCategoriesWithGroupsModifiers,
-} from '../api/product-category.api';
+import { getProducts } from '../api/product.api';
+import { getCategories, getCategoriesWithGroupOptions } from '../api/product-category.api';
 
 export const productQueries = {
   categories: () => {
     return queryOptions({
-      queryKey: ['product-categories'],
+      queryKey: ['categories'],
       queryFn: () => getCategories(),
     });
   },
-  categoriesWithGroups: () => {
+
+  categoriesWithGroupOptions: () => {
     return queryOptions({
-      queryKey: ['product-categories-groups'],
-      queryFn: () => getCategoriesWithGroups(),
+      queryKey: ['category-modifier-group-options'],
+      queryFn: () => getCategoriesWithGroupOptions(),
     });
   },
-  categoriesWithGroupsModifiers: () => {
+
+  products: () => {
     return queryOptions({
-      queryKey: ['product-categories-groups-modifiers'],
-      queryFn: () => getCategoriesWithGroupsModifiers(),
+      queryKey: ['products'],
+      queryFn: () => getProducts(),
     });
   },
 };
