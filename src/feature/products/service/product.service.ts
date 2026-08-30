@@ -359,10 +359,21 @@ export class ProductService {
           );
         }
 
-        // --- Variants: owned 1:1 by the product, so replace-all is safe ---
-        await productRepo.deleteAllVariants(productId);
+        // --- Variants: diff against existing, update in place (never delete-recreate a kept
+        // variant, since that would destroy any stock/history rows keyed on its id) ---
+        const submittedVariantIds = new Set(
+          (values.variants ?? [])
+            .map((variant) => variant.id)
+            .filter((variantId): variantId is string => Boolean(variantId))
+        );
 
-        const processedVariants: Parameters<ProductRepository['createManyVariant']>[0] = [];
+        const removedVariantIds = existing.variants
+          .filter((variant) => !submittedVariantIds.has(variant.id))
+          .map((variant) => variant.id);
+
+        if (removedVariantIds.length > 0) {
+          await productRepo.deleteVariantsByIds(productId, removedVariantIds);
+        }
 
         for (const variant of values.variants ?? []) {
           const { data, error } = variantsSchema
@@ -373,11 +384,21 @@ export class ProductService {
             throw new ValidationError(error.message);
           }
 
-          processedVariants.push({ ...data, productId });
-        }
+          if (variant.id) {
+            const updated = await productRepo.updateVariant(variant.id, data);
 
-        if (processedVariants.length > 0) {
-          await productRepo.createManyVariant(processedVariants);
+            if (!updated) {
+              throw new DatabaseError('An error has occurred while trying to update variant');
+            }
+
+            continue;
+          }
+
+          const created = await productRepo.createVariant({ ...data, productId });
+
+          if (!created) {
+            throw new DatabaseError('An error has occurred while trying to store variant');
+          }
         }
 
         // --- Modifier groups: diff against existing, update custom groups in place ---

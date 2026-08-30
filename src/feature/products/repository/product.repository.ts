@@ -209,8 +209,25 @@ export class ProductRepository {
     return this.database.insertInto('variants').values(values).returningAll().execute();
   }
 
-  async deleteAllVariants(productId: string) {
-    return this.database.deleteFrom('variants').where('productId', '=', productId).execute();
+  async createVariant(
+    values: Omit<VariantFormValues, 'id' | 'productId' | 'priceAmount'> & { productId: string; priceAmount: number }
+  ) {
+    return this.database.insertInto('variants').values(values).returningAll().executeTakeFirst();
+  }
+
+  async updateVariant(
+    id: string,
+    values: Omit<VariantFormValues, 'id' | 'productId' | 'priceAmount'> & { priceAmount: number }
+  ) {
+    return this.database.updateTable('variants').set(values).where('id', '=', id).returningAll().executeTakeFirst();
+  }
+
+  async deleteVariantsByIds(productId: string, ids: string[]) {
+    if (ids.length === 0) {
+      return [];
+    }
+
+    return this.database.deleteFrom('variants').where('productId', '=', productId).where('id', 'in', ids).execute();
   }
 
   async createManyModifierGroup(
