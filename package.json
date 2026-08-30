@@ -12,7 +12,8 @@
     "migrate:kysely": "bunx --bun kysely migrate:latest",
     "generate:types": "kysely-codegen --camel-case --out-file ./src/types/db.d.ts",
     "db:clean": "tsx --env-file=.env ./scripts/clean-db.ts",
-    "db:fresh": "tsx --env-file=.env ./scripts/fresh-db.ts"
+    "db:fresh": "tsx --env-file=.env ./scripts/fresh-db.ts",
+    "worker": "tsx --env-file=.env src/worker/index.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1101.0",
@@ -28,6 +29,7 @@
     "@tanstack/react-table": "^8.21.3",
     "axios": "^1.18.0",
     "better-auth": "^1.6.18",
+    "bullmq": "^6.3.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
@@ -35,6 +37,7 @@
     "dotenv": "^17.4.2",
     "embla-carousel-react": "^8.6.0",
     "input-otp": "^1.4.2",
+    "ioredis": "^6.0.0",
     "kysely": "^0.29.3",
     "lodash": "^4.18.1",
     "lucide-react": "^1.18.0",
@@ -52,6 +55,7 @@
     "react-hook-form": "^7.79.0",
     "react-resizable-panels": "^4.11.2",
     "recharts": "3.8.0",
+    "server-only": "^0.0.1",
     "shadcn": "^4.13.0",
     "sharp": "^0.35.3",
     "sonner": "^2.0.7",

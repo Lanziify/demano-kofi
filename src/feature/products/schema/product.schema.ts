@@ -43,6 +43,10 @@ export const productModifierGroupSchema = z.object({
   modifierGroupId: z.uuid(),
   isRequired: z.boolean(),
   sortOrder: z.number().nonnegative(),
+  // Per-product override of a preset group's selection type. Null = inherit from the
+  // shared modifierGroups.selectionType (also how custom groups always behave, since
+  // they own selectionType directly and never need an override).
+  selectionType: z.enum(['multiple', 'single']).nullable(),
 }) satisfies z.ZodType<Selectable<ProductModifierGroups>>;
 
 export type ProductModifierGroupValues = z.infer<typeof productModifierGroupSchema>;
@@ -55,6 +59,8 @@ export const productModifierOptionFormSchema = modifierGroupOptionSchema
     id: true,
     createdAt: true,
     updatedAt: true,
+    // Ownership is decided server-side, never submitted directly by the client.
+    productId: true,
   })
   .extend({
     id: z.uuid().optional(),

@@ -78,6 +78,7 @@ export interface ModifierGroupOptions {
   modifierGroupId: string;
   name: string;
   priceAdjustment: Generated<number>;
+  productId: string | null;
   sortOrder: number;
   updatedAt: Generated<Timestamp>;
 }
@@ -99,6 +100,16 @@ export interface Organization {
   slug: string;
 }
 
+export interface Outbox {
+  attempts: Generated<number>;
+  createdAt: Generated<Timestamp>;
+  eventType: string;
+  failedAt: Timestamp | null;
+  id: Generated<string>;
+  payload: string;
+  processedAt: Timestamp | null;
+}
+
 export interface ProductImages {
   altText: string | null;
   mediaId: string;
@@ -111,6 +122,7 @@ export interface ProductModifierGroups {
   isRequired: Generated<boolean>;
   modifierGroupId: string;
   productId: string;
+  selectionType: string | null;
   sortOrder: number;
 }
 
@@ -210,6 +222,7 @@ export interface DB {
   modifierGroupOptions: ModifierGroupOptions;
   modifierGroups: ModifierGroups;
   organization: Organization;
+  outbox: Outbox;
   productImages: ProductImages;
   productModifierGroups: ProductModifierGroups;
   productModifierOptions: ProductModifierOptions;

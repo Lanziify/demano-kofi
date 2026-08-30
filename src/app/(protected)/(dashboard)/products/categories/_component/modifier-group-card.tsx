@@ -115,7 +115,7 @@ export default function ProductModifierGroupCard<
               <Field data-invalid={fieldState.invalid}>
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue>{(value: string) => value}</SelectValue>
                   </SelectTrigger>
                   <SelectContent alignItemWithTrigger={false}>
                     <SelectGroup>

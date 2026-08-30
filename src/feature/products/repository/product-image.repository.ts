@@ -15,4 +15,13 @@ export class ProductImageRepository {
   createMany(values: ProductImageValues[]) {
     return this.database.insertInto('productImages').values(values).returningAll().execute();
   }
+
+  /** Safe to call more than once for the same (productId, mediaId) pair - e.g. a retried job. */
+  createIfNotExists(values: ProductImageValues) {
+    return this.database
+      .insertInto('productImages')
+      .values(values)
+      .onConflict((oc) => oc.columns(['productId', 'mediaId']).doNothing())
+      .execute();
+  }
 }

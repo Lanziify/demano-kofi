@@ -3,6 +3,8 @@ import z from 'zod';
 export const envSchema = z.object({
   //Database
   DATABASE_URL: z.string(),
+  // Redis
+  REDIS_URL: z.string(),
   // Storage
   STORAGE_ENDPOINT: z.string(),
   STORAGE_REGION: z.string(),

@@ -1,4 +1,4 @@
-import { DeleteObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
+import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
 import { env } from '@/env';
 import { s3Client } from '@/lib/storage/s3';
 import { bucket } from '@/lib/storage/storage';
@@ -14,6 +14,23 @@ export class StorageService {
         ContentType: contentType,
       })
     );
+  }
+
+  async downloadObject(key: string) {
+    const response = await s3Client.send(
+      new GetObjectCommand({
+        Bucket: bucket,
+        Key: key,
+      })
+    );
+
+    if (!response.Body) {
+      throw new Error(`Storage object "${key}" has no body`);
+    }
+
+    const bytes = await response.Body.transformToByteArray();
+
+    return Buffer.from(bytes);
   }
 
   async deleteObject(key: string) {

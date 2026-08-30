@@ -10,42 +10,38 @@ export class ProductImageService extends ImageProcessingService {
     super();
   }
 
-  async createImageObjects(productId: string, images: ProductImageFormValues[]) {
-    const imageVariants = await Promise.all(
-      images.map(async (image) => {
-        const variants = await this.createImageVariants(image.file);
+  /**
+   * Uploads only the `original` variant synchronously so product creation stays fast.
+   * The `large` and `thumbnail` variants are generated later by the image-processing
+   * worker, dispatched via an outbox event referencing this storage key.
+   */
+  async createOriginalImageObjects(productId: string, images: ProductImageFormValues[]) {
+    const uploadObjects = await Promise.all(
+      images
+        .filter((image): image is ProductImageFormValues & { file: File } => typeof image.file !== 'undefined')
+        .map(async (image) => {
+          const original = await this.processOriginal(image.file);
+          const imageId = crypto.randomUUID();
+          const storageKey = `products/${productId}/${imageId}/original.webp`;
 
-        return {
-          altText: image.altText,
-          sortOrder: image.sortOrder,
-          variants,
-        };
-      })
-    );
-
-    const uploadObjects = imageVariants.flatMap((obj) =>
-      Object.entries(obj.variants).map(([key, value]) => {
-        const imageId = crypto.randomUUID();
-        const storageKey = `products/${productId}/${imageId}/${key}.webp`;
-
-        return {
-          altText: obj.altText,
-          sortOrder: obj.sortOrder,
-          media: {
-            id: imageId,
-            type: mediaTypeSchema.parse(key),
-            storageKey,
-            fileSize: value.data.length,
-            width: value.metadata.width,
-            height: value.metadata.height,
-          },
-          upload: {
-            key: storageKey,
-            body: value.data,
-            contentType: 'image/webp',
-          },
-        };
-      })
+          return {
+            altText: image.altText,
+            sortOrder: image.sortOrder,
+            media: {
+              id: imageId,
+              type: mediaTypeSchema.parse('original'),
+              storageKey,
+              fileSize: original.data.length,
+              width: original.metadata.width,
+              height: original.metadata.height,
+            },
+            upload: {
+              key: storageKey,
+              body: original.data,
+              contentType: 'image/webp',
+            },
+          };
+        })
     );
 
     try {
@@ -71,30 +67,16 @@ export class ProductImageService extends ImageProcessingService {
     return results;
   }
 
-  async createImageVariants(image: File) {
+  private async processOriginal(image: File) {
     if (!ALLOWED_IMAGE_TYPES.includes(image.type)) {
       throw new BadRequestError('Image file type is not supported.');
     }
 
     const buffer = Buffer.from(await image.arrayBuffer());
+    const data = await this.process(buffer, 'productOriginal');
+    const metadata = await this.getMetadata(data);
 
-    const [original, large, thumbnail] = await Promise.all([
-      this.process(buffer, 'productOriginal'),
-      this.process(buffer, 'product'),
-      this.process(buffer, 'productThumbnail'),
-    ]);
-
-    const [originalMetadata, largeMetadata, thumbnailMetadata] = await Promise.all([
-      this.getMetadata(original),
-      this.getMetadata(large),
-      this.getMetadata(thumbnail),
-    ]);
-
-    return {
-      original: { data: original, metadata: originalMetadata },
-      large: { data: large, metadata: largeMetadata },
-      thumbnail: { data: thumbnail, metadata: thumbnailMetadata },
-    };
+    return { data, metadata };
   }
 
   getPublicUrl(storageKey: string) {

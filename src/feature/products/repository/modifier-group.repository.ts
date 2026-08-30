@@ -24,4 +24,8 @@ export class ModifierGroupRepository {
       .returningAll()
       .executeTakeFirst();
   }
+
+  async delete(id: string) {
+    return this.database.deleteFrom('modifierGroups').where('modifierGroups.id', '=', id).execute();
+  }
 }

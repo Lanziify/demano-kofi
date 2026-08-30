@@ -29,9 +29,9 @@ services:
       - minio
     entrypoint: >
       /bin/sh -c "
-      /usr/bin/mc alias set myminio  http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD};
-      /usr/bin/mc mb --ignore-existing myminio/demano-kofi-environment;
-      /usr/bin/mc anonymous set download myminio/demano-kofi-environment;
+      until /usr/bin/mc alias set myminio http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD}; do sleep 1; done;
+      /usr/bin/mc mb --ignore-existing myminio/${STORAGE_BUCKET};
+      /usr/bin/mc anonymous set download myminio/${STORAGE_BUCKET};
       exit 0;
       "
   mailpit:
@@ -47,9 +47,39 @@ services:
       MP_DATABASE: /data/mailpit.db
       MP_SMTP_AUTH_ACCEPT_ANY: 1
       MP_SMTP_AUTH_ALLOW_INSECURE: 1
-
+  redis:
+    image: redis:8.10.1-trixie
+    container_name: demano-kofi-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: demano-kofi-worker
+    depends_on:
+      - redis
+      - db
+      - minio
+    environment:
+      NODE_ENV: development
+      REDIS_URL: ${REDIS_URL}
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      STORAGE_ENDPOINT: http://minio:9000
+      STORAGE_REGION: ${STORAGE_REGION}
+      STORAGE_BUCKET: ${STORAGE_BUCKET}
+      STORAGE_ACCESS_KEY_ID: ${STORAGE_ACCESS_KEY_ID}
+      STORAGE_SECRET_ACCESS_KEY: ${STORAGE_SECRET_ACCESS_KEY}
+      STORAGE_FORCE_PATH_STYLE: ${STORAGE_FORCE_PATH_STYLE}
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: ["bun", "run", "worker"]
 
 volumes:
   pgdata:
   minio-data:
   mailpit-data:
+  redis_data:

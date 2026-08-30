@@ -29,3 +29,13 @@ export const productImageFormSchema = productImageSchema.omit({ mediaId: true, p
 });
 
 export type ProductImageFormValues = z.infer<typeof productImageFormSchema>;
+
+export const productImageProcessRequestedPayloadSchema = z.object({
+  productId: z.uuid(),
+  mediaId: z.uuid(),
+  storageKey: z.string(),
+  altText: z.string().trim().max(255),
+  sortOrder: z.number().int().nonnegative(),
+});
+
+export type ProductImageProcessRequestedPayload = z.infer<typeof productImageProcessRequestedPayloadSchema>;

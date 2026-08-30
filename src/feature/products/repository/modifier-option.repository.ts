@@ -12,12 +12,21 @@ export class ModifierGroupOptionRepository {
     return new ModifierGroupOptionRepository(trx);
   }
 
-  async create(values: Omit<ModifierGroupOptionFormValues, 'id' | 'modifierGroupId'> & { modifierGroupId: string }) {
+  /** `productId` left unset (or null) creates a shared/template option; a real id creates one private to that product. */
+  async create(
+    values: Omit<ModifierGroupOptionFormValues, 'id' | 'modifierGroupId'> & {
+      modifierGroupId: string;
+      productId?: string | null;
+    }
+  ) {
     return this.database.insertInto('modifierGroupOptions').values(values).returningAll().executeTakeFirst();
   }
 
   async createMany(
-    values: (Omit<ModifierGroupOptionFormValues, 'id' | 'modifierGroupId'> & { modifierGroupId: string })[]
+    values: (Omit<ModifierGroupOptionFormValues, 'id' | 'modifierGroupId'> & {
+      modifierGroupId: string;
+      productId?: string | null;
+    })[]
   ) {
     return this.database.insertInto('modifierGroupOptions').values(values).returningAll().execute();
   }

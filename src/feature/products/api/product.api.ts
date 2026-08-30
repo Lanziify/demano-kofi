@@ -25,3 +25,21 @@ export const createProduct = withClientErrorHandling(async (values: ProductFormV
 
   return data;
 });
+
+export const updateProduct = withClientErrorHandling(async (values: ProductFormValues) => {
+  const { images, ...payload } = values;
+
+  const formData = new FormData();
+
+  formData.append('data', JSON.stringify({ ...payload, images: images?.map(({ file, ...image }) => image) }));
+
+  for (const image of images ?? []) {
+    if (image.file) {
+      formData.append('images', image.file);
+    }
+  }
+
+  const { data } = await axios.patch<ApiSuccessResponse<Product>>(`/api/products/${values.id}`, formData);
+
+  return data;
+});

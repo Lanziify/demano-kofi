@@ -36,4 +36,13 @@ export class CategoryModifierGroupRepository {
       .where('categoryModifierGroups.categoryId', '=', id)
       .execute();
   }
+
+  async findByCategoryAndModifierGroup(categoryId: string, modifierGroupId: string) {
+    return this.database
+      .selectFrom('categoryModifierGroups')
+      .selectAll()
+      .where('categoryModifierGroups.categoryId', '=', categoryId)
+      .where('categoryModifierGroups.modifierGroupId', '=', modifierGroupId)
+      .executeTakeFirst();
+  }
 }

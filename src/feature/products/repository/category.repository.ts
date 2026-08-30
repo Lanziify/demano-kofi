@@ -55,12 +55,14 @@ export class CategoryRepository {
                     'mgo.id',
                     'mgo.modifierGroupId',
                     'mgo.name',
+                    'mgo.productId',
                     'mgo.priceAdjustment',
                     'mgo.sortOrder',
                     'mgo.createdAt',
                     'mgo.updatedAt',
                   ])
                   .whereRef('mgo.modifierGroupId', '=', 'mg.id')
+                  .where('mgo.productId', 'is', null)
                   .orderBy('mgo.sortOrder', 'asc')
               ).as('options'),
               'mg.createdAt',
@@ -93,12 +95,14 @@ export class CategoryRepository {
                     'mgo.id',
                     'mgo.modifierGroupId',
                     'mgo.name',
+                    'mgo.productId',
                     'mgo.priceAdjustment',
                     'mgo.sortOrder',
                     'mgo.createdAt',
                     'mgo.updatedAt',
                   ])
                   .whereRef('mgo.modifierGroupId', '=', 'mg.id')
+                  .where('mgo.productId', 'is', null)
                   .orderBy('mgo.sortOrder', 'asc')
               ).as('options'),
               'mg.createdAt',

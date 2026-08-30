@@ -54,24 +54,28 @@ export class ProductRepository {
           eb
             .selectFrom('productModifierGroups as pmg')
             .innerJoin('modifierGroups as mg', 'mg.id', 'pmg.modifierGroupId')
-            .select([
+            .select((mgEb) => [
               'mg.id',
               'mg.name',
-              'mg.selectionType',
+              mgEb.fn.coalesce('pmg.selectionType', 'mg.selectionType').as('selectionType'),
+              'pmg.categoryModifierGroupId',
               'pmg.isRequired',
               typeSafeJsonArrayFrom(
-                eb
+                mgEb
                   .selectFrom('productModifierOptions as pmo')
                   .innerJoin('modifierGroupOptions as mgo', 'mgo.id', 'pmo.modifierOptionId')
                   .select([
                     'mgo.id',
                     'mgo.modifierGroupId',
                     'mgo.name',
+                    'mgo.productId', // null = shared/template option, else private to this product
                     'pmo.priceAdjustment', // using price adjustment from product
                     'pmo.sortOrder', // using sort order from product
                     'mgo.createdAt',
                     'mgo.updatedAt',
                   ])
+                  .whereRef('pmo.modifierGroupId', '=', 'mg.id')
+                  .whereRef('pmo.productId', '=', 'p.id')
                   .orderBy('pmo.sortOrder', 'asc')
               ).as('options'),
               'pmg.sortOrder',
@@ -124,24 +128,28 @@ export class ProductRepository {
           eb
             .selectFrom('productModifierGroups as pmg')
             .innerJoin('modifierGroups as mg', 'mg.id', 'pmg.modifierGroupId')
-            .select([
+            .select((mgEb) => [
               'mg.id',
               'mg.name',
-              'mg.selectionType',
+              mgEb.fn.coalesce('pmg.selectionType', 'mg.selectionType').as('selectionType'),
+              'pmg.categoryModifierGroupId',
               'pmg.isRequired',
               typeSafeJsonArrayFrom(
-                eb
+                mgEb
                   .selectFrom('productModifierOptions as pmo')
                   .innerJoin('modifierGroupOptions as mgo', 'mgo.id', 'pmo.modifierOptionId')
                   .select([
                     'mgo.id',
                     'mgo.modifierGroupId',
                     'mgo.name',
+                    'mgo.productId', // null = shared/template option, else private to this product
                     'pmo.priceAdjustment', // using price adjustment from product
                     'pmo.sortOrder', // using sort order from product
                     'mgo.createdAt',
                     'mgo.updatedAt',
                   ])
+                  .whereRef('pmo.modifierGroupId', '=', 'mg.id')
+                  .whereRef('pmo.productId', '=', 'p.id')
                   .orderBy('pmo.sortOrder', 'asc')
               ).as('options'),
               'pmg.sortOrder',
@@ -163,8 +171,36 @@ export class ProductRepository {
     return this.database.insertInto('products').values(values).returningAll().executeTakeFirst();
   }
 
+  async update(id: string, values: Partial<Omit<ProductValues, 'id' | 'createdAt' | 'updatedAt'>>) {
+    return this.database.updateTable('products').set(values).where('id', '=', id).returningAll().executeTakeFirst();
+  }
+
   async createManyImages(values: ProductImageValues[]) {
     return this.database.insertInto('productImages').values(values).returningAll().execute();
+  }
+
+  /** Safe to call for both a new image link and an existing one - updates altText/sortOrder in place. */
+  async upsertImage(values: ProductImageValues) {
+    return this.database
+      .insertInto('productImages')
+      .values(values)
+      .onConflict((oc) =>
+        oc.columns(['productId', 'mediaId']).doUpdateSet({ altText: values.altText, sortOrder: values.sortOrder })
+      )
+      .returningAll()
+      .executeTakeFirst();
+  }
+
+  async deleteImagesByMediaIds(productId: string, mediaIds: string[]) {
+    if (mediaIds.length === 0) {
+      return [];
+    }
+
+    return this.database
+      .deleteFrom('productImages')
+      .where('productId', '=', productId)
+      .where('mediaId', 'in', mediaIds)
+      .execute();
   }
 
   async createManyVariant(
@@ -173,10 +209,41 @@ export class ProductRepository {
     return this.database.insertInto('variants').values(values).returningAll().execute();
   }
 
+  async deleteAllVariants(productId: string) {
+    return this.database.deleteFrom('variants').where('productId', '=', productId).execute();
+  }
+
   async createManyModifierGroup(
     values: (Omit<ProductModifierGroupValues, 'categoryModifierGroupId'> & { categoryModifierGroupId: string | null })[]
   ) {
     return this.database.insertInto('productModifierGroups').values(values).returningAll().execute();
+  }
+
+  /** Safe to call for both a new group link and an existing one - updates isRequired/sortOrder in place. */
+  async upsertModifierGroup(
+    values: Omit<ProductModifierGroupValues, 'categoryModifierGroupId'> & { categoryModifierGroupId: string | null }
+  ) {
+    return this.database
+      .insertInto('productModifierGroups')
+      .values(values)
+      .onConflict((oc) =>
+        oc.columns(['productId', 'modifierGroupId']).doUpdateSet({
+          categoryModifierGroupId: values.categoryModifierGroupId,
+          isRequired: values.isRequired,
+          sortOrder: values.sortOrder,
+          selectionType: values.selectionType,
+        })
+      )
+      .returningAll()
+      .executeTakeFirst();
+  }
+
+  async deleteModifierGroup(productId: string, modifierGroupId: string) {
+    return this.database
+      .deleteFrom('productModifierGroups')
+      .where('productId', '=', productId)
+      .where('modifierGroupId', '=', modifierGroupId)
+      .execute();
   }
 
   async createModifierOption(values: ProductModifierOptionValues) {
@@ -185,5 +252,35 @@ export class ProductRepository {
 
   async createManyModifierOption(values: ProductModifierOptionValues[]) {
     return this.database.insertInto('productModifierOptions').values(values).execute();
+  }
+
+  /** Safe to call for both a new option override and an existing one - updates priceAdjustment/sortOrder in place. */
+  async upsertModifierOption(values: ProductModifierOptionValues) {
+    return this.database
+      .insertInto('productModifierOptions')
+      .values(values)
+      .onConflict((oc) =>
+        oc
+          .columns(['productId', 'modifierGroupId', 'modifierOptionId'])
+          .doUpdateSet({ priceAdjustment: values.priceAdjustment, sortOrder: values.sortOrder })
+      )
+      .execute();
+  }
+
+  async deleteModifierOptionsByGroup(productId: string, modifierGroupId: string) {
+    return this.database
+      .deleteFrom('productModifierOptions')
+      .where('productId', '=', productId)
+      .where('modifierGroupId', '=', modifierGroupId)
+      .execute();
+  }
+
+  async deleteModifierOption(productId: string, modifierGroupId: string, modifierOptionId: string) {
+    return this.database
+      .deleteFrom('productModifierOptions')
+      .where('productId', '=', productId)
+      .where('modifierGroupId', '=', modifierGroupId)
+      .where('modifierOptionId', '=', modifierOptionId)
+      .execute();
   }
 }

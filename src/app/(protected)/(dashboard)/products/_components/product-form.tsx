@@ -25,7 +25,7 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { useProducts } from '@/feature/products/hooks/use-products';
-import { useCreateProduct } from '@/feature/products/mutations/product.mutation';
+import { useCreateProduct, useUpdateProduct } from '@/feature/products/mutations/product.mutation';
 import { modifierGroupFormWithOptionsSchema } from '@/feature/products/schema/modifier.schema';
 import { type ProductFormValues, productFormSchema } from '@/feature/products/schema/product.schema';
 import type { CategoryModifierGroupsWithSortOrder, ProductEmbedded } from '@/feature/products/types/types';
@@ -44,6 +44,7 @@ export default function ProductForm({ product }: ProductFormProps) {
   const router = useRouter();
   const { categoriesWithGroupOptions } = useProducts();
   const createProduct = useCreateProduct();
+  const updateProduct = useUpdateProduct();
   const confirmationDialog = useDialog<ConfirmationDialogOptions>();
   const [categoryModifierGroups, setCategoryModifierGroups] = React.useState<CategoryModifierGroupsWithSortOrder[]>([]);
 
@@ -166,6 +167,24 @@ export default function ProductForm({ product }: ProductFormProps) {
     [categoriesWithGroupOptions]
   );
 
+  const handleCancel = React.useCallback(() => {
+    if (!form.formState.isDirty) {
+      router.push('/products');
+      return;
+    }
+
+    confirmationDialog.show({
+      title: 'Discard changes?',
+      description: 'Any unsaved changes will be lost.',
+      confirmLabel: 'Discard',
+      confirmVariant: 'destructive',
+      onConfirm: () => {
+        confirmationDialog.close();
+        router.push('/products');
+      },
+    });
+  }, [confirmationDialog, form.formState.isDirty, router]);
+
   const handleModifierGroupClose = React.useCallback(
     (index: number) => {
       confirmationDialog.show({
@@ -225,6 +244,12 @@ export default function ProductForm({ product }: ProductFormProps) {
   );
 
   const onSubmit = async (values: ProductFormValues) => {
+    if (product && !form.formState.isDirty) {
+      toast.info('No changes to save');
+      router.push('/products');
+      return;
+    }
+
     const payload = {
       ...values,
       variants: values.variants?.map((variant, index) => ({
@@ -245,8 +270,14 @@ export default function ProductForm({ product }: ProductFormProps) {
       })),
     } as ProductFormValues;
 
-    await createProduct.mutateAsync(payload);
-    toast.success('Product created successfully');
+    if (product) {
+      await updateProduct.mutateAsync({ ...payload, id: product.id });
+      toast.success('Product updated successfully');
+    } else {
+      await createProduct.mutateAsync(payload);
+      toast.success('Product created successfully');
+    }
+
     router.push('/products');
   };
 
@@ -256,14 +287,10 @@ export default function ProductForm({ product }: ProductFormProps) {
 
     const { category, images, ...productData } = product as ProductEmbedded[number];
 
-    const { success, data, error } = productFormSchema.safeParse({
+    const { success, data } = productFormSchema.safeParse({
       ...productData,
       categoryId: category?.id,
     });
-
-    if (!success) {
-      console.log(error);
-    }
 
     if (success) {
       form.reset({
@@ -707,11 +734,19 @@ export default function ProductForm({ product }: ProductFormProps) {
             </CardContent>
           </Card>
           <Field orientation="vertical">
-            <Button type="submit" disabled={form.formState.isSubmitting}>
+            <Button
+              type="submit"
+              disabled={form.formState.isSubmitting || (Boolean(product) && !form.formState.isDirty)}
+            >
               {form.formState.isSubmitting && <Spinner />}
-              Create Product
+              {product ? 'Save Changes' : 'Create Product'}
             </Button>
-            <Button type="button" variant="secondary" disabled={form.formState.isSubmitting}>
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={form.formState.isSubmitting}
+              onClick={handleCancel}
+            >
               Cancel
             </Button>
           </Field>
