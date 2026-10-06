@@ -1,5 +1,4 @@
 import type { Kysely, Transaction } from 'kysely';
-import { typeSafeJsonArrayFrom } from '@/lib/db-helper';
 import type { DB } from '@/types/db';
 import { db } from '@/utils/db';
 import type { CategoryFormValues } from '../schema/category.schema';
@@ -32,86 +31,5 @@ export class CategoryRepository {
 
   async findById(id: string) {
     return this.database.selectFrom('categories').selectAll().where('categories.id', '=', id).executeTakeFirst();
-  }
-
-  async findWithModifierGroupOptions() {
-    return this.database
-      .selectFrom('categories')
-      .selectAll()
-      .select((cmgeb) => [
-        typeSafeJsonArrayFrom(
-          cmgeb
-            .selectFrom('categoryModifierGroups as cmg')
-            .select('cmg.sortOrder')
-            .innerJoin('modifierGroups as mg', 'mg.id', 'cmg.modifierGroupId')
-            .select((mgeb) => [
-              'mg.id',
-              'mg.name',
-              'mg.selectionType',
-              typeSafeJsonArrayFrom(
-                mgeb
-                  .selectFrom('modifierGroupOptions as mgo')
-                  .select([
-                    'mgo.id',
-                    'mgo.modifierGroupId',
-                    'mgo.name',
-                    'mgo.productId',
-                    'mgo.priceAdjustment',
-                    'mgo.sortOrder',
-                    'mgo.createdAt',
-                    'mgo.updatedAt',
-                  ])
-                  .whereRef('mgo.modifierGroupId', '=', 'mg.id')
-                  .where('mgo.productId', 'is', null)
-                  .orderBy('mgo.sortOrder', 'asc')
-              ).as('options'),
-              'mg.createdAt',
-              'mg.updatedAt',
-            ])
-            .whereRef('cmg.categoryId', '=', 'categories.id')
-        ).as('modifierGroups'),
-      ])
-      .execute();
-  }
-
-  async findOneWithModifierGroupOptions(id: string) {
-    return this.database
-      .selectFrom('categories')
-      .selectAll()
-      .select((cmgeb) => [
-        typeSafeJsonArrayFrom(
-          cmgeb
-            .selectFrom('categoryModifierGroups as cmg')
-            .select('cmg.sortOrder')
-            .innerJoin('modifierGroups as mg', 'mg.id', 'cmg.modifierGroupId')
-            .select((mgeb) => [
-              'mg.id',
-              'mg.name',
-              'mg.selectionType',
-              typeSafeJsonArrayFrom(
-                mgeb
-                  .selectFrom('modifierGroupOptions as mgo')
-                  .select([
-                    'mgo.id',
-                    'mgo.modifierGroupId',
-                    'mgo.name',
-                    'mgo.productId',
-                    'mgo.priceAdjustment',
-                    'mgo.sortOrder',
-                    'mgo.createdAt',
-                    'mgo.updatedAt',
-                  ])
-                  .whereRef('mgo.modifierGroupId', '=', 'mg.id')
-                  .where('mgo.productId', 'is', null)
-                  .orderBy('mgo.sortOrder', 'asc')
-              ).as('options'),
-              'mg.createdAt',
-              'mg.updatedAt',
-            ])
-            .whereRef('cmg.categoryId', '=', 'categories.id')
-        ).as('modifierGroups'),
-      ])
-      .where('categories.id', '=', id)
-      .executeTakeFirst();
   }
 }

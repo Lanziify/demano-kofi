@@ -11,13 +11,8 @@ export type SortableItemProps = {
   children: React.ReactNode;
 };
 
-export default function SortableItem({
-  id,
-  children,
-  ...props
-}: SortableItemProps & React.ComponentProps<'li'>) {
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id });
+export default function SortableItem({ id, children, ...props }: SortableItemProps & React.ComponentProps<'li'>) {
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -26,13 +21,7 @@ export default function SortableItem({
 
   return (
     <li {...props} ref={setNodeRef} style={style} {...attributes}>
-      <Button
-        {...listeners}
-        type="button"
-        variant="ghost"
-        size="icon"
-        className="shrink-0 cursor-grab touch-none"
-      >
+      <Button {...listeners} type="button" variant="ghost" size="icon" className="shrink-0 cursor-grab touch-none">
         <GripVertical />
         <span className="sr-only">Drag</span>
       </Button>

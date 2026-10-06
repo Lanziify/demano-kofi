@@ -35,13 +35,6 @@ export interface Categories {
   updatedAt: Generated<Timestamp>;
 }
 
-export interface CategoryModifierGroups {
-  categoryId: string;
-  id: Generated<string>;
-  modifierGroupId: string;
-  sortOrder: number;
-}
-
 export interface Invitation {
   createdAt: Generated<Timestamp>;
   email: string;
@@ -72,22 +65,25 @@ export interface Member {
   userId: string;
 }
 
-export interface ModifierGroupOptions {
+export interface OptionGroups {
   createdAt: Generated<Timestamp>;
   id: Generated<string>;
-  modifierGroupId: string;
+  maxSelect: number | null;
+  minSelect: Generated<number>;
   name: string;
-  priceAdjustment: Generated<number>;
-  productId: string | null;
+  productId: string;
   sortOrder: number;
   updatedAt: Generated<Timestamp>;
 }
 
-export interface ModifierGroups {
+export interface Options {
   createdAt: Generated<Timestamp>;
   id: Generated<string>;
+  isAvailable: Generated<boolean>;
   name: string;
-  selectionType: string;
+  optionGroupId: string;
+  priceAdjustment: Generated<number>;
+  sortOrder: number;
   updatedAt: Generated<Timestamp>;
 }
 
@@ -110,26 +106,18 @@ export interface Outbox {
   processedAt: Timestamp | null;
 }
 
+export interface ProductAddOns {
+  addOnProductId: string;
+  createdAt: Generated<Timestamp>;
+  priceAmount: number;
+  productId: string;
+  sortOrder: number;
+  updatedAt: Generated<Timestamp>;
+}
+
 export interface ProductImages {
   altText: string | null;
   mediaId: string;
-  productId: string;
-  sortOrder: number;
-}
-
-export interface ProductModifierGroups {
-  categoryModifierGroupId: string | null;
-  isRequired: Generated<boolean>;
-  modifierGroupId: string;
-  productId: string;
-  selectionType: string | null;
-  sortOrder: number;
-}
-
-export interface ProductModifierOptions {
-  modifierGroupId: string;
-  modifierOptionId: string;
-  priceAdjustment: number | null;
   productId: string;
   sortOrder: number;
 }
@@ -215,17 +203,15 @@ export interface Verification {
 export interface DB {
   account: Account;
   categories: Categories;
-  categoryModifierGroups: CategoryModifierGroups;
   invitation: Invitation;
   media: Media;
   member: Member;
-  modifierGroupOptions: ModifierGroupOptions;
-  modifierGroups: ModifierGroups;
+  optionGroups: OptionGroups;
+  options: Options;
   organization: Organization;
   outbox: Outbox;
+  productAddOns: ProductAddOns;
   productImages: ProductImages;
-  productModifierGroups: ProductModifierGroups;
-  productModifierOptions: ProductModifierOptions;
   products: Products;
   session: Session;
   user: User;

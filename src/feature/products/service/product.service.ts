@@ -1,19 +1,24 @@
 import 'server-only';
 
+import z from 'zod';
 import { DatabaseError, NotFoundError, ValidationError } from '@/lib/errors/app-error';
 import { MediaRepository } from '@/repository/media.repository';
 import { OutboxRepository } from '@/repository/outbox.repository';
 import type { CreateOutboxEventValues } from '@/schema/outbox.schema';
 import { db } from '@/utils/db';
-import { CategoryModifierGroupRepository } from '../repository/category-modifier-group.repository';
-import { ModifierGroupRepository } from '../repository/modifier-group.repository';
-import { ModifierGroupOptionRepository } from '../repository/modifier-option.repository';
+import { OptionGroupRepository } from '../repository/option-group.repository';
 import { ProductRepository } from '../repository/product.repository';
+import type { ProductAddOnFormValues } from '../schema/add-on.schema';
+import type { OptionGroupFormValues } from '../schema/option-group.schema';
 import type { ProductFormValues } from '../schema/product.schema';
 import type { ProductImageFormValues, ProductImageProcessRequestedPayload } from '../schema/product-image.schema';
 import { variantsSchema } from '../schema/variants.schema';
 import type { ProductEmbedded } from '../types/types';
 import { ProductImageService } from './product-image.service';
+
+type ExistingProduct = NonNullable<Awaited<ReturnType<ProductRepository['findById']>>>;
+type ExistingOptionGroups = ExistingProduct['optionGroups'];
+type ExistingAddOns = ExistingProduct['addOns'];
 
 export class ProductService {
   constructor(
@@ -21,9 +26,7 @@ export class ProductService {
     private readonly productRepository = new ProductRepository(),
     private readonly mediaRepository = new MediaRepository(),
     private readonly outboxRepository = new OutboxRepository(),
-    private readonly modifierGroupRepository = new ModifierGroupRepository(),
-    private readonly modifierGroupOptionRepository = new ModifierGroupOptionRepository(),
-    private readonly categoryModifierGroupRepository = new CategoryModifierGroupRepository()
+    private readonly optionGroupRepository = new OptionGroupRepository()
   ) {}
 
   async getProducts() {
@@ -38,16 +41,25 @@ export class ProductService {
     }));
   }
 
-  async getProductById(id: string) {
+  /** Returns null for an unknown or malformed id, so callers can 404 instead of querying with a bad uuid. */
+  async getProductById(id: string): Promise<ProductEmbedded[number] | null> {
+    if (!z.uuid().safeParse(id).success) {
+      return null;
+    }
+
     const product = await this.productRepository.findById(id);
+
+    if (!product) {
+      return null;
+    }
 
     return {
       ...product,
-      images: product?.images.map((image) => ({
+      images: product.images.map((image) => ({
         ...image,
         url: this.imageService.getPublicUrl(image.storageKey),
       })),
-    } as ProductEmbedded[number];
+    };
   }
 
   async createProduct(values: ProductFormValues) {
@@ -64,9 +76,7 @@ export class ProductService {
         const productRepo = this.productRepository.withTransaction(trx);
         const mediaRepo = this.mediaRepository.withTransaction(trx);
         const outboxRepo = this.outboxRepository.withTransaction(trx);
-        const modifierGroupRepo = this.modifierGroupRepository.withTransaction(trx);
-        const modifierGroupOptionRepo = this.modifierGroupOptionRepository.withTransaction(trx);
-        const categoryModifierGroupRepo = this.categoryModifierGroupRepository.withTransaction(trx);
+        const optionGroupRepo = this.optionGroupRepository.withTransaction(trx);
 
         const product = await productRepo.create({
           id: productId,
@@ -81,12 +91,10 @@ export class ProductService {
           throw new DatabaseError('An error has occurred while trying to store product');
         }
 
-        const { variants, modifierGroups } = values;
+        const { variants } = values;
 
         const processedImages: Parameters<ProductRepository['createManyImages']>[0] = [];
         const processedVariants: Parameters<ProductRepository['createManyVariant']>[0] = [];
-        const processedModifierGroups: Parameters<ProductRepository['createManyModifierGroup']>[0] = [];
-        const processedModifierOptions: Parameters<ProductRepository['createManyModifierOption']>[0] = [];
 
         uploadObjects.forEach((object) => {
           processedImages.push({
@@ -109,106 +117,6 @@ export class ProductService {
           processedVariants.push({
             ...data,
             productId: product.id,
-          });
-        }
-
-        for (const {
-          id: _,
-          presetId: categoryModifierGroupId,
-          sortOrder,
-          isRequired,
-          selectionType,
-          options,
-          ...modifierGroupData
-        } of modifierGroups ?? []) {
-          if (!categoryModifierGroupId) {
-            const group = await modifierGroupRepo.create({ ...modifierGroupData, selectionType });
-
-            if (!group) {
-              throw new DatabaseError('An error has occurred while trying to store modifier group');
-            }
-
-            for (const { id: _, ...optionData } of options ?? []) {
-              const optionResult = await modifierGroupOptionRepo.create({
-                ...optionData,
-                modifierGroupId: group.id,
-              });
-
-              if (!optionResult) {
-                throw new DatabaseError('An error has occurred while trying to store modifier group option');
-              }
-
-              processedModifierOptions.push({
-                productId: product.id,
-                modifierOptionId: optionResult.id,
-                modifierGroupId: group.id,
-                priceAdjustment: optionData.priceAdjustment,
-                sortOrder: optionData.sortOrder,
-              });
-            }
-
-            processedModifierGroups.push({
-              productId: product.id,
-              categoryModifierGroupId: null,
-              modifierGroupId: group.id,
-              isRequired,
-              sortOrder,
-              // Custom groups own selectionType directly on modifierGroups - no override needed.
-              selectionType: null,
-            });
-
-            continue;
-          }
-
-          for (const option of options ?? []) {
-            if (!option.id) {
-              // A brand-new option under a preset group belongs to this product only -
-              // never the shared template other products/categories see.
-              const optionResult = await modifierGroupOptionRepo.create({
-                ...option,
-                modifierGroupId: categoryModifierGroupId,
-                productId: product.id,
-              });
-
-              if (!optionResult) {
-                throw new DatabaseError('An error has occurred while trying to store modifier group option');
-              }
-
-              processedModifierOptions.push({
-                productId: product.id,
-                modifierOptionId: optionResult.id,
-                modifierGroupId: categoryModifierGroupId,
-                priceAdjustment: option.priceAdjustment,
-                sortOrder: option.sortOrder,
-              });
-
-              continue;
-            }
-
-            processedModifierOptions.push({
-              productId: product.id,
-              modifierOptionId: option.id,
-              modifierGroupId: categoryModifierGroupId,
-              priceAdjustment: option.priceAdjustment,
-              sortOrder: option.sortOrder,
-            });
-          }
-
-          // `categoryModifierGroupId` here is actually modifierGroups.id (see form's handleModifierGroupChange,
-          // which reads it from category.modifierGroups[].id - the shared group, not the category_modifier_groups
-          // join row). Look up the real category_modifier_groups.id so the FK on this column is meaningful.
-          const categoryModifierGroupLink = await categoryModifierGroupRepo.findByCategoryAndModifierGroup(
-            values.categoryId,
-            categoryModifierGroupId
-          );
-
-          processedModifierGroups.push({
-            productId: product.id,
-            categoryModifierGroupId: categoryModifierGroupLink?.id ?? null,
-            modifierGroupId: categoryModifierGroupId,
-            isRequired,
-            sortOrder,
-            selectionType,
           });
         }
 
@@ -237,13 +145,8 @@ export class ProductService {
           await productRepo.createManyVariant(processedVariants);
         }
 
-        if (processedModifierGroups.length > 0) {
-          await productRepo.createManyModifierGroup(processedModifierGroups);
-        }
-
-        if (processedModifierOptions.length > 0) {
-          await productRepo.createManyModifierOption(processedModifierOptions);
-        }
+        await this.syncOptionGroups(optionGroupRepo, product.id, values.optionGroups ?? [], []);
+        await this.syncAddOns(productRepo, product.id, values.addOns ?? [], []);
 
         return product;
       });
@@ -291,9 +194,7 @@ export class ProductService {
         const productRepo = this.productRepository.withTransaction(trx);
         const mediaRepo = this.mediaRepository.withTransaction(trx);
         const outboxRepo = this.outboxRepository.withTransaction(trx);
-        const modifierGroupRepo = this.modifierGroupRepository.withTransaction(trx);
-        const modifierGroupOptionRepo = this.modifierGroupOptionRepository.withTransaction(trx);
-        const categoryModifierGroupRepo = this.categoryModifierGroupRepository.withTransaction(trx);
+        const optionGroupRepo = this.optionGroupRepository.withTransaction(trx);
 
         const product = await productRepo.update(productId, {
           categoryId: values.categoryId,
@@ -401,171 +302,11 @@ export class ProductService {
           }
         }
 
-        // --- Modifier groups: diff against existing, update custom groups in place ---
-        const submittedGroupIds = new Set(
-          (values.modifierGroups ?? [])
-            .map((group) => group.id)
-            .filter((groupId): groupId is string => Boolean(groupId))
-        );
+        // --- Option groups: diff against existing, update kept rows in place ---
+        await this.syncOptionGroups(optionGroupRepo, productId, values.optionGroups ?? [], existing.optionGroups);
 
-        for (const group of existing.modifierGroups) {
-          if (submittedGroupIds.has(group.id)) {
-            continue;
-          }
-
-          await productRepo.deleteModifierOptionsByGroup(productId, group.id);
-          await productRepo.deleteModifierGroup(productId, group.id);
-
-          // Only custom groups are exclusively owned by this product - a preset link
-          // must never delete the shared modifierGroups/modifierGroupOptions rows.
-          if (group.categoryModifierGroupId === null) {
-            for (const option of group.options) {
-              await modifierGroupOptionRepo.delete(group.id, option.id);
-            }
-
-            await modifierGroupRepo.delete(group.id);
-          }
-        }
-
-        for (const {
-          id: groupId,
-          presetId: submittedPresetId,
-          sortOrder,
-          isRequired,
-          selectionType,
-          options,
-          ...modifierGroupData
-        } of values.modifierGroups ?? []) {
-          const existingGroup = groupId ? existing.modifierGroups.find((g) => g.id === groupId) : undefined;
-
-          // Trust the server's own record of preset-vs-custom over the client's `presetId` for a
-          // group that already exists: the repository response the edit form loads its state from
-          // has no field called `presetId`, so a previously preset-linked group would otherwise come
-          // back through this loop looking custom and hit modifierGroupRepo.update() below - mutating
-          // a shared category preset instead of just this product's link to it.
-          const isPresetGroup = existingGroup
-            ? existingGroup.categoryModifierGroupId !== null
-            : Boolean(submittedPresetId);
-          const categoryModifierGroupId = existingGroup ? existingGroup.id : submittedPresetId;
-
-          const existingGroupOptions = existingGroup?.options ?? [];
-          const keptOptionIds = new Set(
-            (options ?? []).map((option) => option.id).filter((optionId): optionId is string => Boolean(optionId))
-          );
-
-          if (!isPresetGroup) {
-            const group = groupId
-              ? await modifierGroupRepo.update({ id: groupId, ...modifierGroupData, selectionType })
-              : await modifierGroupRepo.create({ ...modifierGroupData, selectionType });
-
-            if (!group) {
-              throw new DatabaseError('An error has occurred while trying to store modifier group');
-            }
-
-            // Must happen before any productModifierOptions writes below: product_modifier_options_group_fk
-            // requires a matching (productId, modifierGroupId) row in productModifierGroups to already exist.
-            await productRepo.upsertModifierGroup({
-              productId,
-              categoryModifierGroupId: null,
-              modifierGroupId: group.id,
-              isRequired,
-              sortOrder,
-              selectionType: null,
-            });
-
-            for (const option of existingGroupOptions) {
-              if (!keptOptionIds.has(option.id)) {
-                await modifierGroupOptionRepo.delete(group.id, option.id);
-                await productRepo.deleteModifierOption(productId, group.id, option.id);
-              }
-            }
-
-            for (const { id: optionId, ...optionData } of options ?? []) {
-              const optionResult = optionId
-                ? await modifierGroupOptionRepo.update({ id: optionId, modifierGroupId: group.id, ...optionData })
-                : await modifierGroupOptionRepo.create({ ...optionData, modifierGroupId: group.id });
-
-              if (!optionResult) {
-                throw new DatabaseError('An error has occurred while trying to store modifier group option');
-              }
-
-              await productRepo.upsertModifierOption({
-                productId,
-                modifierOptionId: optionResult.id,
-                modifierGroupId: group.id,
-                priceAdjustment: optionData.priceAdjustment,
-                sortOrder: optionData.sortOrder,
-              });
-            }
-
-            continue;
-          }
-
-          if (!categoryModifierGroupId) {
-            throw new ValidationError('Missing modifier group reference for preset selection');
-          }
-
-          const categoryModifierGroupLink = await categoryModifierGroupRepo.findByCategoryAndModifierGroup(
-            values.categoryId,
-            categoryModifierGroupId
-          );
-
-          // Must happen before any productModifierOptions writes below - see the same note in the
-          // custom-group branch above.
-          await productRepo.upsertModifierGroup({
-            productId,
-            categoryModifierGroupId: categoryModifierGroupLink?.id ?? null,
-            modifierGroupId: categoryModifierGroupId,
-            isRequired,
-            sortOrder,
-            selectionType,
-          });
-
-          for (const option of existingGroupOptions) {
-            if (!keptOptionIds.has(option.id)) {
-              await productRepo.deleteModifierOption(productId, categoryModifierGroupId, option.id);
-
-              // A private option belongs to this product alone - remove it entirely
-              // rather than leaving an orphaned row nobody else can reach.
-              if (option.productId === productId) {
-                await modifierGroupOptionRepo.delete(categoryModifierGroupId, option.id);
-              }
-            }
-          }
-
-          for (const { id: optionId, ...optionData } of options ?? []) {
-            const existingOption = optionId ? existingGroupOptions.find((o) => o.id === optionId) : undefined;
-
-            const optionResult = !optionId
-              ? // Brand-new option under a preset group - private to this product, never the shared template.
-                await modifierGroupOptionRepo.create({
-                  ...optionData,
-                  modifierGroupId: categoryModifierGroupId,
-                  productId,
-                })
-              : existingOption?.productId === productId
-                ? // Already private to this product - safe to rename/reprice at the source.
-                  await modifierGroupOptionRepo.update({
-                    id: optionId,
-                    modifierGroupId: categoryModifierGroupId,
-                    ...optionData,
-                  })
-                : // Shared template option - never mutated, only linked/overridden.
-                  { id: optionId };
-
-            if (!optionResult) {
-              throw new DatabaseError('An error has occurred while trying to store modifier group option');
-            }
-
-            await productRepo.upsertModifierOption({
-              productId,
-              modifierOptionId: optionResult.id,
-              modifierGroupId: categoryModifierGroupId,
-              priceAdjustment: optionData.priceAdjustment,
-              sortOrder: optionData.sortOrder,
-            });
-          }
-        }
+        // --- Add-ons: drop unlinked products, upsert the rest ---
+        await this.syncAddOns(productRepo, productId, values.addOns ?? [], existing.addOns);
 
         return product;
       });
@@ -589,5 +330,87 @@ export class ProductService {
       await this.imageService.removeImageObjects(uploadObjects);
       throw error;
     }
+  }
+
+  /**
+   * Brings a product's option groups (and their options) in line with the submitted list.
+   * Ids are only trusted when they match a row already owned by this product - anything
+   * else is treated as new, so a client can never edit another product's groups.
+   */
+  private async syncOptionGroups(
+    optionGroupRepo: OptionGroupRepository,
+    productId: string,
+    submittedGroups: OptionGroupFormValues[],
+    existingGroups: ExistingOptionGroups
+  ) {
+    const existingGroupsById = new Map(existingGroups.map((group) => [group.id, group]));
+    const keptGroupIds = new Set(
+      submittedGroups.map((group) => group.id).filter((id) => id && existingGroupsById.has(id))
+    );
+
+    await optionGroupRepo.deleteGroupsByIds(
+      productId,
+      existingGroups.filter((group) => !keptGroupIds.has(group.id)).map((group) => group.id)
+    );
+
+    const newOptions: Parameters<OptionGroupRepository['createManyOptions']>[0] = [];
+
+    for (const { id: submittedGroupId, options = [], ...groupData } of submittedGroups) {
+      const existingGroup = submittedGroupId ? existingGroupsById.get(submittedGroupId) : undefined;
+
+      const group = existingGroup
+        ? await optionGroupRepo.updateGroup(productId, existingGroup.id, groupData)
+        : await optionGroupRepo.createGroup({ ...groupData, productId });
+
+      if (!group) {
+        throw new DatabaseError('An error has occurred while trying to store option group');
+      }
+
+      const existingOptionIds = new Set(existingGroup?.options.map((option) => option.id));
+      const keptOptionIds = new Set(options.map((option) => option.id).filter((id) => id && existingOptionIds.has(id)));
+
+      await optionGroupRepo.deleteOptionsByIds(
+        group.id,
+        [...existingOptionIds].filter((id) => !keptOptionIds.has(id))
+      );
+
+      for (const { id: optionId, ...optionData } of options) {
+        if (optionId && keptOptionIds.has(optionId)) {
+          const updated = await optionGroupRepo.updateOption(group.id, optionId, optionData);
+
+          if (!updated) {
+            throw new DatabaseError('An error has occurred while trying to update option');
+          }
+
+          continue;
+        }
+
+        newOptions.push({ ...optionData, optionGroupId: group.id });
+      }
+    }
+
+    if (newOptions.length > 0) {
+      await optionGroupRepo.createManyOptions(newOptions);
+    }
+  }
+
+  private async syncAddOns(
+    productRepo: ProductRepository,
+    productId: string,
+    submittedAddOns: ProductAddOnFormValues[],
+    existingAddOns: ExistingAddOns
+  ) {
+    if (submittedAddOns.some((addOn) => addOn.addOnProductId === productId)) {
+      throw new ValidationError('A product cannot be its own add-on', { errorCode: 'VALIDATION_ERROR' });
+    }
+
+    const submittedIds = new Set(submittedAddOns.map((addOn) => addOn.addOnProductId));
+
+    await productRepo.deleteAddOns(
+      productId,
+      existingAddOns.map((addOn) => addOn.addOnProductId).filter((id) => !submittedIds.has(id))
+    );
+
+    await productRepo.upsertManyAddOns(submittedAddOns.map((addOn) => ({ ...addOn, productId })));
   }
 }

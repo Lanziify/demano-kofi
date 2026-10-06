@@ -2,9 +2,9 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import isEqual from 'lodash/isEqual';
-import { Check, Component, Plus, X } from 'lucide-react';
+import { Check, Plus, X } from 'lucide-react';
 import React from 'react';
-import { Controller, useFieldArray, useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { ConfirmationDialog, type ConfirmationDialogOptions } from '@/components/custom/confirmation-dialog';
 import { Button } from '@/components/ui/button';
@@ -16,16 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-  FieldLegend,
-  FieldSet,
-} from '@/components/ui/field';
+import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Item, ItemContent, ItemMedia, ItemTitle } from '@/components/ui/item';
 import { Spinner } from '@/components/ui/spinner';
@@ -33,13 +24,9 @@ import {
   useCreateProductCategory,
   useUpdateProductCategory,
 } from '@/feature/products/mutations/product-category.mutation';
-import {
-  type CategoryFormWithModifierGroupsValue,
-  categoryFormWithModifierGroupsSchema,
-} from '@/feature/products/schema/category.schema';
-import type { CategoryWithModifierGroupOptions } from '@/feature/products/types/types';
+import { type CategoryFormValues, categoryFormSchema } from '@/feature/products/schema/category.schema';
+import type { Category } from '@/feature/products/types/types';
 import { useDialog } from '@/hooks/use-dialog';
-import ProductModifierGroupCard from './modifier-group-card';
 
 type CategoryDialogFormStatus = 'idle' | 'loading' | 'success' | 'error';
 
@@ -49,7 +36,7 @@ export type CategoryDialogFormOptions = {
   confirmLabel?: string;
   closeText?: string;
   confirmVariant?: 'default' | 'destructive';
-  data?: CategoryWithModifierGroupOptions | null;
+  data?: Category | null;
   onConfirm?: () => void | Promise<void>;
 };
 
@@ -78,11 +65,10 @@ export function CategoryDialogForm({
   const initialValues = {
     name: '',
     description: '',
-    modifierGroups: [],
   };
 
   const form = useForm({
-    resolver: zodResolver(categoryFormWithModifierGroupsSchema),
+    resolver: zodResolver(categoryFormSchema),
     defaultValues: {
       ...initialValues,
     },
@@ -90,22 +76,9 @@ export function CategoryDialogForm({
 
   const isSubmitting = form.formState.isSubmitting;
 
-  const modifierGroups = useFieldArray({
-    control: form.control,
-    name: 'modifierGroups',
-  });
-
-  const onSubmit = async (values: CategoryFormWithModifierGroupsValue) => {
-    const payload = {
-      ...values,
-      modifierGroups: values.modifierGroups?.map((group) => ({
-        ...group,
-        options: group.options?.map((option, index) => ({ ...option, sortOrder: index })),
-      })),
-    } as CategoryFormWithModifierGroupsValue;
-
+  const onSubmit = async (values: CategoryFormValues) => {
     if (data?.id) {
-      const { modifierGroups: groups, ...categoryData } = payload;
+      const categoryId = data.id;
 
       confirmationDialog.show({
         title: 'Continue update?',
@@ -113,18 +86,14 @@ export function CategoryDialogForm({
         confirmLabel: 'Confirm',
         confirmVariant: 'default',
         onConfirm: async () => {
-          await updateCategory.mutateAsync({
-            ...categoryData,
-            id: String(payload.id),
-            modifierGroups: groups,
-          });
+          await updateCategory.mutateAsync({ ...values, id: categoryId });
 
           toast.success('Category updated successfully');
           onOpenChange?.(false);
         },
       });
     } else {
-      await createCategory.mutateAsync(payload);
+      await createCategory.mutateAsync(values);
       toast.success('Category created successfully');
       form.reset();
     }
@@ -132,12 +101,10 @@ export function CategoryDialogForm({
 
   const hasFormValues = () => {
     const values = form.getValues();
-    const editValues = categoryFormWithModifierGroupsSchema.safeParse(data);
+    const editValues = categoryFormSchema.safeParse(data);
 
     return editValues.error
-      ? values.name.trim() !== '' ||
-          values.description.trim() !== '' ||
-          (values.modifierGroups && values.modifierGroups?.length > 0)
+      ? values.name.trim() !== '' || values.description.trim() !== ''
       : !isEqual(values, editValues.data);
   };
 
@@ -174,7 +141,7 @@ export function CategoryDialogForm({
   React.useEffect(() => {
     if (!data) return;
 
-    const parsedData = categoryFormWithModifierGroupsSchema.safeParse(data);
+    const parsedData = categoryFormSchema.safeParse(data);
 
     if (parsedData.error) {
       toast.error(parsedData.error.message);
@@ -190,7 +157,7 @@ export function CategoryDialogForm({
     <div>
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <form id="category-form" onSubmit={form.handleSubmit(onSubmit)}>
-          <DialogContent showCloseButton={false} className="sm:max-w-3xl">
+          <DialogContent showCloseButton={false} className="sm:max-w-xl">
             {!isSubmitting ? (
               <>
                 <DialogHeader>
@@ -224,72 +191,6 @@ export function CategoryDialogForm({
                     )}
                   />
                 </FieldGroup>
-                <div className="-mx-4 no-scrollbar max-h-[50vh] space-y-6 overflow-y-auto px-4">
-                  {modifierGroups.fields.length > 0 && (
-                    <FieldSet>
-                      <FieldLegend>Modifier Groups</FieldLegend>
-                      <FieldDescription>Create product modifier groups</FieldDescription>
-                      <FieldGroup className="gap-4">
-                        {modifierGroups.fields.map((field, index) => (
-                          <ProductModifierGroupCard
-                            key={field.id}
-                            control={form.control}
-                            name={`modifierGroups.${index}`}
-                            onClose={() => modifierGroups.remove(index)}
-                          />
-                        ))}
-                      </FieldGroup>
-                    </FieldSet>
-                  )}
-
-                  {modifierGroups.fields.length === 0 ? (
-                    <Empty className="border border-dashed p-4">
-                      <EmptyHeader className="w-full max-w-none flex-row justify-between">
-                        <div className="flex items-center gap-4">
-                          <EmptyMedia variant="icon" className="m-0">
-                            <Component />
-                          </EmptyMedia>
-                          <div className="text-start">
-                            <EmptyTitle>No modifier groups</EmptyTitle>
-                            <EmptyDescription>
-                              You haven't created any product modifier group for this category yet.
-                            </EmptyDescription>
-                          </div>
-                        </div>
-                        <Button
-                          type="button"
-                          onClick={() =>
-                            modifierGroups.append({
-                              name: '',
-                              selectionType: 'multiple',
-                              options: [],
-                              sortOrder: modifierGroups.fields.length,
-                            })
-                          }
-                        >
-                          <Plus />
-                          Add Group
-                        </Button>
-                      </EmptyHeader>
-                    </Empty>
-                  ) : (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      onClick={() =>
-                        modifierGroups.append({
-                          name: '',
-                          selectionType: 'multiple',
-                          options: [],
-                          sortOrder: modifierGroups.fields.length,
-                        })
-                      }
-                    >
-                      <Plus />
-                      Add Group
-                    </Button>
-                  )}
-                </div>
                 <DialogFooter>
                   <Field orientation="horizontal" className="justify-end">
                     <Button type="button" variant="outline" onClick={handleFormCancel} disabled={isSubmitting}>

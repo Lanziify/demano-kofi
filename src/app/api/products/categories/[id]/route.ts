@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { categoryFormWithModifierGroupsSchema } from '@/feature/products/schema/category.schema';
+import { categoryFormSchema } from '@/feature/products/schema/category.schema';
 import { CategoryService } from '@/feature/products/service/category.service';
 import { apiErrorHandler, requiredSession } from '@/lib/api-handler';
 
@@ -22,7 +22,7 @@ export const PATCH = apiErrorHandler<Context>(
   async (req, context) => {
     const { id } = await context.params;
     const body = await req.json();
-    const values = categoryFormWithModifierGroupsSchema.parse({ ...body, id });
+    const values = categoryFormSchema.parse({ ...body, id });
 
     const result = await service.updateCategory(values);
 

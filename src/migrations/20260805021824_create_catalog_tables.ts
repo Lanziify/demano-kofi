@@ -1,4 +1,4 @@
-import { type Kysely, type SqlBool, sql } from 'kysely';
+import { type Kysely, sql } from 'kysely';
 
 // `any` is required here since migrations should be frozen in time.
 // Alternatively, keep a "snapshot" DB interface.
@@ -49,113 +49,68 @@ export async function up(db: Kysely<any>): Promise<void> {
     .execute();
 
   await db.schema
-    .createTable('modifier_groups')
+    .createTable('option_groups')
     .addColumn('id', 'uuid', (col) => col.primaryKey().defaultTo(sql`gen_random_uuid()`))
+    .addColumn('product_id', 'uuid', (col) => col.references('products.id').onDelete('cascade').notNull())
     .addColumn('name', 'varchar(255)', (col) => col.notNull())
-    .addColumn('selection_type', 'varchar(255)', (col) => col.notNull())
+    // min 0 = optional. max null = no limit. e.g. "pick exactly one" is 1/1.
+    .addColumn('min_select', 'integer', (col) => col.defaultTo(0).notNull())
+    .addColumn('max_select', 'integer')
+    .addColumn('sort_order', 'integer', (col) => col.notNull())
     .addColumn('created_at', 'timestamptz', (col) => col.defaultTo(sql`now()`).notNull())
     .addColumn('updated_at', 'timestamptz', (col) => col.defaultTo(sql`now()`).notNull())
-    .addUniqueConstraint('modifier_group_name_unique', ['name'])
+    // Deferred so renames that swap two names within one transaction don't collide mid-way.
+    .addUniqueConstraint('option_groups_product_name_unique', ['product_id', 'name'], (uc) =>
+      uc.deferrable().initiallyDeferred()
+    )
+    .addCheckConstraint(
+      'option_groups_select_range_check',
+      sql`min_select >= 0 and (max_select is null or (max_select >= 1 and max_select >= min_select))`
+    )
     .execute();
 
   await db.schema
-    .createTable('modifier_group_options')
+    .createTable('options')
     .addColumn('id', 'uuid', (col) => col.primaryKey().defaultTo(sql`gen_random_uuid()`))
-    .addColumn('modifier_group_id', 'uuid', (col) => col.references('modifier_groups.id').onDelete('cascade').notNull())
-    .addColumn('product_id', 'uuid', (col) => col.references('products.id').onDelete('cascade'))
+    .addColumn('option_group_id', 'uuid', (col) => col.references('option_groups.id').onDelete('cascade').notNull())
     .addColumn('name', 'varchar(255)', (col) => col.notNull())
     .addColumn('price_adjustment', 'integer', (col) => col.defaultTo(0).notNull())
+    .addColumn('is_available', 'boolean', (col) => col.defaultTo(true).notNull())
     .addColumn('sort_order', 'integer', (col) => col.notNull())
     .addColumn('created_at', 'timestamptz', (col) => col.defaultTo(sql`now()`).notNull())
     .addColumn('updated_at', 'timestamptz', (col) => col.defaultTo(sql`now()`).notNull())
-    .addUniqueConstraint('modifier_group_options_id_group_unique', ['id', 'modifier_group_id'])
+    .addUniqueConstraint('options_group_name_unique', ['option_group_id', 'name'], (uc) =>
+      uc.deferrable().initiallyDeferred()
+    )
     .execute();
 
+  // An add-on is another product (e.g. a croissant offered with a latte), sold at the link's price.
   await db.schema
-    .createTable('category_modifier_groups')
-    .addColumn('id', 'uuid', (col) => col.primaryKey().defaultTo(sql`gen_random_uuid()`))
-    .addColumn('category_id', 'uuid', (col) => col.references('categories.id').onDelete('cascade').notNull())
-    .addColumn('modifier_group_id', 'uuid', (col) => col.references('modifier_groups.id').onDelete('cascade').notNull())
-    .addColumn('sort_order', 'integer', (col) => col.notNull())
-    .addUniqueConstraint('category_modifier_groups_category_modifier_group_unique', [
-      'category_id',
-      'modifier_group_id',
-    ])
-    .execute();
-
-  await db.schema
-    .createTable('product_modifier_groups')
+    .createTable('product_add_ons')
     .addColumn('product_id', 'uuid', (col) => col.references('products.id').onDelete('cascade').notNull())
-    .addColumn('category_modifier_group_id', 'uuid', (col) =>
-      col.references('category_modifier_groups.id').onDelete('set null')
-    )
-    .addColumn('modifier_group_id', 'uuid', (col) => col.references('modifier_groups.id').onDelete('cascade').notNull())
-    .addColumn('selection_type', 'varchar(255)')
-    .addColumn('is_required', 'boolean', (col) => col.defaultTo(false).notNull())
+    .addColumn('add_on_product_id', 'uuid', (col) => col.references('products.id').onDelete('cascade').notNull())
+    .addColumn('price_amount', 'integer', (col) => col.notNull())
     .addColumn('sort_order', 'integer', (col) => col.notNull())
-    .addPrimaryKeyConstraint('product_modifier_groups_pk', ['product_id', 'modifier_group_id'])
-    .addForeignKeyConstraint(
-      'product_modifier_groups_category_group_fk',
-      ['category_modifier_group_id'],
-      'category_modifier_groups',
-      ['id'],
-      (cb) => cb.onDelete('set null')
-    )
+    .addColumn('created_at', 'timestamptz', (col) => col.defaultTo(sql`now()`).notNull())
+    .addColumn('updated_at', 'timestamptz', (col) => col.defaultTo(sql`now()`).notNull())
+    .addPrimaryKeyConstraint('product_add_ons_pk', ['product_id', 'add_on_product_id'])
+    .addCheckConstraint('product_add_ons_not_self_check', sql`product_id <> add_on_product_id`)
+    .addCheckConstraint('product_add_ons_price_check', sql`price_amount >= 0`)
     .execute();
 
   await db.schema
-    .createTable('product_modifier_options')
-    .addColumn('product_id', 'uuid', (col) => col.references('products.id').onDelete('cascade').notNull())
-    .addColumn('modifier_group_id', 'uuid', (col) => col.references('modifier_groups.id').onDelete('cascade').notNull())
-    .addColumn('modifier_option_id', 'uuid', (col) =>
-      col.references('modifier_group_options.id').onDelete('cascade').notNull()
-    )
-    .addColumn('price_adjustment', 'integer')
-    .addColumn('sort_order', 'integer', (col) => col.notNull())
-    .addPrimaryKeyConstraint('product_modifier_options_pk', ['product_id', 'modifier_group_id', 'modifier_option_id'])
-    .addForeignKeyConstraint(
-      'product_modifier_options_group_fk',
-      ['product_id', 'modifier_group_id'],
-      'product_modifier_groups',
-      ['product_id', 'modifier_group_id'],
-      (cb) => cb.onDelete('cascade')
-    )
-    .addForeignKeyConstraint(
-      'product_modifier_options_option_group_fk',
-      ['modifier_option_id', 'modifier_group_id'],
-      'modifier_group_options',
-      ['id', 'modifier_group_id'],
-      (cb) => cb.onDelete('cascade')
-    )
-    .execute();
-
-  await db.schema
-    .createIndex('modifier_group_options_shared_name_unique')
-    .on('modifier_group_options')
-    .columns(['modifier_group_id', 'name'])
-    .unique()
-    .where(sql<SqlBool>`product_id is null`)
-    .execute();
-
-  await db.schema
-    .createIndex('modifier_group_options_product_name_unique')
-    .on('modifier_group_options')
-    .columns(['modifier_group_id', 'product_id', 'name'])
-    .unique()
-    .where(sql<SqlBool>`product_id is not null`)
+    .createIndex('product_add_ons_add_on_product_id_index')
+    .on('product_add_ons')
+    .column('add_on_product_id')
     .execute();
 }
 
 // `any` is required here since migrations should be frozen in time.
 // Alternatively, keep a "snapshot" DB interface.
 export async function down(db: Kysely<any>): Promise<void> {
-  await db.schema.dropIndex('modifier_group_options_product_name_unique').execute();
-  await db.schema.dropIndex('modifier_group_options_shared_name_unique').execute();
-  await db.schema.dropTable('product_modifier_options').execute();
-  await db.schema.dropTable('product_modifier_groups').execute();
-  await db.schema.dropTable('category_modifier_groups').execute();
-  await db.schema.dropTable('modifier_group_options').execute();
-  await db.schema.dropTable('modifier_groups').execute();
+  await db.schema.dropTable('product_add_ons').execute();
+  await db.schema.dropTable('options').execute();
+  await db.schema.dropTable('option_groups').execute();
   await db.schema.dropTable('variants').execute();
   await db.schema.dropTable('product_images').execute();
   await db.schema.dropTable('products').execute();

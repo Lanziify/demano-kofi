@@ -5,17 +5,17 @@ import { Button } from '@/components/ui/button';
 import { Item, ItemActions, ItemContent, ItemDescription, ItemMedia, ItemTitle } from '@/components/ui/item';
 import { Spinner } from '@/components/ui/spinner';
 import { useProducts } from '@/feature/products/hooks/use-products';
-import type { CategoryWithModifierGroupOptions } from '@/feature/products/types/types';
+import type { Category } from '@/feature/products/types/types';
 import { useDialog } from '@/hooks/use-dialog';
 import { CategoryDialogForm, type CategoryDialogFormOptions } from './category-dialog';
 
 export default function ProductCategoryList() {
   const {
-    categoriesWithGroupOptions: { data: categories, isPending },
+    categories: { data: categories, isPending },
   } = useProducts();
   const categoryDialog = useDialog<CategoryDialogFormOptions>();
 
-  const handleCategoryEdit = (item: CategoryWithModifierGroupOptions) => {
+  const handleCategoryEdit = (item: Category) => {
     categoryDialog.show({
       title: 'Edit Category',
       description: 'Create new product category for you product listings.',

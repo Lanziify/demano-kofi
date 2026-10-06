@@ -1,7 +1,6 @@
 import type { Selectable } from 'kysely';
 import z from 'zod';
-import type { Categories, CategoryModifierGroups } from '@/types/db';
-import { modifierGroupFormWithOptionsSchema } from './modifier.schema';
+import type { Categories } from '@/types/db';
 
 /**
  * Category schema
@@ -17,20 +16,6 @@ export const categorySchema = z.object({
 export type CategoryValues = z.infer<typeof categorySchema>;
 
 /**
- * Category modifier group relation schema
- */
-export const categoryModifierGroupSchema = z.object({
-  id: z.uuid(),
-  categoryId: z.uuid(),
-  modifierGroupId: z.uuid(),
-  sortOrder: z.number().nonnegative(),
-}) satisfies z.ZodType<Selectable<CategoryModifierGroups>>;
-
-export const categoryModifierGroupWithoutIdSchema = categoryModifierGroupSchema.omit({id: true})
-
-export type CategoryModifierGroupWithoutIdValues = z.infer<typeof categoryModifierGroupWithoutIdSchema>;
-
-/**
  * Category form schema
  */
 export const categoryFormSchema = categorySchema.omit({ id: true, createdAt: true, updatedAt: true }).extend({
@@ -38,34 +23,3 @@ export const categoryFormSchema = categorySchema.omit({ id: true, createdAt: tru
 });
 
 export type CategoryFormValues = z.infer<typeof categoryFormSchema>;
-
-/**
- * Category form schema with modifier groups and options
- */
-export const categoryModifierGroupFormWithOptionsSchema = modifierGroupFormWithOptionsSchema.extend({
-  sortOrder: z.number().nonnegative(),
-});
-
-export const categoryFormWithModifierGroupsSchema = categoryFormSchema.extend({
-  modifierGroups: z.array(categoryModifierGroupFormWithOptionsSchema).optional(),
-});
-
-export type CategoryFormWithModifierGroupsValue = z.infer<typeof categoryFormWithModifierGroupsSchema>;
-
-/**
- * Category Response Values
- */
-export const categoryWithModifierGroupsResponseSchema = categoryFormSchema.extend({
-  modifierGroups: z.array(modifierGroupFormWithOptionsSchema).optional(),
-});
-
-export type CategoryWithModifierGroupsResponseValues = z.infer<typeof categoryWithModifierGroupsResponseSchema>;
-
-/**
- * Category Query Schema
- */
-export const categoryQuerySchema = z.object({
-  include: z.enum(['groupModifierOptions']).optional(),
-});
-
-export type CategoryQuerySchemaValues = z.infer<typeof categoryQuerySchema>;

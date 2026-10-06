@@ -1,11 +1,10 @@
 'use client';
 
-import type { ToggleGroupProps } from '@base-ui/react';
 import { DndContext, type DragEndEvent } from '@dnd-kit/core';
 import { restrictToParentElement } from '@dnd-kit/modifiers';
 import { rectSortingStrategy, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { DollarSign, Folders, Images, Info, Plus, Shapes, Star, Trash } from 'lucide-react';
+import { DollarSign, Folders, Images, PackagePlus, Plus, Shapes, Star, Trash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React from 'react';
 import { useDropzone } from 'react-dropzone';
@@ -23,16 +22,15 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { Spinner } from '@/components/ui/spinner';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { useProducts } from '@/feature/products/hooks/use-products';
 import { useCreateProduct, useUpdateProduct } from '@/feature/products/mutations/product.mutation';
-import { modifierGroupFormWithOptionsSchema } from '@/feature/products/schema/modifier.schema';
 import { type ProductFormValues, productFormSchema } from '@/feature/products/schema/product.schema';
-import type { CategoryModifierGroupsWithSortOrder, ProductEmbedded } from '@/feature/products/types/types';
+import type { ProductEmbedded } from '@/feature/products/types/types';
 import { useDialog } from '@/hooks/use-dialog';
 import { MAX_PRODUCT_IMAGES } from '@/lib/image/constants';
 import { cn } from '@/lib/utils';
-import ProductModifierGroupCard from '../categories/_component/modifier-group-card';
+import AddOnsCard from './add-ons-card';
+import OptionGroupCard from './option-group-card';
 import ProductImage from './product-image';
 import SortableVariant from './sortable-variants';
 
@@ -42,11 +40,10 @@ interface ProductFormProps {
 
 export default function ProductForm({ product }: ProductFormProps) {
   const router = useRouter();
-  const { categoriesWithGroupOptions } = useProducts();
+  const { categories } = useProducts();
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
   const confirmationDialog = useDialog<ConfirmationDialogOptions>();
-  const [categoryModifierGroups, setCategoryModifierGroups] = React.useState<CategoryModifierGroupsWithSortOrder[]>([]);
 
   const initialFormValues = {
     categoryId: '',
@@ -54,7 +51,8 @@ export default function ProductForm({ product }: ProductFormProps) {
     description: '',
     images: [],
     variants: [],
-    modifierGroups: [],
+    optionGroups: [],
+    addOns: [],
     isAvailable: true,
     isFeatured: false,
   } as ProductFormValues;
@@ -74,9 +72,9 @@ export default function ProductForm({ product }: ProductFormProps) {
     name: 'images',
   });
 
-  const modifierGroupFields = useFieldArray({
+  const optionGroupFields = useFieldArray({
     control: form.control,
-    name: 'modifierGroups',
+    name: 'optionGroups',
     keyName: '_fieldId',
   });
 
@@ -150,23 +148,6 @@ export default function ProductForm({ product }: ProductFormProps) {
     [variantFields]
   );
 
-  const handleCategoryChange = React.useCallback(
-    (value: string | null) => {
-      // form.setValue('modifierGroups', []);
-
-      if (!categoriesWithGroupOptions.data || !value) return;
-
-      const {
-        data: { data: categories },
-      } = categoriesWithGroupOptions;
-
-      const groups = categories.filter((category) => category.id === value)[0].modifierGroups;
-
-      setCategoryModifierGroups(groups);
-    },
-    [categoriesWithGroupOptions]
-  );
-
   const handleCancel = React.useCallback(() => {
     if (!form.formState.isDirty) {
       router.push('/products');
@@ -185,62 +166,20 @@ export default function ProductForm({ product }: ProductFormProps) {
     });
   }, [confirmationDialog, form.formState.isDirty, router]);
 
-  const handleModifierGroupClose = React.useCallback(
+  const handleOptionGroupClose = React.useCallback(
     (index: number) => {
       confirmationDialog.show({
         title: 'Are you sure?',
-        description: 'You will lose all the information entered for this preset.',
+        description: 'You will lose all the information entered for this group.',
         confirmLabel: 'Confirm',
         confirmVariant: 'default',
         onConfirm: () => {
-          modifierGroupFields.remove(index);
+          optionGroupFields.remove(index);
           confirmationDialog.close();
         },
       });
     },
-    [confirmationDialog, modifierGroupFields]
-  );
-
-  const handleModifierGroupChange = React.useCallback<NonNullable<ToggleGroupProps<string>['onValueChange']>>(
-    (values) => {
-      const currentIds = modifierGroupFields.fields.map((group) => group.presetId);
-
-      // Added
-      const addedIds = values.filter((id) => !currentIds.includes(id));
-
-      // Removed
-      const removedIds = currentIds.filter((id) => id && !values.includes(id));
-
-      addedIds.forEach((id, index) => {
-        const modifierGroup = categoryModifierGroups.filter((g) => g.id === id)[0];
-
-        const parsedModifierGroup = modifierGroupFormWithOptionsSchema.safeParse(modifierGroup);
-
-        if (parsedModifierGroup.error) return;
-
-        const { id: presetId, name, selectionType, options } = parsedModifierGroup.data;
-
-        if (parsedModifierGroup.success) {
-          modifierGroupFields.insert(index, {
-            presetId,
-            isRequired: false,
-            name,
-            selectionType,
-            sortOrder: index,
-            options,
-          });
-        }
-      });
-
-      removedIds.forEach((id) => {
-        const index = modifierGroupFields.fields.findIndex((g) => g.presetId === id);
-
-        if (index !== -1) {
-          handleModifierGroupClose(index);
-        }
-      });
-    },
-    [modifierGroupFields, categoryModifierGroups.filter, handleModifierGroupClose]
+    [confirmationDialog, optionGroupFields]
   );
 
   const onSubmit = async (values: ProductFormValues) => {
@@ -260,12 +199,16 @@ export default function ProductForm({ product }: ProductFormProps) {
         ...image,
         sortOrder: index,
       })),
-      modifierGroups: values.modifierGroups?.map((groups, index) => ({
-        ...groups,
-        options: groups.options?.map((option, index) => ({
+      optionGroups: values.optionGroups?.map((group, index) => ({
+        ...group,
+        options: group.options?.map((option, index) => ({
           ...option,
           sortOrder: index,
         })),
+        sortOrder: index,
+      })),
+      addOns: values.addOns?.map((addOn, index) => ({
+        ...addOn,
         sortOrder: index,
       })),
     } as ProductFormValues;
@@ -523,79 +466,42 @@ export default function ProductForm({ product }: ProductFormProps) {
               )}
             </CardContent>
           </Card>
-          {/* Product Modifiers */}
+          {/* Product Option Groups */}
           <Card className="shadow-none">
             <CardHeader>
-              <CardTitle>Modifier Groups</CardTitle>
-              <CardDescription>Let customers customize their order (e.g. milk type, syrup, extras).</CardDescription>
+              <CardTitle>Options</CardTitle>
+              <CardDescription>Let customers customize their order (e.g. Hot/Cold, Beans).</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {categoryModifierGroups.length > 0 && (
-                <>
-                  <Item size="xs" className="py-0">
-                    <ItemMedia variant="icon">
-                      <Info />
-                    </ItemMedia>
-                    <ItemContent>
-                      <ItemDescription>Quick-add category modifier groups presets</ItemDescription>
-                    </ItemContent>
-                  </Item>
-                  <FieldGroup>
-                    <ToggleGroup
-                      multiple
-                      value={modifierGroupFields.fields.map((group) => String(group.presetId))}
-                      onValueChange={handleModifierGroupChange}
-                    >
-                      {categoryModifierGroups.map((group) => (
-                        <ToggleGroupItem key={group.id} variant="outline" value={group.id}>
-                          {group.name}
-                        </ToggleGroupItem>
-                      ))}
-                    </ToggleGroup>
-                  </FieldGroup>
-                </>
-              )}
-
-              {modifierGroupFields.fields.map((field, index) => {
-                return (
-                  <ProductModifierGroupCard
-                    key={field._fieldId}
-                    name={`modifierGroups.${index}`}
-                    control={form.control}
-                    onClose={() => handleModifierGroupClose(index)}
-                  />
-                );
-              })}
-
-              {!product && categoryModifierGroups.length === 0 && (
-                <Item variant="outline">
-                  <ItemMedia variant="icon">
-                    <Info />
-                  </ItemMedia>
-                  <ItemContent>
-                    <ItemTitle>Select product category to use template groups</ItemTitle>
-                  </ItemContent>
-                </Item>
-              )}
+              {optionGroupFields.fields.map((field, index) => (
+                <OptionGroupCard
+                  key={field._fieldId}
+                  name={`optionGroups.${index}`}
+                  control={form.control}
+                  onClose={() => handleOptionGroupClose(index)}
+                />
+              ))}
 
               <Button
                 type="button"
                 variant="ghost"
                 onClick={() =>
-                  modifierGroupFields.append({
+                  optionGroupFields.append({
                     name: '',
-                    selectionType: 'multiple',
+                    minSelect: 0,
+                    maxSelect: null,
                     options: [],
-                    isRequired: false,
-                    sortOrder: modifierGroupFields.fields.length,
+                    sortOrder: optionGroupFields.fields.length,
                   })
                 }
               >
                 <Plus />
-                Add Custom Modifier
+                Add options
               </Button>
             </CardContent>
           </Card>
+          {/* Product Add-ons */}
+          <AddOnsCard control={form.control} productId={product?.id} />
         </div>
         <div className="space-y-5 lg:sticky lg:top-22.25">
           {/* Product Status */}
@@ -644,20 +550,11 @@ export default function ProductForm({ product }: ProductFormProps) {
                   render={({ field, fieldState }) => (
                     <Field>
                       <FieldLabel data-invalid={fieldState.invalid}>Category</FieldLabel>
-                      <Select
-                        {...field}
-                        value={field.value}
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                          handleCategoryChange(value);
-                        }}
-                      >
+                      <Select {...field} value={field.value} onValueChange={field.onChange}>
                         <SelectTrigger>
                           <SelectValue>
                             {(value) => {
-                              const category = categoriesWithGroupOptions.data?.data.find(
-                                (category) => category.id === value
-                              );
+                              const category = categories.data?.data.find((category) => category.id === value);
 
                               return category?.name ?? 'Select product category';
                             }}
@@ -665,12 +562,12 @@ export default function ProductForm({ product }: ProductFormProps) {
                         </SelectTrigger>
                         <SelectContent alignItemWithTrigger={false}>
                           <SelectGroup>
-                            {categoriesWithGroupOptions.data?.data.map((category) => (
+                            {categories.data?.data.map((category) => (
                               <SelectItem key={category.id} value={category.id}>
                                 {category.name}
                               </SelectItem>
                             ))}
-                            {categoriesWithGroupOptions.isPending && (
+                            {categories.isPending && (
                               <Item>
                                 <ItemMedia variant="icon">
                                   <Spinner />
@@ -716,7 +613,18 @@ export default function ProductForm({ product }: ProductFormProps) {
                     <ItemTitle>Modifier Groups</ItemTitle>
                   </ItemContent>
                   <ItemContent>
-                    <ItemDescription>{form.watch('modifierGroups')?.length}</ItemDescription>
+                    <ItemDescription>{form.watch('optionGroups')?.length}</ItemDescription>
+                  </ItemContent>
+                </Item>
+                <Item className="p-0">
+                  <ItemMedia variant="icon">
+                    <PackagePlus />
+                  </ItemMedia>
+                  <ItemContent>
+                    <ItemTitle>Add-ons</ItemTitle>
+                  </ItemContent>
+                  <ItemContent>
+                    <ItemDescription>{form.watch('addOns')?.length}</ItemDescription>
                   </ItemContent>
                 </Item>
                 <Item className="p-0">
@@ -741,12 +649,7 @@ export default function ProductForm({ product }: ProductFormProps) {
               {form.formState.isSubmitting && <Spinner />}
               {product ? 'Save Changes' : 'Create Product'}
             </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              disabled={form.formState.isSubmitting}
-              onClick={handleCancel}
-            >
+            <Button type="button" variant="secondary" disabled={form.formState.isSubmitting} onClick={handleCancel}>
               Cancel
             </Button>
           </Field>
