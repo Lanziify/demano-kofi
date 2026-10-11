@@ -51,9 +51,21 @@ export interface Media {
   fileSize: number | null;
   height: number | null;
   id: Generated<string>;
+  mimeType: string;
+  status: Generated<string>;
   storageKey: string;
-  type: string;
   updatedAt: Generated<Timestamp>;
+  width: number | null;
+}
+
+export interface MediaVariants {
+  createdAt: Generated<Timestamp>;
+  fileSize: number | null;
+  height: number | null;
+  mediaId: string;
+  mimeType: string;
+  name: string;
+  storageKey: string;
   width: number | null;
 }
 
@@ -205,6 +217,7 @@ export interface DB {
   categories: Categories;
   invitation: Invitation;
   media: Media;
+  mediaVariants: MediaVariants;
   member: Member;
   optionGroups: OptionGroups;
   options: Options;

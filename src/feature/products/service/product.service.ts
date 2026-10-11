@@ -4,6 +4,7 @@ import z from 'zod';
 import { db } from '@/core/db/db';
 import { DatabaseError, NotFoundError, ValidationError } from '@/core/errors/app-error';
 import { MediaRepository } from '@/core/media/media.repository';
+import type { MediaVariantName } from '@/core/media/media.schema';
 import { OutboxRepository } from '@/core/outbox/outbox.repository';
 import type { CreateOutboxEventValues } from '@/core/outbox/outbox.schema';
 import { OptionGroupRepository } from '../repository/option-group.repository';
@@ -19,6 +20,7 @@ import { ProductImageService } from './product-image.service';
 type ExistingProduct = NonNullable<Awaited<ReturnType<ProductRepository['findById']>>>;
 type ExistingOptionGroups = ExistingProduct['optionGroups'];
 type ExistingAddOns = ExistingProduct['addOns'];
+type ProductImageRow = ExistingProduct['images'][number];
 
 export class ProductService {
   constructor(
@@ -34,10 +36,7 @@ export class ProductService {
 
     return products.map((product) => ({
       ...product,
-      images: product.images.map((image) => ({
-        ...image,
-        url: this.imageService.getPublicUrl(image.storageKey),
-      })),
+      images: product.images.map((image) => this.toImageView(image)),
     }));
   }
 
@@ -55,10 +54,7 @@ export class ProductService {
 
     return {
       ...product,
-      images: product.images.map((image) => ({
-        ...image,
-        url: this.imageService.getPublicUrl(image.storageKey),
-      })),
+      images: product.images.map((image) => this.toImageView(image)),
     };
   }
 
@@ -128,9 +124,6 @@ export class ProductService {
             payload: JSON.stringify({
               productId: product.id,
               mediaId: object.media.id,
-              storageKey: object.media.storageKey,
-              altText: object.altText,
-              sortOrder: object.sortOrder,
             } satisfies ProductImageProcessRequestedPayload),
           }));
 
@@ -179,13 +172,12 @@ export class ProductService {
         uploadObjects.push(...imageObjects);
       }
 
-      const existingOriginalImages = existing.images.filter((image) => image.type === 'original');
       const submittedMediaIds = new Set(
         (values.images ?? []).map((image) => image.mediaId).filter((mediaId): mediaId is string => Boolean(mediaId))
       );
-      const removedMediaIds = existingOriginalImages
-        .filter((image) => !submittedMediaIds.has(image.id))
-        .map((image) => image.id);
+      const removedMediaIds = existing.images
+        .filter((image) => !submittedMediaIds.has(image.mediaId))
+        .map((image) => image.mediaId);
       const keptImages = (values.images ?? []).filter(
         (image): image is ProductImageFormValues & { mediaId: string } => typeof image.mediaId !== 'undefined'
       );
@@ -208,29 +200,22 @@ export class ProductService {
           throw new DatabaseError('An error has occurred while trying to update product');
         }
 
-        // --- Images: removed (delete original + generated variants, both DB rows and storage objects) ---
-        for (const mediaId of removedMediaIds) {
-          const siblingMedia = await mediaRepo.findByStorageKeyPrefix(`products/${productId}/${mediaId}/`);
-          const siblingIds = siblingMedia.map((media) => media.id);
+        // --- Images: removed (media rows cascade to their variants; storage objects are deleted after commit) ---
+        if (removedMediaIds.length > 0) {
+          removedStorageKeys.push(...(await mediaRepo.findStorageKeys(removedMediaIds)));
 
-          await productRepo.deleteImagesByMediaIds(productId, siblingIds);
-          const deleted = await mediaRepo.deleteManyByIds(siblingIds);
-
-          removedStorageKeys.push(...deleted.map((media) => media.storageKey));
+          await productRepo.deleteImagesByMediaIds(productId, removedMediaIds);
+          await mediaRepo.deleteManyByIds(removedMediaIds);
         }
 
-        // --- Images: kept (update sortOrder/altText across every generated variant of this picture) ---
+        // --- Images: kept (update sortOrder/altText; ids not linked to this product are ignored) ---
         for (const image of keptImages) {
-          const siblingMedia = await mediaRepo.findByStorageKeyPrefix(`products/${productId}/${image.mediaId}/`);
-
-          for (const media of siblingMedia) {
-            await productRepo.upsertImage({
-              productId,
-              mediaId: media.id,
-              altText: image.altText,
-              sortOrder: image.sortOrder,
-            });
-          }
+          await productRepo.updateImage({
+            productId,
+            mediaId: image.mediaId,
+            altText: image.altText,
+            sortOrder: image.sortOrder,
+          });
         }
 
         // --- Images: new (same original-only pipeline as create, deferring variants to the outbox worker) ---
@@ -242,9 +227,6 @@ export class ProductService {
             payload: JSON.stringify({
               productId,
               mediaId: object.media.id,
-              storageKey: object.media.storageKey,
-              altText: object.altText,
-              sortOrder: object.sortOrder,
             } satisfies ProductImageProcessRequestedPayload),
           }));
 
@@ -330,6 +312,17 @@ export class ProductService {
       await this.imageService.removeImageObjects(uploadObjects);
       throw error;
     }
+  }
+
+  /** Resolves storage keys to public URLs: `url` is the original, `variants` holds whichever sizes are ready. */
+  private toImageView({ storageKey, variants, ...image }: ProductImageRow) {
+    return {
+      ...image,
+      url: this.imageService.getPublicUrl(storageKey),
+      variants: Object.fromEntries(
+        variants.map((variant) => [variant.name, this.imageService.getPublicUrl(variant.storageKey)])
+      ) as Partial<Record<MediaVariantName, string>>,
+    };
   }
 
   /**

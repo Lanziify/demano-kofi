@@ -1,7 +1,6 @@
 import { BadRequestError } from '@/core/errors/app-error';
 import { ALLOWED_IMAGE_TYPES } from '@/core/image/constants';
 import { ImageProcessingService } from '@/core/image/image.service';
-import { mediaTypeSchema } from '@/core/media/media.schema';
 import { StorageService } from '@/core/storage/storage.service';
 import type { ProductImageFormValues } from '../schema/product-image.schema';
 
@@ -29,8 +28,8 @@ export class ProductImageService extends ImageProcessingService {
             sortOrder: image.sortOrder,
             media: {
               id: imageId,
-              type: mediaTypeSchema.parse('original'),
               storageKey,
+              mimeType: 'image/webp',
               fileSize: original.data.length,
               width: original.metadata.width,
               height: original.metadata.height,

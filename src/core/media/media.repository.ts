@@ -1,7 +1,7 @@
-import type { Kysely, Transaction } from 'kysely';
+import { type Kysely, sql, type Transaction } from 'kysely';
 import { db } from '@/core/db/db';
 import type { DB } from '@/core/db/types';
-import type { CreateMediaSchemaValue } from '@/core/media/media.schema';
+import type { CreateMediaSchemaValue, CreateMediaVariantValues, MediaStatus } from '@/core/media/media.schema';
 
 type Database = Kysely<DB> | Transaction<DB>;
 
@@ -16,30 +16,44 @@ export class MediaRepository {
     return this.database.insertInto('media').values(values).returningAll().execute();
   }
 
-  /**
-   * Safe to call more than once with the same `storageKey` (e.g. a retried job) -
-   * returns the existing row instead of erroring or creating a duplicate.
-   */
-  async createIfNotExists(values: CreateMediaSchemaValue) {
-    const inserted = await this.database
-      .insertInto('media')
-      .values(values)
-      .onConflict((oc) => oc.column('storageKey').doNothing())
-      .returningAll()
-      .executeTakeFirst();
+  async findById(id: string) {
+    return this.database.selectFrom('media').selectAll().where('id', '=', id).executeTakeFirst();
+  }
 
-    if (inserted) {
-      return inserted;
+  /** Safe to call more than once for the same (mediaId, name) pair - e.g. a retried job. */
+  async createVariantIfNotExists(values: CreateMediaVariantValues) {
+    return this.database
+      .insertInto('mediaVariants')
+      .values(values)
+      .onConflict((oc) => oc.columns(['mediaId', 'name']).doNothing())
+      .execute();
+  }
+
+  async updateStatus(id: string, status: MediaStatus) {
+    return this.database
+      .updateTable('media')
+      .set({ status, updatedAt: sql`now()` })
+      .where('id', '=', id)
+      .executeTakeFirst();
+  }
+
+  /** Storage keys of the originals and every generated variant, so callers can clean up storage after a delete. */
+  async findStorageKeys(ids: string[]) {
+    if (ids.length === 0) {
+      return [];
     }
 
-    return this.database.selectFrom('media').selectAll().where('storageKey', '=', values.storageKey).executeTakeFirstOrThrow();
+    const rows = await this.database
+      .selectFrom('media')
+      .select('storageKey')
+      .where('id', 'in', ids)
+      .union((eb) => eb.selectFrom('mediaVariants').select('storageKey').where('mediaId', 'in', ids))
+      .execute();
+
+    return rows.map((row) => row.storageKey);
   }
 
-  /** Finds every variant (original/large/thumbnail) sharing an image's storage folder. */
-  async findByStorageKeyPrefix(prefix: string) {
-    return this.database.selectFrom('media').selectAll().where('storageKey', 'like', `${prefix}%`).execute();
-  }
-
+  /** Variants are removed with their media (`on delete cascade`). */
   async deleteManyByIds(ids: string[]) {
     if (ids.length === 0) {
       return [];

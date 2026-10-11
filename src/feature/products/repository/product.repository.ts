@@ -38,10 +38,22 @@ export class ProductRepository {
           eb
             .selectFrom('productImages as pi')
             .innerJoin('media as m', 'm.id', 'pi.mediaId')
-            .selectAll('m')
-            .select(['pi.altText', 'pi.sortOrder'])
+            .select((imageEb) => [
+              'pi.mediaId',
+              'pi.altText',
+              'pi.sortOrder',
+              'm.storageKey',
+              'm.status',
+              'm.width',
+              'm.height',
+              typeSafeJsonArrayFrom(
+                imageEb
+                  .selectFrom('mediaVariants as mv')
+                  .select(['mv.name', 'mv.storageKey', 'mv.width', 'mv.height'])
+                  .whereRef('mv.mediaId', '=', 'm.id')
+              ).as('variants'),
+            ])
             .whereRef('pi.productId', '=', 'p.id')
-            .orderBy('m.type', 'asc')
             .orderBy('pi.sortOrder', 'asc')
         ).as('images'),
         typeSafeJsonArrayFrom(
@@ -105,10 +117,22 @@ export class ProductRepository {
           eb
             .selectFrom('productImages as pi')
             .innerJoin('media as m', 'm.id', 'pi.mediaId')
-            .selectAll('m')
-            .select(['pi.altText', 'pi.sortOrder'])
+            .select((imageEb) => [
+              'pi.mediaId',
+              'pi.altText',
+              'pi.sortOrder',
+              'm.storageKey',
+              'm.status',
+              'm.width',
+              'm.height',
+              typeSafeJsonArrayFrom(
+                imageEb
+                  .selectFrom('mediaVariants as mv')
+                  .select(['mv.name', 'mv.storageKey', 'mv.width', 'mv.height'])
+                  .whereRef('mv.mediaId', '=', 'm.id')
+              ).as('variants'),
+            ])
             .whereRef('pi.productId', '=', 'p.id')
-            .orderBy('m.type', 'asc')
             .orderBy('pi.sortOrder', 'asc')
         ).as('images'),
         typeSafeJsonArrayFrom(
@@ -166,14 +190,13 @@ export class ProductRepository {
     return this.database.insertInto('productImages').values(values).returningAll().execute();
   }
 
-  /** Safe to call for both a new image link and an existing one - updates altText/sortOrder in place. */
-  async upsertImage(values: ProductImageValues) {
+  /** Only updates an image already linked to this product, so a client can't attach another product's media. */
+  async updateImage({ productId, mediaId, altText, sortOrder }: ProductImageValues) {
     return this.database
-      .insertInto('productImages')
-      .values(values)
-      .onConflict((oc) =>
-        oc.columns(['productId', 'mediaId']).doUpdateSet({ altText: values.altText, sortOrder: values.sortOrder })
-      )
+      .updateTable('productImages')
+      .set({ altText, sortOrder })
+      .where('productId', '=', productId)
+      .where('mediaId', '=', mediaId)
       .returningAll()
       .executeTakeFirst();
   }

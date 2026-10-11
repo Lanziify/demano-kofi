@@ -122,7 +122,13 @@ export default function AddOnsCard({ control, productId }: AddOnsCardProps) {
                     <SortableItem key={field._fieldId} id={field._fieldId} className="flex items-center gap-4">
                       <div className="flex min-w-0 flex-1 items-center gap-3">
                         <Avatar className="border-0 ring-0 after:border-none">
-                          {image && <AvatarImage className="rounded-md" src={image.url} alt={image.altText ?? ''} />}
+                          {image && (
+                            <AvatarImage
+                              className="rounded-md"
+                              src={image.variants.thumbnail ?? image.url}
+                              alt={image.altText ?? ''}
+                            />
+                          )}
                           <AvatarFallback className="rounded-md">
                             <ImageOff size={14} />
                           </AvatarFallback>

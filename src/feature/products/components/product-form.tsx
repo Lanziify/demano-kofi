@@ -239,15 +239,13 @@ export default function ProductForm({ product }: ProductFormProps) {
       form.reset({
         ...initialFormValues,
         ...data,
-        images: images
-          .filter((image) => image.type === 'original')
-          .map((image) => ({
-            mediaId: image.id,
-            productId: product.id,
-            sortOrder: image.sortOrder,
-            altText: image.altText ?? '',
-            imageUrl: image.url,
-          })),
+        images: images.map((image) => ({
+          mediaId: image.mediaId,
+          productId: product.id,
+          sortOrder: image.sortOrder,
+          altText: image.altText ?? '',
+          imageUrl: image.url,
+        })),
       });
     }
   }, [product, form.reset]);

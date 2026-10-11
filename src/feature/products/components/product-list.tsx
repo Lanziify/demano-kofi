@@ -43,7 +43,13 @@ const getColumns = (actions?: ColumnActions): ColumnDef<ProductRow>[] => [
 
       return (
         <Avatar size="lg" className="border-0 ring-0 after:border-none">
-          {image && <AvatarImage className="rounded-md" src={image.url} alt={image.altText ?? row.original.name} />}
+          {image && (
+            <AvatarImage
+              className="rounded-md"
+              src={image.variants.thumbnail ?? image.url}
+              alt={image.altText ?? row.original.name}
+            />
+          )}
           <AvatarFallback className="rounded-md">
             <ImageOff size={16} />
           </AvatarFallback>
