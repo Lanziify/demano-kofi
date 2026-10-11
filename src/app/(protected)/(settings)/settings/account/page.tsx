@@ -9,9 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import AccountEmailForm from './_components/email-change-form';
-import AccountPasswordForm from './_components/password-change-form';
-import AccountUsernameForm from './_components/username-change-form';
+import { AccountEmailForm, AccountPasswordForm, AccountUsernameForm } from '@/feature/auth/client';
 
 export default function AccountPage() {
   return (

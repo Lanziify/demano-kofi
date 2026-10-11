@@ -1,6 +1,6 @@
 import type { Selectable } from 'kysely';
 import z from 'zod';
-import type { ProductImages } from '@/types/db';
+import type { ProductImages } from '@/core/db/types';
 
 export const productImageSchema = z.object({
   mediaId: z.uuid(),

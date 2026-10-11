@@ -1,9 +1,9 @@
 'use server';
 
 import { headers } from 'next/headers';
-import { actionErrorParser } from '@/lib/errors/action-error-parser';
-import { safeCatch } from '@/lib/errors/safe-catch';
-import { auth } from '@/utils/auth';
+import { auth } from '@/core/auth/auth';
+import { actionErrorParser } from '@/core/errors/action-error-parser';
+import { safeCatch } from '@/core/errors/safe-catch';
 import { AuthRepository } from '../repository/auth.repository';
 import { UserRepository } from '../repository/user.repository';
 import {

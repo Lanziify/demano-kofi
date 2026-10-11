@@ -1,7 +1,7 @@
 import axios from 'axios';
-import type { GetVerificationAccountApiResponse } from '@/app/api/verification/verify-account/route';
-import { withClientErrorHandling } from '@/lib/errors/client-error-parser';
+import { withClientErrorHandling } from '@/core/errors/client-error-parser';
 import { verifyUserPasswordAction } from '../actions/auth.actions';
+import type { GetVerificationAccountApiResponse } from '../types/api.types';
 
 export const getUserVerification = withClientErrorHandling(
   async (email: string) => {

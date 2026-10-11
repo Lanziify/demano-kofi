@@ -1,5 +1,4 @@
-import { CategoryDialogFormTrigger } from './_component/category-dialog';
-import ProductCategoryList from './_component/product-category-lists';
+import { CategoryDialogFormTrigger, ProductCategoryList } from '@/feature/products/client';
 
 export default function ProductCategoryPage() {
   return (

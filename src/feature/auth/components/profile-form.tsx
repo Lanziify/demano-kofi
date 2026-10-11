@@ -37,7 +37,6 @@ import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
 import { formatDate, toDate } from '@/lib/date';
 import { getInitials } from '@/lib/strings';
-import { useAuthStore } from '@/store/auth-store';
 import { usePsgcQueries } from '../hooks/use-psgc-quries';
 import { useUserQueries } from '../hooks/use-user-queries';
 import { useUpdateUserProfile } from '../mutations/user.mutation';
@@ -45,6 +44,7 @@ import {
   type ProfileSchemaValues,
   profileSchema,
 } from '../schema/profile.schema';
+import { useAuthStore } from '../store/auth-store';
 
 export default function ProfileForm() {
   const { user } = useAuthStore();

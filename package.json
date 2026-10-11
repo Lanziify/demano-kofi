@@ -8,9 +8,9 @@
     "start": "next start",
     "lint": "biome check",
     "format": "biome format --write",
-    "migrate:better-auth": "bunx --bun @better-auth/cli migrate",
-    "migrate:kysely": "bunx --bun kysely migrate:latest",
-    "generate:types": "kysely-codegen --camel-case --out-file ./src/types/db.d.ts",
+    "migrate:auth": "bunx --bun @better-auth/cli migrate --config ./src/core/auth/auth.ts",
+    "migrate:db": "bunx --bun kysely migrate:latest",
+    "generate:types": "kysely-codegen --camel-case --out-file ./src/core/db/types.d.ts",
     "db:clean": "tsx --env-file=.env ./scripts/clean-db.ts",
     "db:fresh": "tsx --env-file=.env ./scripts/fresh-db.ts",
     "worker": "tsx --env-file=.env src/worker/index.ts"

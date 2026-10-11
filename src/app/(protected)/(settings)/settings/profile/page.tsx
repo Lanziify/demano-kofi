@@ -1,6 +1,6 @@
 'use client';
 
-import ProfileForm from '@/feature/auth/components/profile-form';
+import { ProfileForm } from '@/feature/auth/client';
 
 export default function ProfilePage() {
   return (

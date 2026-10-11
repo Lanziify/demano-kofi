@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
-import { ProductService } from '@/feature/products/service/product.service';
-import ProductForm from '../../_components/product-form';
+import { ProductForm } from '@/feature/products/client';
+import { ProductService } from '@/feature/products/server';
 
 interface PageProps {
   params: Promise<{

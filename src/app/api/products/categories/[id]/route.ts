@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { categoryFormSchema } from '@/feature/products/schema/category.schema';
-import { CategoryService } from '@/feature/products/service/category.service';
-import { apiErrorHandler, requiredSession } from '@/lib/api-handler';
+import { apiErrorHandler, requiredSession } from '@/core/http/api-handler';
+import { categoryFormSchema } from '@/feature/products';
+import { CategoryService } from '@/feature/products/server';
 
 const service = new CategoryService();
 

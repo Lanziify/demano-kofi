@@ -1,14 +1,8 @@
 import { NextResponse } from 'next/server';
-import { UserRepository } from '@/feature/auth/repository/user.repository';
-import { UserService } from '@/feature/auth/service/user.service';
-import { apiErrorHandler } from '@/lib/api-handler';
+import { apiErrorHandler } from '@/core/http/api-handler';
+import { UserService } from '@/feature/auth/server';
 
-const repository = new UserRepository();
-const service = new UserService(repository);
-
-export type UserProfileApiResponse = Awaited<
-  ReturnType<UserService['getUserProfile']>
->;
+const service = new UserService();
 
 type UserFilters = Parameters<UserService['getUser']>[0];
 

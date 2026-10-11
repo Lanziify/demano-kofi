@@ -1,6 +1,6 @@
 import { defineConfig, getKnexTimestampPrefix } from 'kysely-ctl';
 
-import { db } from '../src/utils/db';
+import { db } from '../src/core/db/db';
 
 export default defineConfig({
   kysely: db,

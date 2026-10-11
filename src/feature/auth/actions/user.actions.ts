@@ -1,7 +1,7 @@
 'use server';
 
-import { actionErrorParser } from '@/lib/errors/action-error-parser';
-import { safeCatch } from '@/lib/errors/safe-catch';
+import { actionErrorParser } from '@/core/errors/action-error-parser';
+import { safeCatch } from '@/core/errors/safe-catch';
 import { UserRepository } from '../repository/user.repository';
 import type { ChangeEmailSchemaValues } from '../schema/account.schema';
 import {

@@ -2,9 +2,9 @@ import 'server-only';
 
 import type { Kysely, Transaction } from 'kysely';
 import { jsonObjectFrom } from 'kysely/helpers/postgres';
-import { typeSafeJsonArrayFrom } from '@/lib/db-helper';
-import type { DB } from '@/types/db';
-import { db } from '@/utils/db';
+import { db } from '@/core/db/db';
+import { typeSafeJsonArrayFrom } from '@/core/db/db-helper';
+import type { DB } from '@/core/db/types';
 import type { ProductAddOnFormValues } from '../schema/add-on.schema';
 import type { ProductValues } from '../schema/product.schema';
 import type { ProductImageValues } from '../schema/product-image.schema';

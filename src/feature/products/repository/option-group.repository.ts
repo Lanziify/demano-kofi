@@ -1,8 +1,8 @@
 import 'server-only';
 
 import type { Insertable, Kysely, Transaction, Updateable } from 'kysely';
-import type { DB, OptionGroups, Options } from '@/types/db';
-import { db } from '@/utils/db';
+import { db } from '@/core/db/db';
+import type { DB, OptionGroups, Options } from '@/core/db/types';
 
 type Database = Kysely<DB> | Transaction<DB>;
 

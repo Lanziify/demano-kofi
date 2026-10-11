@@ -1,5 +1,4 @@
 import type React from 'react';
-import { DashboardNavUser } from '@/components/custom/layout/dashboard-nav-user';
 import { DashboardSidebar } from '@/components/custom/layout/dashboard-sidebar';
 import { Separator } from '@/components/ui/separator';
 import {
@@ -7,6 +6,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from '@/components/ui/sidebar';
+import { DashboardNavUser } from '@/feature/auth/client';
 
 type DashboardLayoutProps = {
   breadcrumbs: React.ReactNode;

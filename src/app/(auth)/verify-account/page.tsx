@@ -1,6 +1,6 @@
 import { CircleX } from 'lucide-react';
 import { Empty, EmptyDescription, EmptyHeader } from '@/components/ui/empty';
-import { OTPVerificationForm } from '@/feature/auth/components/otp-verification-form';
+import { OTPVerificationForm } from '@/feature/auth/client';
 
 type VerifyAccountPageProps = {
   searchParams: Promise<{ email?: string }>;

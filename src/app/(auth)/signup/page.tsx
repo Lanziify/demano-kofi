@@ -1,4 +1,4 @@
-import { SignUpForm } from '@/feature/auth/components/signup-form';
+import { SignUpForm } from '@/feature/auth/client';
 
 export default function SignInPage() {
   return (

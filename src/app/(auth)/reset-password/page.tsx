@@ -2,7 +2,7 @@ import { CircleX } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Empty, EmptyDescription, EmptyHeader } from '@/components/ui/empty';
-import { ResetPasswordForm } from '@/feature/auth/components/reset-password-form';
+import { ResetPasswordForm } from '@/feature/auth/client';
 
 type ResetPasswordProps = {
   searchParams: Promise<{ token?: string; error?: string }>;

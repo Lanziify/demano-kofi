@@ -1,11 +1,11 @@
 import 'server-only';
 
 import z from 'zod';
-import { DatabaseError, NotFoundError, ValidationError } from '@/lib/errors/app-error';
-import { MediaRepository } from '@/repository/media.repository';
-import { OutboxRepository } from '@/repository/outbox.repository';
-import type { CreateOutboxEventValues } from '@/schema/outbox.schema';
-import { db } from '@/utils/db';
+import { db } from '@/core/db/db';
+import { DatabaseError, NotFoundError, ValidationError } from '@/core/errors/app-error';
+import { MediaRepository } from '@/core/media/media.repository';
+import { OutboxRepository } from '@/core/outbox/outbox.repository';
+import type { CreateOutboxEventValues } from '@/core/outbox/outbox.schema';
 import { OptionGroupRepository } from '../repository/option-group.repository';
 import { ProductRepository } from '../repository/product.repository';
 import type { ProductAddOnFormValues } from '../schema/add-on.schema';

@@ -1,8 +1,8 @@
-import { BadRequestError } from '@/lib/errors/app-error';
-import { ALLOWED_IMAGE_TYPES } from '@/lib/image/constants';
-import { mediaTypeSchema } from '@/schema/media.schema';
-import { ImageProcessingService } from '@/service/image.service';
-import { StorageService } from '@/service/storage.service';
+import { BadRequestError } from '@/core/errors/app-error';
+import { ALLOWED_IMAGE_TYPES } from '@/core/image/constants';
+import { ImageProcessingService } from '@/core/image/image.service';
+import { mediaTypeSchema } from '@/core/media/media.schema';
+import { StorageService } from '@/core/storage/storage.service';
 import type { ProductImageFormValues } from '../schema/product-image.schema';
 
 export class ProductImageService extends ImageProcessingService {

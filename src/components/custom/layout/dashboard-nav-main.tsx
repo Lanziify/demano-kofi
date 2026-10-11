@@ -18,7 +18,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from '@/components/ui/sidebar';
-import { dashboardMenuItems } from '@/data/dashboard-menu';
+import { dashboardMenuItems } from '@/config/dashboard-menu';
 
 export function DashboardMainNav() {
   return (

@@ -1,8 +1,8 @@
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import type React from 'react';
-import { AuthProvider } from '@/components/providers/auth-provider';
-import { auth } from '@/utils/auth';
+import { auth } from '@/core/auth/auth';
+import { AuthProvider } from '@/feature/auth/client';
 
 type ProtectedPagesLayoutProps = {
   children: React.ReactNode;

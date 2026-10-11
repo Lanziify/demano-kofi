@@ -1,14 +1,8 @@
 import { NextResponse } from 'next/server';
-import { AuthRepository } from '@/feature/auth/repository/auth.repository';
-import { AuthService } from '@/feature/auth/service/auth.service';
-import { apiErrorHandler } from '@/lib/api-handler';
+import { apiErrorHandler } from '@/core/http/api-handler';
+import { AuthService } from '@/feature/auth/server';
 
-const repository = new AuthRepository();
-const service = new AuthService(repository);
-
-export type GetVerificationAccountApiResponse = Awaited<
-  ReturnType<AuthService['getPendingAccountVerification']>
->;
+const service = new AuthService();
 
 export const GET = apiErrorHandler(async (req) => {
   const { searchParams } = new URL(req.url);

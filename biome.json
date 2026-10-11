@@ -22,6 +22,23 @@
       "suspicious": {
         "noUnknownAtRules": "off"
       },
+      "style": {
+        "noRestrictedImports": {
+          "level": "error",
+          "options": {
+            "patterns": [
+              {
+                "group": ["@/feature/*/**", "!@/feature/*/client", "!@/feature/*/server", "!@/feature/*/worker"],
+                "message": "Import features through their public entry: '@/feature/<name>', '@/feature/<name>/client', '@/feature/<name>/server' or '@/feature/<name>/worker'. Inside a feature, use relative imports."
+              },
+              {
+                "group": ["@/app/**"],
+                "message": "Nothing may depend on the routing layer. Move shared code or types into a feature or 'src/core'."
+              }
+            ]
+          }
+        }
+      },
       "correctness": {
         "noUnusedImports": {
           "fix": "safe",
@@ -57,5 +74,67 @@
       "trailingCommas": "es5",
       "semicolons": "always"
     }
-  }
+  },
+  "overrides": [
+    {
+      "includes": ["src/core/**", "src/components/**", "src/hooks/**", "src/config/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["@/feature/*/**", "!@/feature/*/client", "!@/feature/*/server", "!@/feature/*/worker"],
+                    "message": "Import features through their public entry: '@/feature/<name>', '@/feature/<name>/client', '@/feature/<name>/server' or '@/feature/<name>/worker'. Inside a feature, use relative imports."
+                  },
+                  {
+                    "group": ["@/app/**"],
+                    "message": "Nothing may depend on the routing layer. Move shared code or types into a feature or 'src/core'."
+                  },
+                  {
+                    "group": ["@/feature", "@/feature/**"],
+                    "message": "Shared code must not depend on features. Move it into the feature, or pass what it needs in as props/arguments."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/lib/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["@/feature/*/**", "!@/feature/*/client", "!@/feature/*/server", "!@/feature/*/worker"],
+                    "message": "Import features through their public entry: '@/feature/<name>', '@/feature/<name>/client', '@/feature/<name>/server' or '@/feature/<name>/worker'. Inside a feature, use relative imports."
+                  },
+                  {
+                    "group": ["@/app/**"],
+                    "message": "Nothing may depend on the routing layer. Move shared code or types into a feature or 'src/core'."
+                  },
+                  {
+                    "group": ["@/feature", "@/feature/**"],
+                    "message": "Shared code must not depend on features. Move it into the feature, or pass what it needs in as props/arguments."
+                  },
+                  {
+                    "group": ["@/core/**", "@/components/**", "@/hooks/**", "@/config/**"],
+                    "message": "'src/lib' holds pure helpers only. Code with side effects or app state belongs in 'src/core'."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
 }

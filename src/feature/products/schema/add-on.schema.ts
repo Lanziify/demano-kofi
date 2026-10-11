@@ -1,6 +1,6 @@
 import type { Selectable } from 'kysely';
 import z from 'zod';
-import type { ProductAddOns } from '@/types/db';
+import type { ProductAddOns } from '@/core/db/types';
 
 /**
  * Product add-on schema - links a product to another product offered as an add-on

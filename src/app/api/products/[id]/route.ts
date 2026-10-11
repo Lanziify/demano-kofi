@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
-import { productFormSchema } from '@/feature/products/schema/product.schema';
-import { ProductService } from '@/feature/products/service/product.service';
-import type { Product } from '@/feature/products/types/types';
-import { apiErrorHandler, requiredSession } from '@/lib/api-handler';
-import type { ApiSuccessResponse } from '@/types/api';
+import type { ApiSuccessResponse } from '@/core/http/api.types';
+import { apiErrorHandler, requiredSession } from '@/core/http/api-handler';
+import { type Product, productFormSchema } from '@/feature/products';
+import { ProductService } from '@/feature/products/server';
 
 const service = new ProductService();
 

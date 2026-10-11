@@ -1,6 +1,6 @@
 import type { Selectable } from 'kysely';
 import z from 'zod';
-import type { OptionGroups, Options } from '@/types/db';
+import type { OptionGroups, Options } from '@/core/db/types';
 
 /**
  * Option schema

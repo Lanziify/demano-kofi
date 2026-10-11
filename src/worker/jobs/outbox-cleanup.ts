@@ -1,5 +1,5 @@
 import type { Job } from 'bullmq';
-import { OutboxRepository } from '@/repository/outbox.repository';
+import { OutboxRepository } from '@/core/outbox/outbox.repository';
 import { maintenanceQueue } from '../queues';
 
 export const OUTBOX_CLEANUP_JOB_NAME = 'outbox-cleanup';

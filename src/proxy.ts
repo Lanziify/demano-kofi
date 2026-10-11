@@ -1,6 +1,6 @@
 import { headers } from 'next/headers';
 import { type NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/utils/auth';
+import { auth } from '@/core/auth/auth';
 // import { isPlatformInitialized, refreshPlatformState } from './utils/platform';
 
 export async function proxy(request: NextRequest) {

@@ -9,7 +9,7 @@ async function run() {
     process.exit(1);
   }
 
-  const { db } = await import('../src/utils/db');
+  const { db } = await import('../src/core/db/db');
 
   console.log('⏳ Wiping all data from database tables...');
 

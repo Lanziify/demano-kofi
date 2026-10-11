@@ -11,7 +11,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { settingsMenuItems } from '@/data/settings-menu';
+import { settingsMenuItems } from '@/config/settings-menu';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 type SettingsLayoutHeaderProps = {

@@ -19,8 +19,8 @@ import {
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { useAuthStore } from '@/store/auth-store';
 import { type SignInSchemaValues, signInSchema } from '../schema/auth.schema';
+import { useAuthStore } from '../store/auth-store';
 
 export function SignInForm({
   className,

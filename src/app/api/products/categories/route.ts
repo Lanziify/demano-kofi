@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
-import { categoryFormSchema } from '@/feature/products/schema/category.schema';
-import { CategoryService } from '@/feature/products/service/category.service';
-import type { Category } from '@/feature/products/types/types';
-import { apiErrorHandler, requiredSession } from '@/lib/api-handler';
-import type { ApiSuccessResponse } from '@/types/api';
+import type { ApiSuccessResponse } from '@/core/http/api.types';
+import { apiErrorHandler, requiredSession } from '@/core/http/api-handler';
+import { type Category, categoryFormSchema } from '@/feature/products';
+import { CategoryService } from '@/feature/products/server';
 
 const service = new CategoryService();
 

@@ -1,11 +1,11 @@
 import axios from 'axios';
-import { withClientErrorHandling } from '@/lib/errors/client-error-parser';
+import { withClientErrorHandling } from '@/core/errors/client-error-parser';
 import type {
   BarangayResponse,
   CityMunicipalityResponse,
   ProvinceResponse,
   RegionResponse,
-} from '@/types/psgc';
+} from '../types/psgc.types';
 
 export const getRegions = withClientErrorHandling(async () => {
   const { data } = await axios.get<ProvinceResponse>(

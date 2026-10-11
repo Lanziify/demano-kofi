@@ -1,5 +1,5 @@
-import { OutboxRepository } from '@/repository/outbox.repository';
-import { db } from '@/utils/db';
+import { db } from '@/core/db/db';
+import { OutboxRepository } from '@/core/outbox/outbox.repository';
 import { outboxQueue } from './queues';
 
 const POLL_INTERVAL_MS = 5_000;

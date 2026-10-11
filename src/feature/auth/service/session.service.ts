@@ -1,5 +1,5 @@
 import { headers } from 'next/headers';
-import { auth } from '@/utils/auth';
+import { auth } from '@/core/auth/auth';
 
 export class SessionService {
   constructor() {}

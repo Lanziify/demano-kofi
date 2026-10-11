@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import ProductList from './_components/product-list';
+import { ProductList } from '@/feature/products/client';
 
 export default function ProductPage() {
   return (

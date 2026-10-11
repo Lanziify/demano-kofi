@@ -1,7 +1,7 @@
 import type { Kysely, Transaction, Updateable } from 'kysely';
 import { jsonObjectFrom } from 'kysely/helpers/postgres';
-import type { DB, UserProfiles } from '@/types/db';
-import { db } from '@/utils/db';
+import { db } from '@/core/db/db';
+import type { DB, UserProfiles } from '@/core/db/types';
 
 type Database = Kysely<DB> | Transaction<DB>;
 

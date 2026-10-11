@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { withClientErrorHandling } from '@/lib/errors/client-error-parser';
-import type { ApiSuccessResponse } from '@/types/api';
+import { withClientErrorHandling } from '@/core/errors/client-error-parser';
+import type { ApiSuccessResponse } from '@/core/http/api.types';
 import type { CategoryFormValues } from '../schema/category.schema';
 import type { Category } from '../types/types';
 

@@ -1,8 +1,8 @@
 import { type Job, Worker } from 'bullmq';
-import { OutboxRepository } from '@/repository/outbox.repository';
+import { OutboxRepository } from '@/core/outbox/outbox.repository';
+import { processProductImageEvent } from '@/feature/products/worker';
 import { redisConnection } from './connection';
 import { routeMaintenanceJob } from './jobs/outbox-cleanup';
-import { processProductImageEvent } from './processors/product-image.processor';
 
 const outboxRepository = new OutboxRepository();
 

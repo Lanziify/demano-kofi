@@ -1,16 +1,12 @@
 import { headers } from 'next/headers';
-import { ALLOWED_IMAGE_TYPES } from '@/data/profile';
+import { auth } from '@/core/auth/auth';
+import { db } from '@/core/db/db';
+import { BadRequestError, DatabaseError, NotFoundError } from '@/core/errors/app-error';
+import { ALLOWED_IMAGE_TYPES } from '@/core/image/constants';
+import { ImageProcessingService } from '@/core/image/image.service';
+import { StorageService } from '@/core/storage/storage.service';
 import { toDate } from '@/lib/date';
-import {
-  BadRequestError,
-  DatabaseError,
-  NotFoundError,
-} from '@/lib/errors/app-error';
-import { processProfileImage } from '@/lib/image/process';
-import { getPublicUrl, uploadObject } from '@/lib/storage/storage';
-import { auth } from '@/utils/auth';
-import { db } from '@/utils/db';
-import type { UserRepository } from '../repository/user.repository';
+import { UserRepository } from '../repository/user.repository';
 import type { ChangeEmailSchemaValues } from '../schema/account.schema';
 import type { ChangePasswordApiSchemaValues } from '../schema/auth.schema';
 import type { ProfileSchemaValues } from '../schema/profile.schema';
@@ -22,7 +18,11 @@ export type UserFilters = {
 };
 
 export class UserService {
-  constructor(private repository: UserRepository) {}
+  constructor(
+    private repository = new UserRepository(),
+    private readonly imageService = new ImageProcessingService(),
+    private readonly storageService = new StorageService()
+  ) {}
 
   async getUserProfile(userId: string) {
     const profile = await this.repository.findUserProfile(userId);
@@ -80,15 +80,15 @@ export class UserService {
 
       const key = `user-profile/${userId}/avatar.webp`;
       const buffer = Buffer.from(await image.arrayBuffer());
-      const proccessedImage = await processProfileImage(buffer);
+      const proccessedImage = await this.imageService.process(buffer, 'avatar');
 
-      await uploadObject({
+      await this.storageService.uploadObject({
         key,
         body: proccessedImage,
         contentType: 'image/webp',
       });
 
-      authUpdates.image = getPublicUrl(key);
+      authUpdates.image = this.storageService.getPublicUrl(key);
     }
 
     const fullName = `${profile.firstName} ${profile.lastName}`;

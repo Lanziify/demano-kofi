@@ -6,7 +6,7 @@ async function run() {
     throw new Error('Cannot wipe production database');
   }
 
-  const { db } = await import('../src/utils/db');
+  const { db } = await import('../src/core/db/db');
 
   try {
     console.log('⏳ Resetting schema...');

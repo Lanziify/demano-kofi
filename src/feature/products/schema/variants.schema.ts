@@ -1,6 +1,6 @@
 import type { Selectable } from 'kysely';
 import z from 'zod';
-import type { Variants } from '@/types/db';
+import type { Variants } from '@/core/db/types';
 
 /**
  * Variant schema

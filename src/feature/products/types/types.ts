@@ -1,5 +1,5 @@
 import type { Selectable } from 'kysely';
-import type { Categories, OptionGroups, Options, ProductAddOns, Products } from '@/types/db';
+import type { Categories, OptionGroups, Options, ProductAddOns, Products } from '@/core/db/types';
 import type { ProductService } from '../service/product.service';
 
 export type Product = Selectable<Products>;

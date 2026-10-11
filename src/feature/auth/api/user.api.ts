@@ -1,10 +1,6 @@
 import axios from 'axios';
-import type {
-  UpdateUserProfileApiResponse,
-  UserProfileApiResponse,
-} from '@/app/api/users/me/route';
-import { withClientErrorHandling } from '@/lib/errors/client-error-parser';
-import { safeCatch } from '@/lib/errors/safe-catch';
+import { withClientErrorHandling } from '@/core/errors/client-error-parser';
+import { safeCatch } from '@/core/errors/safe-catch';
 import {
   updateEmailAddressAction,
   updateUsernameAction,
@@ -16,6 +12,10 @@ import type {
 } from '../schema/account.schema';
 import type { ChangePasswordApiSchemaValues } from '../schema/auth.schema';
 import type { ProfileSchemaWithUserIdValues } from '../schema/profile.schema';
+import type {
+  UpdateUserProfileApiResponse,
+  UserProfileApiResponse,
+} from '../types/api.types';
 
 export const getUser = withClientErrorHandling(async (email: string) => {
   const { data } = await axios.get<UserProfileApiResponse>(

@@ -1,6 +1,6 @@
 import type { Kysely, Transaction } from 'kysely';
-import type { DB } from '@/types/db';
-import { db } from '@/utils/db';
+import { db } from '@/core/db/db';
+import type { DB } from '@/core/db/types';
 
 type Database = Kysely<DB> | Transaction<DB>;
 

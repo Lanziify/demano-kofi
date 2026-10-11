@@ -1,17 +1,11 @@
 import { NextResponse } from 'next/server';
-import { UserRepository } from '@/feature/auth/repository/user.repository';
-import { profileSchemaWithUserId } from '@/feature/auth/schema/profile.schema';
-import { UserService } from '@/feature/auth/service/user.service';
-import { apiErrorHandler, requiredSession } from '@/lib/api-handler';
-import { formDataToObject } from '@/utils/api-helpers';
-import { auth } from '@/utils/auth';
+import { auth } from '@/core/auth/auth';
+import { apiErrorHandler, requiredSession } from '@/core/http/api-handler';
+import { formDataToObject } from '@/core/http/api-helpers';
+import { profileSchemaWithUserId } from '@/feature/auth';
+import { UserService } from '@/feature/auth/server';
 
-const repository = new UserRepository();
-const service = new UserService(repository);
-
-export type UserProfileApiResponse = Awaited<
-  ReturnType<UserService['getUserProfile']>
->;
+const service = new UserService();
 
 export const GET = apiErrorHandler(
   async (req) => {
@@ -27,10 +21,6 @@ export const GET = apiErrorHandler(
     guards: [requiredSession],
   }
 );
-
-export type UpdateUserProfileApiResponse = Awaited<
-  ReturnType<UserService['updateUserProfile']>
->;
 
 export const PATCH = apiErrorHandler(
   async (req) => {

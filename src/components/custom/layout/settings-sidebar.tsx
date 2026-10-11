@@ -1,6 +1,6 @@
 import { cva } from 'class-variance-authority';
 import Link from 'next/link';
-import { settingsMenuItems } from '@/data/settings-menu';
+import { settingsMenuItems } from '@/config/settings-menu';
 import { cn } from '@/lib/utils';
 
 export default function SettingsLayoutSidebar() {

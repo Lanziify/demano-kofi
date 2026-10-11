@@ -1,4 +1,4 @@
-import { DatabaseError, NotFoundError, ValidationError } from '@/lib/errors/app-error';
+import { DatabaseError, NotFoundError, ValidationError } from '@/core/errors/app-error';
 import { CategoryRepository } from '../repository/category.repository';
 import type { CategoryFormValues } from '../schema/category.schema';
 

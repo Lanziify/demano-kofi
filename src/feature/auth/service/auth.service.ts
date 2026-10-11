@@ -1,8 +1,8 @@
 import { headers } from 'next/headers';
-import { BadRequestError, NotFoundError } from '@/lib/errors/app-error';
-import { auth } from '@/utils/auth';
-import type { AuthRepository } from '../repository/auth.repository';
-import type { UserRepository } from '../repository/user.repository';
+import { auth } from '@/core/auth/auth';
+import { BadRequestError, NotFoundError } from '@/core/errors/app-error';
+import { AuthRepository } from '../repository/auth.repository';
+import { UserRepository } from '../repository/user.repository';
 import type {
   RequestPasswordResetSchemaValues,
   ResetPasswordSchemaValues,
@@ -10,8 +10,8 @@ import type {
 
 export class AuthService {
   constructor(
-    private readonly authRepository: AuthRepository,
-    private readonly userRepository?: UserRepository
+    private readonly authRepository = new AuthRepository(),
+    private readonly userRepository = new UserRepository()
   ) {}
 
   async getPendingAccountVerification(email: string) {
@@ -32,10 +32,6 @@ export class AuthService {
   }
 
   async requestPasswordReset(values: RequestPasswordResetSchemaValues) {
-    if (!this.userRepository) {
-      throw new Error('UserRepository is required');
-    }
-
     const user = await this.userRepository.findUserByEmail(values.email);
 
     if (!user) {

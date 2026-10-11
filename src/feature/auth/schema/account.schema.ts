@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import type { ApiBody } from '@/types/api';
-import type { auth } from '@/utils/auth';
+import type { auth } from '@/core/auth/auth';
+import type { ApiBody } from '@/core/http/api.types';
 import {
   passwordSchema,
   passwordWithConfirmationSchema,

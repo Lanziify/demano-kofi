@@ -1,6 +1,6 @@
 import type { Selectable } from 'kysely';
 import z from 'zod';
-import type { Categories } from '@/types/db';
+import type { Categories } from '@/core/db/types';
 
 /**
  * Category schema

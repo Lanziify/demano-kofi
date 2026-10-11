@@ -1,6 +1,6 @@
 import type { Selectable } from 'kysely';
 import z from 'zod';
-import type { Products } from '@/types/db';
+import type { Products } from '@/core/db/types';
 import { productAddOnFormSchema } from './add-on.schema';
 import { optionGroupFormSchema } from './option-group.schema';
 import { productImageFormSchema } from './product-image.schema';
