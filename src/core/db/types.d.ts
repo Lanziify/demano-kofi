@@ -35,6 +35,37 @@ export interface Categories {
   updatedAt: Generated<Timestamp>;
 }
 
+export interface InventoryItems {
+  archivedAt: Timestamp | null;
+  baseUnit: string;
+  createdAt: Generated<Timestamp>;
+  id: Generated<string>;
+  name: string;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface InventoryLocations {
+  createdAt: Generated<Timestamp>;
+  id: Generated<string>;
+  isActive: Generated<boolean>;
+  name: string;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface InventoryTransactions {
+  createdAt: Generated<Timestamp>;
+  createdBy: string | null;
+  id: Generated<string>;
+  inventoryItemId: string;
+  inventoryLocationId: string;
+  note: string | null;
+  quantityDelta: number;
+  referenceId: string | null;
+  referenceType: string | null;
+  totalCost: number | null;
+  transactionType: string;
+}
+
 export interface Invitation {
   createdAt: Generated<Timestamp>;
   email: string;
@@ -86,6 +117,12 @@ export interface OptionGroups {
   productId: string;
   sortOrder: number;
   updatedAt: Generated<Timestamp>;
+}
+
+export interface OptionRecipeItems {
+  inventoryItemId: string;
+  optionId: string;
+  quantityDelta: number;
 }
 
 export interface Options {
@@ -145,6 +182,12 @@ export interface Products {
   updatedAt: Generated<Timestamp>;
 }
 
+export interface RecipeItems {
+  inventoryItemId: string;
+  quantity: number;
+  variantId: string;
+}
+
 export interface Session {
   activeOrganizationId: string | null;
   createdAt: Generated<Timestamp>;
@@ -156,6 +199,65 @@ export interface Session {
   updatedAt: Timestamp;
   userAgent: string | null;
   userId: string;
+}
+
+export interface StockCountItems {
+  countedAt: Generated<Timestamp>;
+  countedQuantity: number;
+  expectedQuantity: number;
+  inventoryItemId: string;
+  stockCountId: string;
+  variance: Generated<number>;
+}
+
+export interface StockCounts {
+  appliedAt: Timestamp | null;
+  appliedBy: string | null;
+  createdAt: Generated<Timestamp>;
+  createdBy: string | null;
+  id: Generated<string>;
+  inventoryLocationId: string;
+  note: string | null;
+  status: Generated<string>;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface StockLevels {
+  inventoryItemId: string;
+  inventoryLocationId: string;
+  quantity: Generated<number>;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface StockPurchaseItems {
+  id: Generated<string>;
+  inventoryItemId: string;
+  quantity: number;
+  stockPurchaseId: string;
+  totalCost: number | null;
+}
+
+export interface StockPurchases {
+  completedAt: Timestamp | null;
+  createdAt: Generated<Timestamp>;
+  createdBy: string | null;
+  id: Generated<string>;
+  inventoryLocationId: string;
+  merchantName: string | null;
+  note: string | null;
+  receiptNumber: string | null;
+  status: Generated<string>;
+  supplierId: string | null;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface StockSuppliers {
+  archivedAt: Timestamp | null;
+  contactNumber: string;
+  createdAt: Generated<Timestamp>;
+  id: Generated<string>;
+  name: string;
+  updatedAt: Generated<Timestamp>;
 }
 
 export interface User {
@@ -215,18 +317,29 @@ export interface Verification {
 export interface DB {
   account: Account;
   categories: Categories;
+  inventoryItems: InventoryItems;
+  inventoryLocations: InventoryLocations;
+  inventoryTransactions: InventoryTransactions;
   invitation: Invitation;
   media: Media;
   mediaVariants: MediaVariants;
   member: Member;
   optionGroups: OptionGroups;
+  optionRecipeItems: OptionRecipeItems;
   options: Options;
   organization: Organization;
   outbox: Outbox;
   productAddOns: ProductAddOns;
   productImages: ProductImages;
   products: Products;
+  recipeItems: RecipeItems;
   session: Session;
+  stockCountItems: StockCountItems;
+  stockCounts: StockCounts;
+  stockLevels: StockLevels;
+  stockPurchaseItems: StockPurchaseItems;
+  stockPurchases: StockPurchases;
+  stockSuppliers: StockSuppliers;
   user: User;
   userProfiles: UserProfiles;
   variants: Variants;
