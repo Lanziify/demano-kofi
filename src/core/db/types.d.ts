@@ -35,35 +35,44 @@ export interface Categories {
   updatedAt: Generated<Timestamp>;
 }
 
+export interface InventoryCategories {
+  createdAt: Generated<Timestamp>;
+  description: string | null;
+  id: Generated<string>;
+  name: string;
+  updatedAt: Generated<Timestamp>;
+}
+
 export interface InventoryItems {
   archivedAt: Timestamp | null;
-  baseUnit: string;
+  baseUnitId: string;
+  categoryId: string;
   createdAt: Generated<Timestamp>;
   id: Generated<string>;
   name: string;
+  packDescription: string | null;
+  sku: string;
   updatedAt: Generated<Timestamp>;
 }
 
-export interface InventoryLocations {
+export interface InventoryItemSuppliers {
   createdAt: Generated<Timestamp>;
   id: Generated<string>;
-  isActive: Generated<boolean>;
-  name: string;
+  itemId: string;
+  packName: string;
+  packQuantity: number;
+  supplierId: string;
+  unitCost: number | null;
   updatedAt: Generated<Timestamp>;
 }
 
-export interface InventoryTransactions {
-  createdAt: Generated<Timestamp>;
-  createdBy: string | null;
+export interface InventoryStocks {
   id: Generated<string>;
-  inventoryItemId: string;
-  inventoryLocationId: string;
-  note: string | null;
-  quantityDelta: number;
-  referenceId: string | null;
-  referenceType: string | null;
-  totalCost: number | null;
-  transactionType: string;
+  itemId: string;
+  locationId: string;
+  quantityOnHand: Generated<number>;
+  reorderThreshold: number | null;
+  updatedAt: Generated<Timestamp>;
 }
 
 export interface Invitation {
@@ -75,6 +84,14 @@ export interface Invitation {
   organizationId: string;
   role: string | null;
   status: string;
+}
+
+export interface Locations {
+  createdAt: Generated<Timestamp>;
+  id: Generated<string>;
+  isActive: Generated<boolean>;
+  name: string;
+  updatedAt: Generated<Timestamp>;
 }
 
 export interface Media {
@@ -120,7 +137,7 @@ export interface OptionGroups {
 }
 
 export interface OptionRecipeItems {
-  inventoryItemId: string;
+  itemId: string;
   optionId: string;
   quantityDelta: number;
 }
@@ -182,8 +199,34 @@ export interface Products {
   updatedAt: Generated<Timestamp>;
 }
 
+export interface PurchaseOrderItems {
+  id: Generated<string>;
+  itemId: string;
+  packName: string;
+  packQuantity: number;
+  purchaseOrderId: string;
+  quantityOrdered: number;
+  quantityReceived: Generated<number>;
+  unitCost: number;
+}
+
+export interface PurchaseOrders {
+  createdAt: Generated<Timestamp>;
+  createdBy: string | null;
+  expectedAt: Timestamp | null;
+  id: Generated<string>;
+  locationId: string;
+  notes: string | null;
+  orderedAt: Timestamp | null;
+  receivedAt: Timestamp | null;
+  referenceNumber: string | null;
+  status: Generated<string>;
+  supplierId: string;
+  updatedAt: Generated<Timestamp>;
+}
+
 export interface RecipeItems {
-  inventoryItemId: string;
+  itemId: string;
   quantity: number;
   variantId: string;
 }
@@ -205,7 +248,7 @@ export interface StockCountItems {
   countedAt: Generated<Timestamp>;
   countedQuantity: number;
   expectedQuantity: number;
-  inventoryItemId: string;
+  itemId: string;
   stockCountId: string;
   variance: Generated<number>;
 }
@@ -213,51 +256,49 @@ export interface StockCountItems {
 export interface StockCounts {
   appliedAt: Timestamp | null;
   appliedBy: string | null;
+  countedBy: string | null;
   createdAt: Generated<Timestamp>;
-  createdBy: string | null;
   id: Generated<string>;
-  inventoryLocationId: string;
+  locationId: string;
   note: string | null;
+  scope: Generated<string>;
   status: Generated<string>;
   updatedAt: Generated<Timestamp>;
 }
 
-export interface StockLevels {
-  inventoryItemId: string;
-  inventoryLocationId: string;
-  quantity: Generated<number>;
-  updatedAt: Generated<Timestamp>;
-}
-
-export interface StockPurchaseItems {
+export interface StockMovements {
+  createdAt: Generated<Timestamp>;
+  createdBy: string | null;
   id: Generated<string>;
-  inventoryItemId: string;
-  quantity: number;
-  stockPurchaseId: string;
+  itemId: string;
+  locationId: string;
+  note: string | null;
+  quantityDelta: number;
+  reason: string | null;
+  referenceId: string | null;
+  referenceType: string | null;
   totalCost: number | null;
+  type: string;
 }
 
-export interface StockPurchases {
-  completedAt: Timestamp | null;
+export interface Suppliers {
+  address: string | null;
+  contactPerson: string | null;
   createdAt: Generated<Timestamp>;
-  createdBy: string | null;
+  email: string | null;
   id: Generated<string>;
-  inventoryLocationId: string;
-  merchantName: string | null;
-  note: string | null;
-  receiptNumber: string | null;
-  status: Generated<string>;
-  supplierId: string | null;
+  isActive: Generated<boolean>;
+  name: string;
+  phone: string;
   updatedAt: Generated<Timestamp>;
 }
 
-export interface StockSuppliers {
-  archivedAt: Timestamp | null;
-  contactNumber: string;
-  createdAt: Generated<Timestamp>;
+export interface UnitOfMeasure {
   id: Generated<string>;
   name: string;
-  updatedAt: Generated<Timestamp>;
+  symbol: string;
+  toBaseFactor: number;
+  unitType: string;
 }
 
 export interface User {
@@ -317,10 +358,12 @@ export interface Verification {
 export interface DB {
   account: Account;
   categories: Categories;
+  inventoryCategories: InventoryCategories;
   inventoryItems: InventoryItems;
-  inventoryLocations: InventoryLocations;
-  inventoryTransactions: InventoryTransactions;
+  inventoryItemSuppliers: InventoryItemSuppliers;
+  inventoryStocks: InventoryStocks;
   invitation: Invitation;
+  locations: Locations;
   media: Media;
   mediaVariants: MediaVariants;
   member: Member;
@@ -332,14 +375,15 @@ export interface DB {
   productAddOns: ProductAddOns;
   productImages: ProductImages;
   products: Products;
+  purchaseOrderItems: PurchaseOrderItems;
+  purchaseOrders: PurchaseOrders;
   recipeItems: RecipeItems;
   session: Session;
   stockCountItems: StockCountItems;
   stockCounts: StockCounts;
-  stockLevels: StockLevels;
-  stockPurchaseItems: StockPurchaseItems;
-  stockPurchases: StockPurchases;
-  stockSuppliers: StockSuppliers;
+  stockMovements: StockMovements;
+  suppliers: Suppliers;
+  unitOfMeasure: UnitOfMeasure;
   user: User;
   userProfiles: UserProfiles;
   variants: Variants;
