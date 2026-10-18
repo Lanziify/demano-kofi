@@ -22,29 +22,29 @@ import { Item, ItemContent, ItemMedia, ItemTitle } from '@/components/ui/item';
 import { Spinner } from '@/components/ui/spinner';
 import { useDialog } from '@/hooks/use-dialog';
 import { useCreateProductCategory, useUpdateProductCategory } from '../mutations/product-category.mutation';
-import { type CategoryFormValues, categoryFormSchema } from '../schema/category.schema';
-import type { Category } from '../types/types';
+import { type ProductCategoryFormValues, productCategoryFormSchema } from '../schema/category.schema';
+import type { ProductCategory } from '../types/types';
 
-type CategoryDialogFormStatus = 'idle' | 'loading' | 'success' | 'error';
+type ProductCategoryDialogFormStatus = 'idle' | 'loading' | 'success' | 'error';
 
-export type CategoryDialogFormOptions = {
+export type ProductCategoryDialogFormOptions = {
   title?: string;
   description?: string;
   confirmLabel?: string;
   closeText?: string;
   confirmVariant?: 'default' | 'destructive';
-  data?: Category | null;
+  data?: ProductCategory | null;
   onConfirm?: () => void | Promise<void>;
 };
 
-export type CategoryDialogFormProps = CategoryDialogFormOptions & {
+export type ProductCategoryDialogFormProps = ProductCategoryDialogFormOptions & {
   open?: boolean;
   loading?: boolean;
-  status?: CategoryDialogFormStatus;
+  status?: ProductCategoryDialogFormStatus;
   onOpenChange?: (open: boolean) => void;
 };
 
-export function CategoryDialogForm({
+export function ProductCategoryDialogForm({
   open = false,
   title = '',
   description = '',
@@ -52,7 +52,7 @@ export function CategoryDialogForm({
   confirmLabel = 'Submit',
   data,
   onOpenChange,
-}: CategoryDialogFormProps) {
+}: ProductCategoryDialogFormProps) {
   const isLoading = status === 'loading';
 
   const createCategory = useCreateProductCategory();
@@ -65,7 +65,7 @@ export function CategoryDialogForm({
   };
 
   const form = useForm({
-    resolver: zodResolver(categoryFormSchema),
+    resolver: zodResolver(productCategoryFormSchema),
     defaultValues: {
       ...initialValues,
     },
@@ -73,7 +73,7 @@ export function CategoryDialogForm({
 
   const isSubmitting = form.formState.isSubmitting;
 
-  const onSubmit = async (values: CategoryFormValues) => {
+  const onSubmit = async (values: ProductCategoryFormValues) => {
     if (data?.id) {
       const categoryId = data.id;
 
@@ -98,7 +98,7 @@ export function CategoryDialogForm({
 
   const hasFormValues = () => {
     const values = form.getValues();
-    const editValues = categoryFormSchema.safeParse(data);
+    const editValues = productCategoryFormSchema.safeParse(data);
 
     return editValues.error
       ? values.name.trim() !== '' || values.description.trim() !== ''
@@ -138,7 +138,7 @@ export function CategoryDialogForm({
   React.useEffect(() => {
     if (!data) return;
 
-    const parsedData = categoryFormSchema.safeParse(data);
+    const parsedData = productCategoryFormSchema.safeParse(data);
 
     if (parsedData.error) {
       toast.error(parsedData.error.message);
@@ -227,8 +227,8 @@ export function CategoryDialogForm({
   );
 }
 
-export function CategoryDialogFormTrigger() {
-  const categoryDialog = useDialog<CategoryDialogFormOptions>();
+export function ProductCategoryDialogFormTrigger() {
+  const categoryDialog = useDialog<ProductCategoryDialogFormOptions>();
 
   return (
     <div>
@@ -244,7 +244,7 @@ export function CategoryDialogFormTrigger() {
         Add Category
       </Button>
       {categoryDialog.dialog?.open && (
-        <CategoryDialogForm
+        <ProductCategoryDialogForm
           onOpenChange={(open) => {
             categoryDialog.setDialog((prev) => (prev ? { ...prev, open } : prev));
           }}

@@ -18,7 +18,9 @@ export const createProduct = withClientErrorHandling(async (values: ProductFormV
   formData.append('data', JSON.stringify({ ...payload, images: images?.map(({ file, ...image }) => image) }));
 
   for (const image of images ?? []) {
-    formData.append('images', image.file);
+    if (image.file) {
+      formData.append('images', image.file);
+    }
   }
 
   const { data } = await axios.post<ApiSuccessResponse<Product>>('/api/products', formData);

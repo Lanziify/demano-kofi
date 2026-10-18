@@ -4,19 +4,19 @@ import { type Kysely, sql } from 'kysely';
 // Alternatively, keep a "snapshot" DB interface.
 export async function up(db: Kysely<any>): Promise<void> {
   await db.schema
-    .createTable('categories')
+    .createTable('product_categories')
     .addColumn('id', 'uuid', (col) => col.primaryKey().defaultTo(sql`gen_random_uuid()`))
     .addColumn('name', 'varchar(255)', (col) => col.notNull())
     .addColumn('description', 'text')
     .addColumn('created_at', 'timestamptz', (col) => col.defaultTo(sql`now()`).notNull())
     .addColumn('updated_at', 'timestamptz', (col) => col.defaultTo(sql`now()`).notNull())
-    .addUniqueConstraint('category_name_unique', ['name'])
+    .addUniqueConstraint('product_categories_name_unique', ['name'])
     .execute();
 
   await db.schema
     .createTable('products')
     .addColumn('id', 'uuid', (col) => col.primaryKey().defaultTo(sql`gen_random_uuid()`))
-    .addColumn('category_id', 'uuid', (col) => col.references('categories.id').onDelete('set null'))
+    .addColumn('category_id', 'uuid', (col) => col.references('product_categories.id').onDelete('set null'))
     .addColumn('name', 'varchar(255)', (col) => col.notNull())
     .addColumn('description', 'text')
     .addColumn('is_available', 'boolean', (col) => col.defaultTo(true).notNull())
@@ -114,5 +114,5 @@ export async function down(db: Kysely<any>): Promise<void> {
   await db.schema.dropTable('variants').execute();
   await db.schema.dropTable('product_images').execute();
   await db.schema.dropTable('products').execute();
-  await db.schema.dropTable('categories').execute();
+  await db.schema.dropTable('product_categories').execute();
 }

@@ -5,7 +5,7 @@ import { getCategories } from '../api/product-category.api';
 export const productQueries = {
   categories: () => {
     return queryOptions({
-      queryKey: ['categories'],
+      queryKey: ['product-categories'],
       queryFn: () => getCategories(),
     });
   },

@@ -1,11 +1,11 @@
 import { DatabaseError, NotFoundError, ValidationError } from '@/core/errors/app-error';
 import { CategoryRepository } from '../repository/category.repository';
-import type { CategoryFormValues } from '../schema/category.schema';
+import type { ProductCategoryFormValues } from '../schema/category.schema';
 
-export class CategoryService {
+export class ProductCategoryService {
   constructor(private readonly categoryRepository = new CategoryRepository()) {}
 
-  async createCategory(values: CategoryFormValues) {
+  async createCategory(values: ProductCategoryFormValues) {
     const { id: _, ...categoryData } = values;
 
     const category = await this.categoryRepository.create(categoryData);
@@ -17,7 +17,7 @@ export class CategoryService {
     return category;
   }
 
-  async updateCategory(values: CategoryFormValues) {
+  async updateCategory(values: ProductCategoryFormValues) {
     const { id, ...categoryData } = values;
 
     if (!id) {
@@ -30,7 +30,7 @@ export class CategoryService {
 
     if (!updated) {
       throw new NotFoundError('Category not found', {
-        errorCode: 'CATEGORY_NOT_FOUND',
+        errorCode: 'PRODUCT_CATEGORY_NOT_FOUND',
       });
     }
 

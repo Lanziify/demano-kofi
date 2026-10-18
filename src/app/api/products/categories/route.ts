@@ -1,16 +1,16 @@
 import { NextResponse } from 'next/server';
 import type { ApiSuccessResponse } from '@/core/http/api.types';
 import { apiErrorHandler, requiredSession } from '@/core/http/api-handler';
-import { type Category, categoryFormSchema } from '@/feature/products';
-import { CategoryService } from '@/feature/products/server';
+import { type ProductCategory, productCategoryFormSchema } from '@/feature/products';
+import { ProductCategoryService } from '@/feature/products/server';
 
-const service = new CategoryService();
+const service = new ProductCategoryService();
 
 export const GET = apiErrorHandler(
   async () => {
     const result = await service.getCategories();
 
-    return NextResponse.json<ApiSuccessResponse<Category[]>>(
+    return NextResponse.json<ApiSuccessResponse<ProductCategory[]>>(
       {
         success: true,
         data: result,
@@ -25,7 +25,7 @@ export const GET = apiErrorHandler(
 export const POST = apiErrorHandler(
   async (req) => {
     const body = await req.json();
-    const values = categoryFormSchema.parse(body);
+    const values = productCategoryFormSchema.parse(body);
 
     const result = await service.createCategory(values);
 

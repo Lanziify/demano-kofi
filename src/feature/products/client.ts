@@ -1,4 +1,4 @@
-export { CategoryDialogForm, CategoryDialogFormTrigger } from './components/category-dialog';
+export { ProductCategoryDialogForm, ProductCategoryDialogFormTrigger } from './components/category-dialog';
 export { default as ProductCategoryList } from './components/product-category-lists';
 export { default as ProductForm } from './components/product-form';
 export { default as ProductList } from './components/product-list';

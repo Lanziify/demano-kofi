@@ -93,6 +93,7 @@ export default function ProfileForm() {
 
     if (error) {
       toast.error(error.message);
+      return;
     }
 
     toast.success('Profile updated!');

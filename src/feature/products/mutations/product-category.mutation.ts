@@ -9,7 +9,7 @@ export const useCreateProductCategory = () => {
   return useMutation({
     mutationFn: createCategory,
     onSuccess() {
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      queryClient.invalidateQueries({ queryKey: ['product-categories'] });
     },
   });
 };
@@ -20,7 +20,7 @@ export const useUpdateProductCategory = () => {
   return useMutation({
     mutationFn: updateCategory,
     onSuccess() {
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      queryClient.invalidateQueries({ queryKey: ['product-categories'] });
     },
   });
 };

@@ -30,7 +30,7 @@ export class ProductRepository {
         'p.isFeatured',
         jsonObjectFrom(
           eb
-            .selectFrom('categories as c')
+            .selectFrom('productCategories as c')
             .select(['c.id', 'c.name', 'c.description'])
             .whereRef('c.id', '=', 'p.categoryId')
         ).as('category'),
@@ -109,7 +109,7 @@ export class ProductRepository {
         'p.isFeatured',
         jsonObjectFrom(
           eb
-            .selectFrom('categories as c')
+            .selectFrom('productCategories as c')
             .select(['c.id', 'c.name', 'c.description'])
             .whereRef('c.id', '=', 'p.categoryId')
         ).as('category'),

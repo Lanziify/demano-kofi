@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 import { apiErrorHandler, requiredSession } from '@/core/http/api-handler';
-import { categoryFormSchema } from '@/feature/products';
-import { CategoryService } from '@/feature/products/server';
+import { productCategoryFormSchema } from '@/feature/products';
+import { ProductCategoryService } from '@/feature/products/server';
 
-const service = new CategoryService();
+const service = new ProductCategoryService();
 
 type Context = RouteContext<'/api/products/categories/[id]'>;
 
@@ -22,7 +22,7 @@ export const PATCH = apiErrorHandler<Context>(
   async (req, context) => {
     const { id } = await context.params;
     const body = await req.json();
-    const values = categoryFormSchema.parse({ ...body, id });
+    const values = productCategoryFormSchema.parse({ ...body, id });
 
     const result = await service.updateCategory(values);
 

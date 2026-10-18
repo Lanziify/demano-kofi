@@ -42,7 +42,7 @@ export function ResetPasswordForm({
     Omit<ResultDialogProps, 'onOpenChange'>
   >({
     open: false,
-    variant: 'idle',
+    variant: 'loading',
     title: '',
     description: '',
     closeText: '',

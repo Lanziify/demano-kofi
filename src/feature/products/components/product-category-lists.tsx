@@ -6,16 +6,16 @@ import { Item, ItemActions, ItemContent, ItemDescription, ItemMedia, ItemTitle }
 import { Spinner } from '@/components/ui/spinner';
 import { useDialog } from '@/hooks/use-dialog';
 import { useProducts } from '../hooks/use-products';
-import type { Category } from '../types/types';
-import { CategoryDialogForm, type CategoryDialogFormOptions } from './category-dialog';
+import type { ProductCategory } from '../types/types';
+import { ProductCategoryDialogForm, type ProductCategoryDialogFormOptions } from './category-dialog';
 
 export default function ProductCategoryList() {
   const {
     categories: { data: categories, isPending },
   } = useProducts();
-  const categoryDialog = useDialog<CategoryDialogFormOptions>();
+  const categoryDialog = useDialog<ProductCategoryDialogFormOptions>();
 
-  const handleCategoryEdit = (item: Category) => {
+  const handleCategoryEdit = (item: ProductCategory) => {
     categoryDialog.show({
       title: 'Edit Category',
       description: 'Create new product category for you product listings.',
@@ -52,7 +52,7 @@ export default function ProductCategoryList() {
       ))}
 
       {categoryDialog.dialog?.open && (
-        <CategoryDialogForm
+        <ProductCategoryDialogForm
           onOpenChange={(open) => {
             categoryDialog.setDialog((prev) => (prev ? { ...prev, open } : prev));
           }}

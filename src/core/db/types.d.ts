@@ -27,14 +27,6 @@ export interface Account {
   userId: string;
 }
 
-export interface Categories {
-  createdAt: Generated<Timestamp>;
-  description: string | null;
-  id: Generated<string>;
-  name: string;
-  updatedAt: Generated<Timestamp>;
-}
-
 export interface InventoryCategories {
   createdAt: Generated<Timestamp>;
   description: string | null;
@@ -178,6 +170,14 @@ export interface ProductAddOns {
   priceAmount: number;
   productId: string;
   sortOrder: number;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface ProductCategories {
+  createdAt: Generated<Timestamp>;
+  description: string | null;
+  id: Generated<string>;
+  name: string;
   updatedAt: Generated<Timestamp>;
 }
 
@@ -357,7 +357,6 @@ export interface Verification {
 
 export interface DB {
   account: Account;
-  categories: Categories;
   inventoryCategories: InventoryCategories;
   inventoryItems: InventoryItems;
   inventoryItemSuppliers: InventoryItemSuppliers;
@@ -373,6 +372,7 @@ export interface DB {
   organization: Organization;
   outbox: Outbox;
   productAddOns: ProductAddOns;
+  productCategories: ProductCategories;
   productImages: ProductImages;
   products: Products;
   purchaseOrderItems: PurchaseOrderItems;

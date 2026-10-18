@@ -33,7 +33,7 @@ export function ForgotPasswordForm({
     Omit<ResultDialogProps, 'onOpenChange'>
   >({
     open: false,
-    variant: 'idle',
+    variant: 'loading',
     title: '',
     description: '',
     closeText: '',

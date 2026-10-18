@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { withClientErrorHandling } from '@/core/errors/client-error-parser';
 import { safeCatch } from '@/core/errors/safe-catch';
+import type { ApiErrorBody, ApiRErrorResponse } from '@/core/http/api.types';
 import {
   updateEmailAddressAction,
   updateUsernameAction,
@@ -51,6 +52,12 @@ export const updateUserProfile = withClientErrorHandling(
       );
 
       return result.data;
+    }, {
+      parser: (error) => ({
+        message: axios.isAxiosError<ApiRErrorResponse<ApiErrorBody>>(error)
+          ? (error.response?.data.error?.message ?? error.message)
+          : 'Failed to update profile',
+      }),
     });
   }
 );

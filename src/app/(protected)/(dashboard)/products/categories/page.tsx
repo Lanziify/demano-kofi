@@ -1,4 +1,4 @@
-import { CategoryDialogFormTrigger, ProductCategoryList } from '@/feature/products/client';
+import { ProductCategoryDialogFormTrigger, ProductCategoryList } from '@/feature/products/client';
 
 export default function ProductCategoryPage() {
   return (
@@ -8,7 +8,7 @@ export default function ProductCategoryPage() {
           <h1 className="font-bold text-2xl tracking-tight">Product Categories</h1>
           <p className="mt-0.5 text-muted-foreground text-sm">Organize your menu into groups customers can browse.</p>
         </div>
-        <CategoryDialogFormTrigger />
+        <ProductCategoryDialogFormTrigger />
       </div>
       <ProductCategoryList />
     </div>
